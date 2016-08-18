@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>管理后台</title>
+	<script type="text/javascript" src="/Public/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="/Public/js/scripts/jquery/Validform_v5.3.2_min.js"></script>
+    <script type="text/javascript" src="/Public/js/scripts/lhgdialog/lhgdialog.js?skin=idialog"></script>
+	<script type="text/javascript" src="/Public/js/scripts/swfupload/swfupload.js"></script>
+	<script type="text/javascript" src="/Public/js/scripts/swfupload/swfupload.handlers.js"></script>
+    <script type="text/javascript" src="/Public/js/layout.js"></script>	
+    <link href="/Public/admin/css/pagination.css" rel="stylesheet" type="text/css" />	
+	<link href="/Public/admin/admin.css" rel="stylesheet" type="text/css" />
+	<link href="/Public/admin/page.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="/Public/js/check.js"></script>
+	<script type="text/javascript">
+
+	    $(function () {
+	        //初始化表单验证
+	        $("#form").initValidform();
+	        //是否启用权限
+	        if ($("#ddlRoleType").find("option:selected").attr("value") == 1) {
+	            $(".border-table").find("input[type='checkbox']").prop("disabled", true);
+	        }
+	        $("#ddlRoleType").change(function () {
+	            if ($(this).find("option:selected").attr("value") == 1) {
+	                $(".border-table").find("input[type='checkbox']").prop("checked", false);
+	                $(".border-table").find("input[type='checkbox']").prop("disabled", true);
+	            } else {
+	                $(".border-table").find("input[type='checkbox']").prop("disabled", false);
+	            }
+	        });
+	        //权限全选
+	        $("input[name='checkAll']").click(function () {
+	            if ($(this).prop("checked") == true) {
+	                $(this).parent().siblings("td").find("input[type='checkbox']").prop("checked", true);
+	            } else {
+	                $(this).parent().siblings("td").find("input[type='checkbox']").prop("checked", false);
+	            }
+	        });
+	    });
+
+		
+	</script>
+</head>
+<body class="mainbody">
+    <form id="form" method="post">
+    <!--导航栏-->
+<div class="location">
+  <a href="javascript:history.back(-1);" class="back"><i></i><span>返回上一页</span></a>
+  <a href="/Admin/Index/center" class="home"><i></i><span>首页</span></a>
+  <i class="arrow"></i>
+  <a href="/Admin/Role"><span>角色列表</span></a>
+  <i class="arrow"></i>
+  <span>修改信息</span>
+</div>
+<div class="line10"></div>
+<!--/导航栏-->
+
+<!--内容-->
+<div class="content-tab-wrap">
+  <div id="floatHead" class="content-tab">
+    <div class="content-tab-ul-wrap">
+      <ul>
+        <li><a href="javascript:;" onclick="tabs(this);" class="selected">基本信息</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content">
+	<input type="hidden" name="id" value="{$id}" />
+	<dl>
+		<dt>角色名称</dt>
+		<dd><input type="text" name="name" datatype="*" value="{$name}" Class="input normal" sucmsg=" " /> <span class="Validform_checktip">*</span></dd>
+	</dl> 
+	<dl>
+		<dt>角色简介</dt>
+		<dd>
+			<textarea id="webcopyright" name="remark" Class="input" />{$remark}</textarea>
+	      	<!--<span class="Validform_checktip">支持HTML</span>-->
+		</dd>
+	</dl> 
+	<dl>
+    <dt>管理权限</dt>
+    <dd>
+      <table border="0" cellspacing="0" cellpadding="0" class="border-table" width="98%">
+        <thead>
+          <tr>
+            <th width="25%">导航名称</th>
+            <th>权限分配</th>
+            <th width="10%">全选</th>
+          </tr>
+        </thead>
+        <tbody>
+        	<input type="hidden" name="node_id[]" value="9_1"  />
+          <volist name="nav" id="val">
+			<volist name="val.catid" id="val1">
+				  <tr>
+				    <td style="white-space:nowrap;word-break:break-all;overflow:hidden;padding-left: 50px;">
+				      <span class="folder-open"></span>
+				      <a>{$val1.title}</a>
+				    </td>		    
+		            <td align="left">
+		            	<input type="checkbox" id="cblActionType" Class="cbllist" <php> if(in_array($val1['id'],$select)){</php>checked="checked"<php>}</php> name="node_id[]" value="{$val1.id}_1" Style="vertical-align: middle;" /> 显示　
+	            		<volist name="val1.role" id="val11">
+	            			<input type="checkbox" id="cblActionType" Class="cbllist" <php> if(in_array($val11['id'],$select)){</php>checked="checked"<php>}</php> name="node_id[]" value="{$val11.id}_3" Style="vertical-align: middle;" /> {$val11.title} 　  
+						</volist>
+		            </td>
+					<td align="center">
+						<input name="checkAll" type="checkbox" />
+				    </td>
+				  </tr>
+					  <volist name="val1.catid" id="val2">
+					  	 <tr>
+						    <td style="white-space:nowrap;word-break:break-all;overflow:hidden;padding-left: 50px;">
+							  <span style="display:inline-block;width:0px;"></span>
+						      <span class="folder-line"></span><span class="folder-open"></span>
+						      <a>{$val2.title}</a>						  	
+						    </td>				    
+				            <td align="left">		        
+									<input type="checkbox" id="cblActionType" Class="cbllist" <php> if(in_array($val2['id'],$select)){</php>checked="checked"<php>}</php> name="node_id[]" value="{$val2.id}_1" Style="vertical-align: middle;" /> 显示　
+				            		<foreach name="val2.role" item="val21">
+				            			<input type="checkbox" id="cblActionType" name="node_id[]" Class="cbllist" <php> if(in_array($val21['id'],$select)){</php>checked="checked"<php>}</php> value="{$val21.id}_3" Style="vertical-align: middle;" /> {$val21.title} 　 
+									</foreach>
+				            </td>
+							<td align="center">
+								<input name="checkAll" type="checkbox" />
+						    </td>
+						  </tr>		
+							  <foreach name="val2.catid" item="val3">
+							  	 <tr>
+								    <td style="white-space:nowrap;word-break:break-all;overflow:hidden;padding-left: 50px;">
+									  <span style="display:inline-block;width:25px;"></span>
+								      <span class="folder-line"></span><span class="folder-open"></span>
+								      <a>{$val3.title}</a>
+								    </td>
+						            <td align="left">
+						            	<input type="checkbox" Class="cbllist" name="node_id[]" <php> if(in_array($val3['id'],$select)){</php>checked="checked"<php>}</php> value="{$val3.id}_2" Style="vertical-align: middle;" /> 显示　
+						            	<foreach name="val3.role" item="val31">
+					            			<input type="checkbox" name="node_id[]" Class="cbllist" <php> if(in_array($val31['id'],$select)){</php>checked="checked"<php>}</php> value="{$val31.id}_3" Style="vertical-align: middle;" /> {$val31.title} 　 
+										</foreach>
+						            </td>
+									<td align="center">
+										<input name="checkAll" type="checkbox" />
+								    </td>
+								  </tr>
+						  </foreach>
+				  </volist>
+		  	</volist>
+          </volist>
+        </tbody>
+      </table>
+    </dd>
+  </dl>
+</div>
+<!--/内容-->
+
+<!--工具栏-->
+<div class="page-footer">
+  <div class="btn-list">
+    <input id="btnSubmit" type="submit" value="提交保存" Class="btn" onclick="btnSubmit_Click" />
+    <input name="btnReturn" type="button" value="返回上一页" class="btn yellow" onclick="javascript:history.back(-1);" />
+  </div>
+  <div class="clear"></div>
+</div>
+<!--/工具栏-->
+    </form>
+</body>
+</html>

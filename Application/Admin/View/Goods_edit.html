@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>管理后台</title>
+	<script type="text/javascript" src="/Public/js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="/Public/js/scripts/jquery/Validform_v5.3.2_min.js"></script>
+    <script type="text/javascript" src="/Public/js/scripts/lhgdialog/lhgdialog.js?skin=idialog"></script>
+	<script type="text/javascript" src="/Public/js/scripts/swfupload/swfupload.js"></script>
+	<script type="text/javascript" src="/Public/js/scripts/swfupload/swfupload.handlers.js"></script>
+	<script type="text/javascript" src="/Public/js/scripts/datepicker/WdatePicker.js"></script>
+		<script type="text/javascript" charset="utf-8" src="/Public/js/scripts/kindeditor/kindeditor.js"></script>
+	<script type="text/javascript" charset="utf-8" src="/Public/js/scripts/kindeditor/lang/zh_CN.js"></script>
+    <script type="text/javascript" src="/Public/js/layout.js"></script>	
+    <link href="/Public/admin/css/pagination.css" rel="stylesheet" type="text/css" />	
+	<link href="/Public/admin/admin.css" rel="stylesheet" type="text/css" />
+	<link href="/Public/admin/page.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="/Public/js/check.js"></script>
+	<script type="text/javascript">
+		//初始化编辑器
+        KindEditor.ready(function(K) {
+                window.editor = K.create('#content');
+        });
+        KindEditor.ready(function(K) {
+                K.create('#content', {
+						uploadJson : '/Public/js/scripts/kindeditor/php/upload_json.php',
+						fileManagerJson : '/Public/js/scripts/kindeditor/php/file_manager_json.php',
+                        allowFileManager : true
+                });
+        });
+		 KindEditor.ready(function(K) {
+                window.editor = K.create('#service');
+        });
+        KindEditor.ready(function(K) {
+                K.create('#service', {
+						uploadJson : '/Public/js/scripts/kindeditor/php/upload_json.php',
+						fileManagerJson : '/Public/js/scripts/kindeditor/php/file_manager_json.php',
+                        allowFileManager : true
+                });
+        });
+		 KindEditor.ready(function(K) {
+                window.editor = K.create('#spec');
+        });
+        KindEditor.ready(function(K) {
+                K.create('#spec', {
+						uploadJson : '/Public/js/scripts/kindeditor/php/upload_json.php',
+						fileManagerJson : '/Public/js/scripts/kindeditor/php/file_manager_json.php',
+                        allowFileManager : true
+                });
+        });
+	    $(function () {
+	        //初始化表单验证
+	        $("#form").initValidform();
+			 //初始化上传控件
+	        $(".upload-img").each(function () {
+	            $(this).InitSWFUpload({ sendurl: "/Admin/Public/upload", flashurl: "/Public/js/scripts/swfupload/swfupload.swf" });
+	        });
+	        $(".upload-album").each(function () {
+	            $(this).InitSWFUpload({ btntext: "批量上传", btnwidth: 66, single: false, water: true, thumbnail: true, filesize: "2048", sendurl: "/Admin/Public/upload", flashurl: "/Public/js/scripts/swfupload/swfupload.swf", filetypes: "*.jpg;*.jpge;*.png;*.gif;" });
+	        });
+	        $(".attach-btn").click(function () {
+	            showAttachDialog();
+	        });
+	        //设置封面图片的样式
+	        $(".photo-list ul li .img-box img").each(function () {
+	            if ($(this).attr("src") == $("#hidFocusPhoto").val()) {
+	                $(this).parent().addClass("selected");
+	            }
+	        });
+			$("#ddlParentId").change(function(){
+				$.get('/Admin/Shop/selectajax',{id:this.value},function(data){
+					 var dataobj = eval("("+data+")");
+					 $("#ddlParentId1").prev().find('span').html('请选择在市级单位');					 
+					 $("#ddlParentId1").html(dataobj.str);
+					 $("#ddlParentId1").prev().find('ul').html(dataobj.str1);
+				});
+			});
+			$("#ddlParentId1").change(function(){
+				$.get('/Admin/Shop/selectajax1',{id:this.value},function(data){
+					 var dataobj = eval("("+data+")");
+					 $("#ddlParentId2").prev().find('span').html('请选择在区县单位');					 
+					 $("#ddlParentId2").html(dataobj.str);
+					 $("#ddlParentId2").prev().find('ul').html(dataobj.str1);
+				});
+			});
+			$("#ddlParentId3").change(function(){
+				$.get('/Admin/Shop/selectajax3',{id:this.value},function(data){
+					if(data == 0){
+						$("#checkbox").html('<div class="boxwrap"></div>');
+					}else{
+						 var dataobj = eval("("+data+")");	
+						 $("#checkbox").html('<div class="boxwrap"></div>');
+						 $("#checkbox").find('div').html(dataobj.str1);
+					 		$("#checkbox").append(dataobj.str);
+					}				 
+				});
+			});
+
+	    });
+		function sel(obj){		
+			$(obj).siblings().removeClass("selected");
+            $(obj).addClass("selected"); //添加选中样式
+            var indexNum = $(obj).index();
+			var titObj = $(obj).parents('.boxwrap');
+            var selectObj = $(obj).parents('.boxwrap').next();
+            //selectObj.find("option").attr("selected", false);			
+           // selectObj.find("option").eq(indexNum).attr("selected", true); //赋值给对应的option
+		   selectObj.get(0).selectedIndex =$(obj).index();
+            titObj.find("span").text($(obj).text()); //赋值选中值        
+            selectObj.trigger("change"); 		
+		}
+		
+		function checkb(obj){
+			if($(obj).attr("class")=='selected'){
+				$(obj).removeClass("selected");         	
+			}else{
+				$(obj).addClass("selected"); //添加选中样式
+			}		
+            var indexNum = $(obj).index();
+			var titObj = $(obj).parents('.boxwrap');
+            var selectObj = $(obj).parents('.boxwrap').siblings('label');
+            //selectObj.find("option").attr("selected", false);			
+           // selectObj.find("option").eq(indexNum).attr("selected", true); //赋值给对应的option
+		  selectObj.eq(indexNum).trigger("click"); 
+            //titObj.find("span").text($(obj).text()); //赋值选中值        
+            	
+		}
+		
+		function otable(str){
+			if(str == 2){
+				$('#otable').css('display','block');
+			}else{
+				$('#otable').css('display','none');
+			}
+		}
+		
+		function addtable(){
+			$str = '<tr><td style="padding: 5px;"><input type="text" name="tab[]" style="width: 160px;height: 26px;text-align: center;"  /></td><td style="padding: 5px;"><input type="text" name="tab[]" style="width: 160px;height: 26px;text-align: center;"  /></td><td style="padding: 5px;"><input type="text" name="tab[]" style="width: 160px;height: 26px;text-align: center;"  /></td></tr>';
+			$('#tab').append($str);
+		}
+		
+		function deltable(){
+			$("#tab tr:last").remove();
+		}
+		
+	</script>
+</head>
+<body class="mainbody">
+    <form id="form" method="post">
+    <!--导航栏-->
+<div class="location">
+  <a href="javascript:history.back(-1);" class="back"><i></i><span>返回上一页</span></a>
+  <a href="/Admin/Index/center" class="home"><i></i><span>首页</span></a>
+  <i class="arrow"></i>
+  <a href="/Admin/Shop"><span>用户</span></a>
+  <i class="arrow"></i>
+  <span>修改信息</span>
+</div>
+<div class="line10"></div>
+<!--/导航栏-->
+<!--内容-->
+<div class="content-tab-wrap">
+  <div id="floatHead" class="content-tab">
+    <div class="content-tab-ul-wrap">
+      <ul>
+        <li><a href="javascript:;" onclick="tabs(this);" class="selected">基本信息</a></li>
+        <li><a href="javascript:;" onclick="tabs(this);">详细描述</a></li>
+        <li><a href="javascript:;" onclick="tabs(this);">SEO选项</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content">
+	<input type="hidden" name="id" value="{$id}" />
+	<dl>
+    <dt>图片</dt>
+      <dd>
+			<img src="{$simg}" class="upload-img" style="height: 120px;" />
+			<input type="hidden" id="txtImgUrl" value="{$simg}" name="simg" Class="input normal upload-path" />
+      		<div style="position:relative; top: -13px; left: 5px;" class="upload-box upload-img"></div><span style="position:relative; top: -13px; left: 5px;" class="Validform_checktip">*建议上传1:1的jpg,png图片</span>
+	</dd>
+  </dl>
+  <!--
+  <dl>
+		<dt>商铺</dt>
+		<dd>
+			<div class="rule-single-select">
+				<select id="ddlParentId" name="pid">
+					<option value="0" selected="selected">请选择所属商铺</option>
+					<volist name="type1" id="val">		
+						<option value="{$val.id}" <if condition="$val.id eq $pid">selected="selected"</if>>{$val.name}</option>
+					</volist>
+				</select>
+			</div>
+		</dd>
+	</dl>
+	-->
+	<dl>
+	<dt>标题</dt>
+		<dd><input type="text" value="{$title}" name="title" datatype="*1-20" Class="input normal" sucmsg=" " /> <span class="Validform_checktip">* 20个字符以内</span></dd>
+	</dl>
+	<dl>
+		<dt>分类</dt>
+		<dd>
+			<div class="rule-single-select">
+				<select id="ddlParentId" name="groupid" datatype="*">
+					<option value="0">请选择一级分类</option>
+					<volist name="type1" id="val">
+						<option value="{$val.id}" <if condition="$val.id eq $groupid">selected="selected"</if>>{$val.title}</option>
+					</volist>
+				</select>
+			</div>
+			<div class="rule-single-select">
+				<select name="subgroupid" id="ddlParentId1"> 
+					<option value="0" <if condition="$subgroupid eq 0">selected="selected"</if>>请选择二级分类</option>
+					<volist name="type2" id="v">
+						<option value="{$v.id}" <if condition="$v.id eq $subgroupid">selected="selected"</if>>{$v.title}</option>
+					</volist>
+				</select>
+			</div>
+			<span class="Validform_checktip">* 一级分类必须选择</span>
+		</dd>
+	</dl>
+	<dl>
+    <dt>状态</dt>
+    <dd>
+		<div class="rule-multi-radio multi-radio">	
+			<if condition="$state eq 0">
+	      		<label><input type="radio" Value="0" checked="checked" name="state" />待发布</label>
+			<else />
+				<label><input type="radio" Value="2" <if condition="$state eq 2">checked="checked"</if> name="state" />已上架</label>
+				<label><input type="radio" Value="1" <if condition="$state eq 1">checked="checked"</if> name="state" />已下架</label>
+			</if>
+    	</div>
+	</dd>
+  </dl>
+
+	<!--
+	<dl>
+    <dt>会员价格</dt>
+    <dd>
+      <table border="0" cellspacing="0" cellpadding="0" class="border-table">
+        <tr>
+          <th style="font-size: 13px;" width="80">普通会员</th>
+          <td>
+            <input type="text" id="txtGroupPrice" size="10"  Class="td-input groupprice" maxlength="10" sucmsg=" " />
+            <span class="Validform_checktip">*享受7折折优惠</span>
+          </td>
+        </tr>
+		<tr>
+          <th style="font-size: 13px;" width="80">VIP会员</th>
+          <td>
+            <input type="text" id="txtGroupPrice" size="10"  Class="td-input groupprice" maxlength="10" sucmsg=" " />
+            <span class="Validform_checktip">*享受5折折优惠</span>
+          </td>
+        </tr>
+      </table>
+    </dd>
+  </dl>
+  
+	<dl>
+    <dt>起始时间</dt>
+    <dd>
+    	<div style="width: 190px" class="input-date">
+        <input type="text" value="{$starttime|date='Y-m-d H:i:s',###}" name="starttime" id="txtAddTime" Class="input date" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" datatype="/^\s*$|^\d{4}\-\d{1,2}\-\d{1,2}\s{1}(\d{1,2}:){2}\d{1,2}$/" errormsg="请选择正确的日期" sucmsg=" " />
+        <i>日期</i>
+      </div>
+	</dd>
+  </dl>
+	<dl>
+    <dt>结束时间</dt>
+    <dd>
+    	<div style="width: 190px" class="input-date">
+        <input type="text" value="{$stoptime|date='Y-m-d H:i:s',###}" name="stoptime" id="txtAddTime" Class="input date" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" datatype="/^\s*$|^\d{4}\-\d{1,2}\-\d{1,2}\s{1}(\d{1,2}:){2}\d{1,2}$/" errormsg="请选择正确的日期" sucmsg=" " />
+        <i>日期</i>
+      </div>
+	</dd>
+  </dl>
+  -->
+  <dl>
+	<dt>排序</dt>
+		<dd><input type="text" name="ord" value="{$ord}"  Class="input small" datatype="*" sucmsg=" "  /><span class="Validform_checktip">*越小越在前面</span></dd>
+	</dl>
+	<dl>
+		<dt>描述</dt>
+		<dd>
+			<textarea id="webcopyright" name="description" Class="input" />{$description}</textarea>
+	      	<span class="Validform_checktip">非必填</span>
+		</dd>
+	</dl>
+	<!--
+	<dl>
+    <dt>使用表格</dt>
+    <dd>
+		<div class="rule-multi-radio multi-radio">	   		
+			<label><input type="radio" onclick="otable(this.value)" Value="2" <if condition="$istab eq 2">checked="checked"</if> name="istab" />是</label>
+			<label><input type="radio" onclick="otable(this.value)" Value="1" <if condition="$istab eq 1">checked="checked"</if> name="istab" />否</label>
+    	</div>
+	</dd>
+  </dl>
+	<dl id="otable" style="display: block;">
+		<dt>表格详情</dt>
+		<dd>
+			<p><a onclick = "addtable()" style="display: inline-block; height: 20px; line-height:20px;cursor: pointer; border: 1px solid #ccc; margin: 0 10px 10px 0; padding: 5px;">添加一行</a><a onclick = "deltable()" style="display: inline-block; height: 20px; line-height:20px;cursor: pointer; border: 1px solid #ccc; margin: 0 10px 10px 0; padding: 5px;">删除一行</a>　*标题可写在中间</p>
+			<table id="tab" border = '1' bordercolor = '#ccc'>
+				<volist name="ttt" id="val1">
+					<tr>
+						<volist name="val1.content" id="val">
+							<td style="padding: 5px;"><input type="text" value="{$val}" name="tab[]" style="width: 160px;height: 26px;text-align: center;"  /></td>
+						</volist>
+					</tr>
+				</volist>
+			</table>
+		</dd>
+	</dl>
+	-->
+</div>
+<div class="tab-content" style="display:none">
+	<dl>
+    	<dt>商品详情</dt>
+    	<dd><textarea id="content" name="content" style="width:700px;height:200px;visibility:hidden;">{$content}</textarea></dd>
+  </dl>
+  <dl>
+    	<dt>规格参数</dt>
+    	<dd><textarea id="spec" name="spec" style="width:700px;height:200px;visibility:hidden;">{$spec}</textarea></dd>
+  </dl>
+  <dl>
+    	<dt>售后服务</dt>
+    	<dd><textarea id="service" name="service" style="width:700px;height:200px;visibility:hidden;">{$service}</textarea></dd>
+  </dl>
+</div>
+<div class="tab-content" style="display:none">
+  <dl>
+    <dt>SEO标题</dt>
+    <dd>
+      <input value="{$seotitle}" type="text" name="seotitle" maxlength="255"  Class="input normal" datatype="*0-40" sucmsg=" " />
+      <span class="Validform_checktip">40个字符以内</span>
+    </dd>
+  </dl>
+  <dl>
+    <dt>SEO关健字</dt>
+    <dd>
+      <textarea name="seokeyword"  Class="input" datatype="*0-255" sucmsg=" ">{$seokeyword}</textarea>
+      <span class="Validform_checktip">以“,”逗号区分开，255个字符以内</span>
+    </dd>
+  </dl>
+  <dl>
+    <dt>SEO描述</dt>
+    <dd>
+      <textarea name="seodescription"  Class="input" datatype="*0-255" sucmsg=" ">{$seodescription}</textarea>
+      <span class="Validform_checktip">255个字符以内</span>
+    </dd>
+  </dl>
+</div>
+<!--/内容-->
+
+<!--工具栏-->
+<div class="page-footer">
+  <div class="btn-list">
+    <input id="btnSubmit" type="submit" value="提交保存" Class="btn" onclick="btnSubmit_Click" />
+    <input name="btnReturn" type="button" value="返回上一页" class="btn yellow" onclick="javascript:history.back(-1);" />
+  </div>
+  <div class="clear"></div>
+</div>
+<!--/工具栏-->
+    </form>
+</body>
+</html>

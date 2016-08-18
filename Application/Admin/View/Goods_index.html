@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>管理后台</title>
+	<script type="text/javascript" src="/Public/js/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="/Public/js/scripts/lhgdialog/lhgdialog.js?skin=idialog"></script>
+    <script type="text/javascript" src="/Public/js/layout.js"></script>	
+    <link href="/Public/admin/css/pagination.css" rel="stylesheet" type="text/css" />	
+	<link href="/Public/admin/base.css" rel="stylesheet" type="text/css" />
+	<link href="/Public/admin/layout.css" rel="stylesheet" type="text/css" />
+	<link href="/Public/admin/admin.css" rel="stylesheet" type="text/css" />
+	<link href="/Public/admin/page.css" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="/Public/js/check.js"></script>
+	<script type="text/javascript">
+    $(function () {
+        imgLayout();
+        $(window).resize(function () {
+            imgLayout();
+        });
+        //图片延迟加载
+        $(".pic img").lazyload({ load: AutoResizeImage, effect: "fadeIn" });
+        //点击图片链接
+        $(".pic img").click(function () {
+            //$.dialog({ lock: true, title: "查看大图", content: "<img src=\"" + $(this).attr("src") + "\" />", padding: 0 });
+            var linkUrl = $(this).parent().parent().find(".foot a").attr("href");
+            if (linkUrl != "") {
+                location.href = linkUrl; //跳转到修改页面
+            }
+        });
+    });
+    //排列图文列表
+    function imgLayout() {
+        var imgWidth = $(".imglist").width();
+        var lineCount = Math.floor(imgWidth / 222);
+        var lineNum = imgWidth % 222 / (lineCount - 1);
+        $(".imglist ul").width(imgWidth + Math.ceil(lineNum));
+        $(".imglist ul li").css("margin-right", parseFloat(lineNum));
+    }
+    //等比例缩放图片大小
+    function AutoResizeImage(e, s) {
+        var img = new Image();
+        img.src = $(this).attr("src")
+        var w = img.width;
+        var h = img.height;
+        var wRatio = w / h;
+        if ((220 / wRatio) >= 165) {
+            $(this).width(220); $(this).height(220 / wRatio);
+        } else {
+            $(this).width(165 * wRatio); $(this).height(165);
+        }
+    }
+	</script>
+</head>
+<body class="mainbody">
+    <form id="form1" method="get">
+    <div>
+        <!--导航栏-->
+        <div class="location">
+            <a href="javascript:history.back(-1);" class="back"><i></i><span>返回上一页</span></a>
+            <a href="/Admin/Index/center" class="home"><i></i><span>首页</span></a> <i class="arrow">
+            </i><span>产品列表</span>
+        </div>
+        <!--/导航栏-->
+        <!--工具栏-->	
+        <div class="toolbar-wrap">
+            <div id="floatHead" class="toolbar">
+                <div class="l-list">
+                    <ul class="icon-list">
+                        <li><a class="add" href="{:U('/Admin/Goods/add')}"><i></i><span> 新增</span></a></li>
+						<!--<li><a id="btnSave" Class="save"><i></i><span>保存</span></a></li>-->
+                        <li><a class="all" href="javascript:;" onclick="checkAll(this)"><i></i><span>全选</span></a></li>
+                        <li><a class="del" style="cursor:pointer;" id="btnDelete" OnClick="return ExePostBack('Goods')"><i></i><span>删除</span></a></li>
+                    </ul>
+					<div class="menu-list">
+
+				        <div class="rule-single-select single-select">
+				          <select id="ddlProperty" name="verify" onchange="location='/Admin/Goods/index/verify/'+options[selectedIndex].value">
+				            <option Value=""  <if condition="$verify eq ''">selected="selected"</if>>所有分类</option>
+							<if condition="$type" >
+		  					<volist name="type" id="val">
+				            	<option Value="{$val.id}" <if condition="$verify eq $val['id']">selected="selected"</if>>{$val.title}</option>
+							</volist>
+							</if>
+				          </select>
+				        </div>
+
+      				</div>
+                </div>
+                <div class="r-list">
+                	<p style="float:left;height:30px;line-height:30px;">名称：</p>
+                    <input type="text" id="txtKeywords" Class="keyword" name="keyword" />
+                    <input type="submit" id="lbtnSearch" name="search" Class="btn-search" value="查询" />
+                </div>
+            </div>
+        </div>
+        <!--/工具栏-->
+		
+        <!--图片列表-->
+
+		<div class="imglist">
+		  <ul>
+		  	<if condition="$data" >
+		  	<volist name="data" id="val">
+		    <li>
+		      <div class="details">
+		        <div class="check"><input type="checkbox" Class="checkall" value="{$val.id}" Style="vertical-align: middle;" /></div>
+		        <div class="pic">
+		        	<if condition="$val['simg']">
+		        		<img src="{$val.simg}" width="220" height="220" />
+					<else />
+						<img src="/Public/admin/loadimg.gif" />
+					</if>
+				</div><i class="absbg"></i>
+		        <h1><span><a href="/Admin/Goods/edit/id/{$val.id}">{$val.title}</a></span></h1>
+		        <div class="remark">
+		        	<if condition="$val['title']" >
+		        	<!--	厂家直营<br />-->
+						{$val.description}
+		        	<else />	
+					暂无内容摘要说明...	
+					</if>
+				          
+		        </div>
+		        <div class="tools">	  
+				<!--      	
+		        	<a title="<if condition='$val[iscomment] eq 2'>取消评论<else />开启评论</if>" Class="<if condition='$val[iscomment] eq 2'>msg selected<else />msg</if>" href="/Admin/Shop/state/id/{$val.id}/iscomment/<if condition='$val[iscomment] eq 2'>1<else />2</if><if condition='$_GET[p]'>/p/{$Think.get.p}</if><if condition='$_GET[verify]'>/verify/{$Think.get.verify}</if><if condition='$_GET[keyword]'>/keyword/{$Think.get.keyword}</if>"></a>
+				-->
+				 	<a title="<if condition='$val[isred] eq 2'>取消推荐<else />设置推荐</if>" Class="<if condition='$val[isred] eq 2'>red selected<else />red</if>" href="/Admin/Goods/state/id/{$val.id}/isred/<if condition='$val[isred] eq 2'>1<else />2</if><if condition='$_GET[p]'>/p/{$Think.get.p}</if><if condition='$_GET[verify]'>/verify/{$Think.get.verify}</if><if condition='$_GET[keyword]'>/keyword/{$Think.get.keyword}</if>"></a>
+				 	<a title="<if condition='$val[state] eq 2'>已上架<else />已下架</if>" Class="<if condition='$val[state] eq 2'>top selected<else />top</if>" href="/Admin/Goods/state/id/{$val.id}/state/<if condition='$val[state] eq 2'>1<else />2</if><if condition='$_GET[p]'>/p/{$Think.get.p}</if><if condition='$_GET[verify]'>/verify/{$Think.get.verify}</if><if condition='$_GET[keyword]'>/keyword/{$Think.get.keyword}</if>"></a>
+				  <!--
+				  <a title="取消置顶" Class="top selected" href=""></a>
+		          <a title="取消热门" Class="hot selected" href=""></a>
+				  -->
+				  <input name="ord" value="{$val.ord}" Class="sort" style="text-align:center;" onblur="order({$val.id},this.value,'Goods')" />	        
+		        </div>
+		        <div class="foot">
+		          <p class="time" style="font-size: 12px;"><!--class="time"--> 
+		          	<if condition="$val['state'] eq 0" >
+						<span style="border:1px solid #ccc;padding:3px 5px;">待发布</span>
+		        	<elseif condition="$val['state'] eq 1" />
+						<span style="color:green;border:1px solid #ccc;padding:3px 5px;">已下架</span>
+					<elseif condition="$val['state'] eq 2" />
+						<span style="color:red;border:1px solid #ccc;padding:3px 5px;">已上架</span>
+					<else />
+						
+					</if>
+					</p>
+				
+		          <a href="/Admin/Goods/edit/id/{$val.id}" title="内容修改"  class="edit">基础</a>
+				   <a href="/Admin/Product/index/id/{$val.id}" title="品类价格" class="yuan">品类</a>
+		        </div>
+		      </div>
+		    </li>
+			</volist>
+			<else />
+		    	<div align="center" style="padding: 8px 2px;border: 1px solid #e8e8e8;line-height: 1.5em;color: #666;">暂无记录</div>
+			</if>
+		  </ul>
+		</div>
+		<!--/图片列表-->
+        <!--内容底部-->
+        <div class="line20">
+        </div>
+        <div class="pagelist">
+            <div class="flickr">
+                {$page}
+            </div>
+        </div>
+        <!--/内容底部-->
+    </div>
+    </form>
+</body>
+</html>
