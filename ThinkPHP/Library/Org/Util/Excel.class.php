@@ -295,6 +295,64 @@ class Excel{
 		$objWriter->save("php://output");
 	
 	}
+
+    public function excelimport($filename,$sheet="Sheet1"){
+        $objPHPExcel = new \PHPExcel();
+        $fileType=\PHPExcel_IOFactory::identify($filename);//自动获取文件的类型提供给phpecxel用
+        $objReader=\PHPExcel_IOFactory::createReader($fileType);//获取文件读取操作对象
+        $sheetName=$sheet;//指定sheet
+        $objReader->setLoadsheetsOnly($sheetName);//只加载指定的sheet
+        $objPHPExcel=$objReader->load($filename);
+        //全部加载
+        //  		$sheetCount=$objPHPExcel->getSheetCount();//获取excel 文件里有多少个sheet
+        // 		for ($i=0;$i<$sheetCount;$i++){
+        // 			$data=$objPHPExcel->getSheet($i)->toArray();//读取每个sheet里的数据 全部放入到数组中
+        // 			print_r($data);
+        // 		}
+        //全部加载end
+        $table=M('task');
+        $id = $table->order('id desc')->getField('id');
+        //逐行加载
+        foreach ($objPHPExcel->getWorksheetIterator() as $val){//循环取sheet
+            $i=0;
+            foreach ($val->getRowIterator() as $row){//逐行处理
+                if($row->getRowIndex()<2){
+                    continue;
+                }
+                $rs = array();
+                $id = $id ? $id : 0;
+                foreach ($row->getCellIterator() as $key => $cell){//逐列读取
+                    $data = $cell->getValue();//获取单元格数据
+                    if($key==0){$rs['id']=$data+$id;}
+                    if($key==1){$rs['status']=$data;}
+                    if($key==2){$rs['type']=$data;}
+                    if($key==3){$rs['title']=$data;}
+                    if($key==4){$rs['day']=$data;}
+                    if($key==5){$rs['starttime']=$data;}
+                    if($key==6){$rs['stoptime']=$data;}
+                    if($key==7){$data && is_numeric($data) ? $rs['bid']=$data+$id:$rs['bid'] = 0;}
+                    if($key==8){$rs['level']=$data;}
+                    if($key==9){$rs['description']=$data;}
+
+                    if ($rs['level'] == 1){
+                        $rs['pid'] = 0;
+                        $pid = array();
+                    }else{
+                        $rs['pid'] = $pid[$rs['level']-1];
+                    }
+                    $rs['addtime']=date('Y-m-d H:i:s',time());
+                    $rs['state']=1;
+                }
+                $level = $rs['level'];
+                $pid[$level] = $rs['id'];
+                $return = $table->add($rs);
+                $i++;
+            }
+            echo '成功插入' .$i. '条数据。';
+        }
+        exit;
+        //逐行加载end
+    }
 	
  }
  

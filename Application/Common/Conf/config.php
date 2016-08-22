@@ -34,10 +34,10 @@ return array(
 	//缓存
 	'DATA_CACHE_TYPE' => 'redis',
 	'DATA_CACHE_TIME' => '0',
-	'DATA_CACHE_PREFIX' => 'JollyShop',
+	'DATA_CACHE_PREFIX' => 'building',
 		
 	/*Redis设置*/
-	'REDIS_HOST'            => '127.0.0.1', //主机
+	'REDIS_HOST'            => '101.200.81.192', //主机
 	'REDIS_PORT'            => '6379', //端口
 	'REDIS_CTYPE'           => 1, //连接类型 1:普通连接 2:长连接
 	'REDIS_TIMEOUT'         => 0, //连接超时时间(S) 0:永不超时
@@ -53,7 +53,10 @@ return array(
 // 	'TOKEN_NAME'    =>    '__hash__',    // 令牌验证的表单隐藏字段名称，默认为__hash__
 // 	'TOKEN_TYPE'    =>    'md5',  //令牌哈希验证规则 默认为MD5
 // 	'TOKEN_RESET'   =>    true,  //令牌验证出错后是否重置令牌 默认为true
-	
-		
+
+    //模版变量替换
+    'TMPL_PARSE_STRING'  =>array(
+        '__Public__' => __ROOT__.'/Public'
+    )
 	
 );

@@ -1,5 +1,6 @@
 <?php
 namespace Admin\Controller;
+use Api\Controller\IndexController;
 use Think\Controller;
 
 
@@ -122,4 +123,51 @@ class PublicController extends Controller {
 			exit;
 		}
 	}
+
+    //	上传excel
+    function upload_excel(){
+        header("Content-Type:text/html; charset=utf-8");
+        $upload = new \Think\Upload();// 实例化上传类
+        $upload->exts      =     array('xls', 'xlsx');// 设置附件上传类型
+        $upload->rootPath  =     './Public/upfile/excel/'; // 设置附件上传根目录
+        $upload->savePath  =     ''; // 设置附件上传（子）目录
+        $upload->saveName = time().'_'.mt_rand(); //文件名
+
+        // 上传文件
+        $info   =   $upload->upload();
+        if(!$info) {// 上传错误提示错误信息
+            echo '上传失败！';
+        }else{// 上传成功
+            $data['status'] = 1;
+            $data['msg'] = '文件上传成功！';
+            $data['name'] = $info['Filedata']['name'];
+            $data['path'] = '/Public/upfile/excel/'.$info['Filedata']['savepath'].$info['Filedata']['savename'];
+            $data['size'] = $info['Filedata']['size'];
+            $data['ext'] = $info['Filedata']['ext'];
+            echo json_encode($data);
+            exit;
+        }
+    }
+
+    //导入Excel
+    public function excelimport(){
+        if (I('post.')){
+            $table = M('task');
+
+            if (file_exists('.'.I('post.file'))){
+                $excel = new \Org\Util\Excel();
+                $excel->excelimport('.'.I('post.file'),I('post.title'));
+                exit;
+            }else{
+                alertBack('文件不存在！');
+            }
+        }
+        $this->display();
+    }
+
+
+
+
+
+
 }

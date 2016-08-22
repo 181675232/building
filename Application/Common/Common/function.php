@@ -282,7 +282,7 @@ function checkEmail($_data) {
 
 //验证手机
 function checkPhone($_data) {
-	if (preg_match('/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/',$_data)) return true;
+	if (preg_match('/^(1[3,4,5,7,8][0-9])\d{8}$/',$_data)) return true;
 	return false;
 }
 
