@@ -328,8 +328,8 @@ class Excel{
                     if($key==2){$rs['type']=$data;}
                     if($key==3){$rs['title']=$data;}
                     if($key==4){$rs['day']=$data;}
-                    if($key==5){$rs['starttime']=$data;}
-                    if($key==6){$rs['stoptime']=$data;}
+                    if($key==5){$rs['starttime']=str_replace('日','',str_replace('年','-',str_replace('月','-',$data)));}
+                    if($key==6){$rs['stoptime']=str_replace('日','',str_replace('年','-',str_replace('月','-',$data)));}
                     if($key==7){$data && is_numeric($data) ? $rs['bid']=$data+$id:$rs['bid'] = 0;}
                     if($key==8){$rs['level']=$data;}
                     if($key==9){$rs['description']=$data;}
@@ -345,7 +345,7 @@ class Excel{
                 }
                 $level = $rs['level'];
                 $pid[$level] = $rs['id'];
-                $return = $table->add($rs);
+                $table->add($rs);
                 $i++;
             }
             echo '成功插入' .$i. '条数据。';

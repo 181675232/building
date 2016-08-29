@@ -494,16 +494,14 @@ function base64_simg($data){
 }
 
 //生成缩略图
-function create_thumb($oprn){
+function create_thumb($oprn,$dir){
 	$image = new \Think\Image();
-	$image->open('./Public/upfile/'.$oprn);
-	if (dirname($oprn)){
-		if (!is_dir('./Public/thumb/'.dirname($oprn))){
-			mkdir('./Public/thumb/'.dirname($oprn),0777);
-		}
-	}
+	$image->open('./Public/upfile/'.$dir.'/'.$oprn);
+    if (!is_dir('./Public/thumb/'.$dir)){
+        mkdir('./Public/thumb/'.$dir,0777);
+    }
 	// 按照原图的比例生成一个最大为400*400的缩略图并保存为thumb.jpg
-	$image->thumb(400, 400)->save('./Public/thumb/'.$oprn);
+	$image->thumb(400, 400)->save('./Public/thumb/'.$dir.'/'.$oprn);
 	return $oprn;
 }
 
@@ -543,3 +541,28 @@ function getArray( $node )
 	return $array;
 }
 
+/**
+ * 递归无限级分类【先序遍历算】，获取任意节点下所有子孩子
+ * @param array $arrCate 待排序的数组
+ * @param int $parent_id 父级节点
+ * @param int $level 层级数
+ * @return array $arrTree 排序后的数组
+ */
+function getMenuTree($arrCat, $parent_id = 0, $level = 0)
+{
+    static  $arrTree = array(); //使用static代替global
+    if( empty($arrCat)) return FALSE;
+    $level++;
+    foreach($arrCat as $key => $value)
+    {
+        if($value['parent_id' ] == $parent_id)
+        {
+            $value[ 'level'] = $level;
+            $arrTree[] = $value;
+            unset($arrCat[$key]); //注销当前节点数据，减少已无用的遍历
+            getMenuTree($arrCat, $value[ 'id'], $level);
+        }
+    }
+
+    return $arrTree;
+}

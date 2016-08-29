@@ -34,7 +34,7 @@
 	            }
 	        });
 			$("#ddlParentId").change(function(){
-				$.get('/Admin/Admin/selectajax',{id:this.value},function(data){
+				$.get('/Admin/Admins/selectajax',{id:this.value},function(data){
 					 var dataobj = eval("("+data+")");
 					 $("#ddlParentId1").prev().find('span').html('请选择在市级单位');					 
 					 $("#ddlParentId1").html(dataobj.str);
@@ -42,7 +42,7 @@
 				});
 			});
 			$("#ddlParentId1").change(function(){
-				$.get('/Admin/Admin/selectajax1',{id:this.value},function(data){
+				$.get('/Admin/Admins/selectajax1',{id:this.value},function(data){
 					 var dataobj = eval("("+data+")");
 					 $("#ddlParentId2").prev().find('span').html('请选择在区县单位');					 
 					 $("#ddlParentId2").html(dataobj.str);
@@ -101,7 +101,7 @@
   <a href="javascript:history.back(-1);" class="back"><i></i><span>返回上一页</span></a>
   <a href="/Admin/Index/center" class="home"><i></i><span>首页</span></a>
   <i class="arrow"></i>
-  <a href="/Admin/Admin"><span>管理员列表</span></a>
+  <a href="/Admin/Admins"><span>管理员列表</span></a>
   <i class="arrow"></i>
   <span>新增信息</span>
 </div>
@@ -160,7 +160,7 @@
 	</dl>
 	<dl>
 		<dt>管理员账号</dt>
-		<dd><input type="text" id="name" name="name" datatype="*" ajaxurl="/Admin/Admin/passajax" Class="input normal" sucmsg=" " /> <span class="Validform_checktip">*</span></dd>
+		<dd><input type="text" id="name" name="name" datatype="*" ajaxurl="/Admin/Admins/passajax" Class="input normal" sucmsg=" " /> <span class="Validform_checktip">*</span></dd>
 	</dl> 
 	<dl>
 	<dt>管理员密码</dt>
