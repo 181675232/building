@@ -167,7 +167,7 @@ function microtime_format($tag, $time)
 	return str_replace('x', $sec, $date);
 }
 //数组分页
-function array_page($array,$page,$count='15'){
+function array_page($array,$page,$count='20'){
 	$page=(empty($page))?'1':$page; #判断当前页面是否为空 如果为空就表示为第一页面
 	$start=($page-1)*$count; #计算每次分页的开始位置
 	$totals=count($array);
@@ -278,6 +278,11 @@ function checkLength($_data, $_length, $_flag) {
 function checkEmail($_data) {
 	if (preg_match('/^[\w\-\.]+@[\w\-\.]+(\.\w+)+$/',$_data)) return true;
 	return false;
+}
+//验证时间格式 2012-08-08
+function checkTime($_data) {
+    if (preg_match('/^[0-9]{4}-([0][0-9]|[1][0-2])-([0-2][0-9]|[3][0,1])$/',$_data)) return true;
+    return false;
 }
 
 //验证手机
