@@ -366,7 +366,7 @@ class IndexController extends CommonController {
             ->group('datetime')
             ->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         foreach ($data['date'] as $key=>$val){
-            $data['date'][$key]['img'] = $table->field('t_img.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+            $data['date'][$key]['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
                 ->join('left join t_building on t_building.id = t_dynamic.building')
                 ->join('left join t_floor on t_floor.id = t_dynamic.floor')
                 ->join('left join t_area on t_area.id = t_dynamic.area')
@@ -677,7 +677,7 @@ class IndexController extends CommonController {
     //
     public function word_view(){
         $filename = './Public/upfile/123.doc';
-        $content = shell_exec('antiword '.$filename);
+        $content = shell_exec('antiword -m UTF-8.txt '.$filename);
         echo $content;
         //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
 
