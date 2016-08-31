@@ -244,6 +244,8 @@ function checkNum($_data) {
 	return false;
 }
 
+
+
 //二维数组去重
 function take($arr){
 	$tmp_array = array();
