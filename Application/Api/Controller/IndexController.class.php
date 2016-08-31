@@ -676,7 +676,7 @@ class IndexController extends CommonController {
 
     //
     public function word_view(){
-        $filename = './Public/upfile/123.doc';
+        $filename = './Public/upfile/123123.doc';
         $content = shell_exec('antiword -m UTF-8.txt '.$filename);
         echo $content;
         //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
