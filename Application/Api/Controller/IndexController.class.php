@@ -658,13 +658,13 @@ class IndexController extends CommonController {
             $data['wind'] = $val['wind'];
             $data['c'] = $val['c'];
             if ($val['burst']){
-                $data['burst'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['burst'].'\n';
+                $data['burst'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['burst'].'/n';
             }
             if ($val['prorecord']){
-                $data['prorecord'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['prorecord'].'\n';
+                $data['prorecord'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['prorecord'].'/n';
             }
             if ($val['record']){
-                $data['record'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['record'].'\n';
+                $data['record'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['record'].'/n';
             }
         }
         if ($data){
@@ -674,19 +674,202 @@ class IndexController extends CommonController {
         }
     }
 
-    //
-    public function word_view(){
-        $filename = './Public/upfile/123123.doc';
-        $content = shell_exec('antiword -m UTF-8.txt '.$filename);
-        echo $content;
-        //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
+    //夜间许可证列表
+    public function night_card(){
+        $type = I('post.type') ? I('post.type') : 1;
+        if ($type == 1){
+            $where['t_night_card.stoptime'] = array('egt',time());
+        }else{
+            $where['t_night_card.stoptime'] = array('lt',time());
+        }
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('night_card');
+        $data = $table->field('t_night_card.*,t_admin.username,t_admin.simg img')
+            ->join('left join t_admin on t_admin.id = t_night_card.uid')
+            ->where($where)->order('t_night_card.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
 
+    //申请动火证
+    public function add_fire_card(){
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['starttime'] = I('post.starttime') ? I('post.starttime') : json('404','缺少参数 starttime');
+        if (checkTimeDate($where['starttime'])){
+            $where['starttime'] = strtotime($where['starttime']);
+        }else{
+            json('404','时间格式不正确');
+        }
+        $where['stoptime'] = I('post.stoptime') ? I('post.stoptime') : json('404','缺少参数 stoptime');
+        if (checkTimeDate($where['stoptime'])){
+            $where['stoptime'] = strtotime($where['stoptime']);
+            if ($where['stoptime'] < $where['starttime']) json('400','开始时间不能大于结束时间');
+            if ($where['stoptime'] < time()) json('400','结束时间不能小于当前时间');
+        }else{
+            json('404','时间格式不正确');
+        }
+
+        $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
+        $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
+        $where['area'] = I('post.area') ? I('post.area') : 0;
+        $where['builder'] = I('post.builder') ? I('post.builder') : json('404','缺少参数 builder');
+        $where['look_fire'] = I('post.look_fire') ? I('post.look_fire') : json('404','缺少参数 look_fire');
+        $where['is_fire'] = I('post.is_fire') ? I('post.is_fire') : 1;
+        $where['desc'] = I('post.desc') ? I('post.desc') : json('404','缺少参数 desc');
+
+        $table = M('fire_card');
+        $where['addtime'] = time();
+        $res = $table->add($where);
+        if ($res){
+            json('200','申请成功');
+        }else{
+            json('400','申请失败');
+        }
+    }
+
+    //我的动火证列表
+    public function my_fire_card(){
+        $type = I('post.type') ? I('post.type') : 1;
+        if ($type == 1){
+            $where['t_fire_card.stoptime'] = array('egt',time());
+            $where['t_fire_card.state'] = 1;
+        }else{
+            $map['t_fire_card.stoptime'] = array('lt',time());
+            $map['t_fire_card.state'] = 1;
+            $where1['_complex'] = $map;
+            $where1['t_fire_card.state']  = array('neq',1);
+            $where1['_logic'] = 'or';
+            $where['_complex'] = $where1;
+        }
+        $where['t_fire_card.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('fire_card');
+        $data = $table->field('t_fire_card.id,t_fire_card.starttime,t_fire_card.stoptime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_fire_card.state')
+            ->join('left join t_building on t_building.id = t_fire_card.building')
+            ->join('left join t_floor on t_floor.id = t_fire_card.floor')
+            ->join('left join t_area on t_area.id = t_fire_card.area')
+            ->where($where)->order('t_fire_card.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //管理端动火证列表
+    public function fire_card_list(){
+        $type = I('post.type') ? I('post.type') : 1;
+        if ($type == 1){
+            $where['t_fire_card.stoptime'] = array('egt',time());
+            $where['t_fire_card.state'] = 1;
+        }else{
+            $map['t_fire_card.stoptime'] = array('lt',time());
+            $map['t_fire_card.state'] = 1;
+            $where['_complex'] = $map;
+            $where['t_fire_card.state']  = array('neq',1);
+            $where['_logic'] = 'or';
+        }
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('fire_card');
+        $data = $table->field('t_fire_card.id,t_fire_card.starttime,t_fire_card.stoptime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_fire_card.state')
+            ->join('left join t_building on t_building.id = t_fire_card.building')
+            ->join('left join t_floor on t_floor.id = t_fire_card.floor')
+            ->join('left join t_area on t_area.id = t_fire_card.area')
+            ->where($where)->order('t_fire_card.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //已通过正在使用动火证列表
+    public function fire_card_suss_list(){
+        $where['t_fire_card.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+
+        $where['t_fire_card.stoptime'] = array('egt',time());
+        $where['t_fire_card.state'] = 2;
+
+        $table = M('fire_card');
+        $data = $table->field('t_fire_card.id,t_fire_card.starttime,t_fire_card.stoptime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_fire_card.state')
+            ->join('left join t_building on t_building.id = t_fire_card.building')
+            ->join('left join t_floor on t_floor.id = t_fire_card.floor')
+            ->join('left join t_area on t_area.id = t_fire_card.area')
+            ->where($where)->order('t_fire_card.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //动火证详情
+    public function fire_card_info(){
+        $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('fire_card');
+        $data = $table->field('t_fire_card.id,t_fire_card.uid,t_fire_card.starttime,t_fire_card.stoptime,t_fire_card.builder,t_fire_card.look_fire,t_fire_card.is_fire,t_fire_card.desc,t_fire_card.sid,IFNULL(a.username,"") susername,t_admin.username,t_role.name,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
+            ->join('left join t_building on t_building.id = t_fire_card.building')
+            ->join('left join t_floor on t_floor.id = t_fire_card.floor')
+            ->join('left join t_area on t_area.id = t_fire_card.area')
+            ->join('left join t_admin on t_admin.id = t_fire_card.uid')
+            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
+            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_admin a on a.id = t_fire_card.sid')
+            ->where("t_fire_card.id = $id")->find();
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //审核动火证
+    public function fire_card_state(){
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $where['sid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['state'] = I('post.state') == 2 ? 2 : 3;
+        $table = M('fire_card');
+        $res = $table->field('stoptime,state')->find($where['id']);
+        if ($res['stoptime'] < time()) json('400','审核无效，动火证已过期');
+        if ($res['state'] != 1) json('400','审核无效，请不要重复操作');
+        $where['statetime'] = time();
+        $data = $table->save($where);
+        if ($data){
+            json('200','操作成功');
+        }else{
+            json('400','审核失败');
+        }
     }
 
 
+    //
+    public function word_view(){
+        $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
+        $res =  file_get_contents($url);
+        print_r($res);
+        exit;
+        $filename = './Public/upfile/123123.doc';
+        $content = shell_exec('antiword -w 0 UTF-8.txt '.$filename);
+        print_r($content);
+        //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
 
-
-
+    }
 
 
 

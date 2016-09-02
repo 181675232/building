@@ -287,6 +287,12 @@ function checkTime($_data) {
     return false;
 }
 
+//验证时间格式 2012-08-08 08:08
+function checkTimeDate($_data) {
+    if (preg_match('/^[0-9]{4}-([0][0-9]|[1][0-2])-([0-2][0-9]|[3][0,1])\s([0-1][0-9]|[2][0-3]):[0-5][0-9]$/',$_data)) return true;
+    return false;
+}
+
 //验证手机
 function checkPhone($_data) {
 	if (preg_match('/^(1[3,4,5,7,8][0-9])\d{8}$/',$_data)) return true;
