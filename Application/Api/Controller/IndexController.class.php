@@ -439,7 +439,7 @@ class IndexController extends CommonController {
     //修改个人资料
     public function user_edit(){
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
-        $where['sex'] = (I('post.sex') == 1 || I('post.sex') == 2) ? I('post.sex') : json('404','非法传值');
+        $where['sex'] = (I('post.sex') == 1 || I('post.sex') == 2) ? I('post.sex') : 1;
         if($_FILES['simg']){
             $file = $_FILES['simg'];
             $rand = '';
