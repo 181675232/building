@@ -28,7 +28,7 @@ return array(
 
 	
 	//'DB_CONFIG1' = array('db_type'  => 'mysql',    'db_user'  => 'root',    'db_pwd'   => '1234',    'db_host'  => 'localhost',    'db_port'  => '3306',    'db_name'  => 'thinkphp'),
-	'DB_CONFIG2' => 'mysql://root:Jolly@#2009@101.200.81.192:3306/jollycolorsbox',
+	'DB_CONFIG2' => 'mysql://root:Jolly@#2009@101.200.81.192:3306/jolly',
 	'SHOW_PAGE_TRACE' => false,		//页面trace
 	
 	//缓存

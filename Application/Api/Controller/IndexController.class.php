@@ -857,6 +857,23 @@ class IndexController extends CommonController {
         }
     }
 
+    //关于我们
+    public function about(){
+        $table = M('base','t_','DB_CONFIG2');
+        $data = $table->field('title,phone,email,description as descript,android,ios')->find();
+        json('200','成功',$data);
+    }
+
+    //意见反馈
+    public function add_feedback(){
+        $table = M('feedback','t_','DB_CONFIG2');
+        $where = I('post.');
+        if ($table->add($where)){
+            json('200','成功');
+        }else{
+            json('400','失败');
+        }
+    }
 
     //
     public function word_view(){
