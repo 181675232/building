@@ -340,7 +340,7 @@ class IndexController extends CommonController {
             ->join('left join t_role on t_role.id = t_role_user.role_id')
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
             ->where("t_dynamic.building = $id")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
-        if ($data){
+        if ($data['img']){
             json('200','成功',$data);
         }elseif($pages > 1){
             json('400','已经是最后一页');
@@ -376,7 +376,7 @@ class IndexController extends CommonController {
                 ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
                 ->where("FROM_UNIXTIME(t_dynamic.addtime,'%Y-%m-%d') = '{$val['datetime']}'")->order('t_dynamic.addtime desc')->select();
         }
-        if ($data){
+        if ($data['date']){
             json('200','成功',$data);
         }elseif($pages > 1){
             json('400','已经是最后一页');
