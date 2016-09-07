@@ -988,6 +988,13 @@ class IndexController extends CommonController {
 
     }
 
+    public function php_shell(){
+
+        shell_exec('cd /var/www/html/jollycolors/building');
+        shell_exec('git pull');
+
+    }
+
 
 
 //    public function add_dynamic(){
