@@ -83,12 +83,9 @@ class IndexController extends CommonController {
     public  function  login(){
         $data['phone'] = I('post.phone') ? I('post.phone') : json('404','缺少参数 phone');
         $data['jpushid'] = I('post.jpushid') ? I('post.jpushid') : json('404','缺少参数 jpushid');
-        if (!checkPhone($data['phone'])) {
-            json('400', '手机格式不正确');
-        }
         $password = I('post.password') ? I('post.password') : json('404','缺少参数 password');
         $table = M('admin');
-        $res = $table->field('id,jpushid,level,password,token,phone')->where("phone='{$data['phone']}'")->find();
+        $res = $table->field('id,jpushid,proid,level,password,token,phone')->where("phone='{$data['phone']}'")->find();
         if ($res){
             if ($res['password'] == md5(trim($password))){
                 unset($res['password']);
@@ -811,7 +808,6 @@ class IndexController extends CommonController {
 
     //已通过正在使用动火证列表
     public function fire_card_suss_list(){
-        $where['t_fire_card.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
 
