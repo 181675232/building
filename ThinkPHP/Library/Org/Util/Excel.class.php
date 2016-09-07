@@ -296,7 +296,7 @@ class Excel{
 	
 	}
 
-    public function excelimport($filename,$sheet="Sheet1"){
+    public function excelimport($filename,$sheet="Sheet1",$table="task"){
         $objPHPExcel = new \PHPExcel();
         $fileType=\PHPExcel_IOFactory::identify($filename);//自动获取文件的类型提供给phpecxel用
         $objReader=\PHPExcel_IOFactory::createReader($fileType);//获取文件读取操作对象
@@ -310,7 +310,7 @@ class Excel{
         // 			print_r($data);
         // 		}
         //全部加载end
-        $table=M('task');
+        $table=M($table);
         $id = $table->order('id desc')->getField('id');
         //逐行加载
         foreach ($objPHPExcel->getWorksheetIterator() as $val){//循环取sheet
@@ -321,18 +321,38 @@ class Excel{
                 }
                 $rs = array();
                 $id = $id ? $id : 0;
+                //检测
+                foreach ($row->getCellIterator() as $key => $cell){//逐列读取
+                    $data = $cell->getValue();//获取单元格数据
+                    if($key==0){
+                        if(!is_numeric($data)){
+                            alertBack('错误：标识号必须为数字，错误行数第 '.$row->getRowIndex().' 行');
+                        }
+                    }
+                    if($key==3){
+                        if(!$data){
+                            alertBack('错误：任务名称不能为空，错误行数第 '.$row->getRowIndex().' 行');
+                        }
+                    }
+                    if($key==8){
+                        if(!is_numeric($data)){
+                            alertBack('错误：大纲级别必须为数字，错误行数第 '.$row->getRowIndex().' 行');
+                        }
+                    }
+                }
+                //上传
                 foreach ($row->getCellIterator() as $key => $cell){//逐列读取
                     $data = $cell->getValue();//获取单元格数据
                     if($key==0){$rs['id']=$data+$id;}
-                    if($key==1){$rs['status']=$data;}
-                    if($key==2){$rs['type']=$data;}
-                    if($key==3){$rs['title']=$data;}
-                    if($key==4){$rs['day']=$data;}
-                    if($key==5){$rs['starttime']=str_replace('日','',str_replace('年','-',str_replace('月','-',$data)));}
-                    if($key==6){$rs['stoptime']=str_replace('日','',str_replace('年','-',str_replace('月','-',$data)));}
+                    if($key==1){$rs['status']=$data?$data:'';}
+                    if($key==2){$rs['type']=$data?$data:'';}
+                    if($key==3){$rs['title']=$data?$data:'';}
+                    if($key==4){$rs['day']=$data?$data:0;}
+                    if($key==5){$rs['starttime']=$data?str_replace('日','',str_replace('年','-',str_replace('月','-',$data))):'';}
+                    if($key==6){$rs['stoptime']=$data?str_replace('日','',str_replace('年','-',str_replace('月','-',$data))):'';}
                     if($key==7){$data && is_numeric($data) ? $rs['bid']=$data+$id:$rs['bid'] = 0;}
                     if($key==8){$rs['level']=$data;}
-                    if($key==9){$rs['description']=$data;}
+                    if($key==9){$rs['description']=$data?$data:'';}
 
                     if ($rs['level'] == 1){
                         $rs['pid'] = 0;

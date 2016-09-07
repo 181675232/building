@@ -166,6 +166,21 @@ function microtime_format($tag, $time)
 	$date = date($tag,$usec);
 	return str_replace('x', $sec, $date);
 }
+//融云状态订阅消息去重
+function rong_filter( $data )
+{
+    $data   = my_sort( $data, 'time', false );
+    $return = $temp = [ ];
+
+    foreach( $data as $k => $v ){
+        if( !in_array( $v['user_id'], $temp ) ){
+            $return[] = $v;
+            $temp[]   = $v['user_id'];
+        }
+    }
+
+    return $return;
+}
 //数组分页
 function array_page($array,$page,$count='20'){
 	$page=(empty($page))?'1':$page; #判断当前页面是否为空 如果为空就表示为第一页面

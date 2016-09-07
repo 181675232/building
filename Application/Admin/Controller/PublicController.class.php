@@ -152,11 +152,9 @@ class PublicController extends Controller {
     //导入Excel
     public function excelimport(){
         if (I('post.')){
-            $table = M('task');
-
             if (file_exists('.'.I('post.file'))){
                 $excel = new \Org\Util\Excel();
-                $excel->excelimport('.'.I('post.file'),I('post.title'));
+                $excel->excelimport('.'.I('post.file'),I('post.title'),'week_task');
                 exit;
             }else{
                 alertBack('文件不存在！');

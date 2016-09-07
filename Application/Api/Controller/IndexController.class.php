@@ -388,7 +388,14 @@ class IndexController extends CommonController {
     //获取下级总控大纲
     public function total_task_tree(){
         $id = I('post.id') ? I('post.id') : 0;
-        $table = M('task');
+        $type = I('post.type') ? I('post.type') : 1;
+        if ($type == 2){
+            $table = M('month_task');
+        }elseif($type == 3){
+            $table = M('week_task');
+        }else{
+            $table = M('task');
+        }
         $data = $table->field('id,title')->where("pid = '{$id}'")->order('id asc')->select();
         $arr = array();
         foreach ($data as $val){
@@ -407,8 +414,15 @@ class IndexController extends CommonController {
     public function total_task(){
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $page = I('post.page') ? I('post.page') : 1;
+        $type = I('post.type') ? I('post.type') : 1;
         $table = D('Task');
-        $res = $table->task_tree($id);
+        if ($type == 2){
+            $res = $table->month_task_tree($id);
+        }elseif($type == 3){
+            $res = $table->week_task_tree($id);
+        }else{
+            $res = $table->task_tree($id);
+        }
         if ($res){
             $data = array_page($res,$page);
             if ($data){
@@ -872,6 +886,92 @@ class IndexController extends CommonController {
             json('200','成功');
         }else{
             json('400','失败');
+        }
+    }
+
+    //融云在线状态订阅
+    public function login_state(){
+
+        $appKey    = $_GET['appKey'];
+        $nonce     = $_GET['nonce'];
+        $timestamp = $_GET['timestamp'];
+        $signature = $_GET['signature'];
+        if( $appKey && $nonce && $timestamp && $signature ){
+            if( $appKey != $this->appKey ){
+                json( '1002', 'appKey错误!' );
+            }
+            $appSecret = $this->appSecret;
+            $sign      = sha1( $appSecret . $nonce . $timestamp );
+            if( $sign != $signature ){
+                json( '1002', 'signature错误!' );
+            }
+            $data = file_get_contents( "php://input" );
+
+            if( $data ){
+                json( '1002', '验证通过,数据不可为空!' );
+            }
+
+            $data = json_decode( $data, true );
+            $data = rong_filter( $data );
+
+            foreach( $data as $k => $v ){
+                if( $data[$k]['status'] === '0' ){
+                    $logins[] = $data[$k]['userid'];
+                }else{
+                    $logout[] = $data[$k]['userid'];
+                }
+
+            }
+
+            if( !empty( $logins ) ){
+                $map['id']     = array( 'in', $logins );
+                $res['online'] = '2';
+                M( 'admin' )->where( $map )->save( $res );
+                unset( $map );
+                unset( $res );
+            }
+
+            if( !empty( $logout ) ){
+                $map['id']     = array( 'in', $logout );
+                $res['online'] = '1';
+                M( 'admin' )->where( $map )->save( $res );
+            }
+
+            json( '200', 'success' );
+        }else{
+            json( '1002', '参数错误!' );
+        }
+    }
+
+    //APP启动更新
+    public function app_state(){
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+
+        $where['logintime'] = time();
+        $where['state'] = 2;
+        $data = M('admin')->where("id = $uid")->save($where);
+        if($data){
+            json('200','成功');
+        }else{
+            json('400','数据更新失败');
+        }
+    }
+
+    //联系人列表
+    public function contacts_list(){
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $table = M('team');
+        $data = $table->field('id,title')->where("id != 8")->order('ord asc')->select();
+        $admin = M('admin');
+        foreach ($data as $key=>$val){
+            $data[$key]['user'] = $admin->field('t_admin.id,t_admin.username,t_admin.simg,t_admin.online,t_level.title')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where("t_admin.id != '{$uid}' and t_level.pid = '{$val['id']}'")->order('t_admin.online desc,t_admin.level desc')->select();
+        }
+        if($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
         }
     }
 

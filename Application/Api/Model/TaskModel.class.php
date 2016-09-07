@@ -20,5 +20,41 @@ class TaskModel extends Model{
             return $arr;
         }
     }
-	
+
+    public function month_task_tree($pid = 0){
+        static  $arr = array(); //使用static代替global
+        $table = M('month_task');
+        $result = $table->field('t_month_task.id,t_month_task.title,t_month_task.starttime,t_month_task.stoptime,t_month_task.day,IFNULL(t.title,"") as btitle')
+            ->join('left join t_month_task as t on t.id = t_month_task.bid')
+            ->where("t_month_task.pid = $pid")->order('t_month_task.id asc')->select();
+        if ($result){
+            foreach ($result as $key => $val){
+                if ($table->where("pid = '{$val['id']}'")->find()){
+                    $this->month_task_tree($val['id']);
+                }else{
+                    $arr[] = $val;
+                }
+            }
+            return $arr;
+        }
+    }
+
+    public function week_task_tree($pid = 0){
+        static  $arr = array(); //使用static代替global
+        $table = M('week_task');
+        $result = $table->field('t_week_task.id,t_week_task.title,t_week_task.starttime,t_week_task.stoptime,t_week_task.day,IFNULL(t.title,"") as btitle')
+            ->join('left join t_week_task as t on t.id = t_week_task.bid')
+            ->where("t_week_task.pid = $pid")->order('t_week_task.id asc')->select();
+        if ($result){
+            foreach ($result as $key => $val){
+                if ($table->where("pid = '{$val['id']}'")->find()){
+                    $this->week_task_tree($val['id']);
+                }else{
+                    $arr[] = $val;
+                }
+            }
+            return $arr;
+        }
+    }
+
 }
