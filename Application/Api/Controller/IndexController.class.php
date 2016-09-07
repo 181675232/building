@@ -977,10 +977,6 @@ class IndexController extends CommonController {
 
     //
     public function word_view(){
-        $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-        $res =  file_get_contents($url);
-        print_r($res);
-        exit;
         $filename = './Public/upfile/123123.doc';
         $content = shell_exec('antiword -w 0 UTF-8.txt '.$filename);
         print_r($content);
