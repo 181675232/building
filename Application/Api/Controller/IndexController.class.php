@@ -171,6 +171,7 @@ class IndexController extends CommonController {
     //修改密码
     public function passedit(){
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
 
         $user = M('admin');
         $where['password'] = md5(I('post.fpass'));
@@ -199,6 +200,7 @@ class IndexController extends CommonController {
     //一键现场默认页
     public function dynamic_list(){
         $page = I('post.page') ? I('post.page') : 1;
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $pages = ($page - 1)*20;
         $table = M('dynamic');
         $data = $table->field('t_dynamic.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
@@ -208,7 +210,7 @@ class IndexController extends CommonController {
             ->join('left join t_admin on t_admin.id = t_dynamic.uid')
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
-            ->order('t_dynamic.addtime desc')->limit($pages,20)->select();
+            ->where("t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         if ($data){
             $img = M('img')->field('id,simg,pid')->where('type = "dynamic"')->select();
             foreach ($data as $key=>$val){
@@ -228,9 +230,11 @@ class IndexController extends CommonController {
 
     //获取楼层区结构
     public function get_building_floor(){
-        $data = M('building')->field('id,title')->order('id asc')->select();
-        $floor = M('floor')->field('id,title,pid')->order('id asc')->select();
-        $area = M('area')->field('id,title,pid')->order('id asc')->select();
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $data = M('building')->field('id,title')->where("proid = $proid")->order('id asc')->select();
+        $floor = M('floor')->field('id,title,pid')->where("proid = $proid")->order('id asc')->select();
+        $area = M('area')->field('id,title,pid')->where("proid = $proid")->order('id asc')->select();
+
 
         foreach ($data as $key=>$value){
             foreach ($floor as $k=>$val){
@@ -255,6 +259,7 @@ class IndexController extends CommonController {
 
     //发布现场动态
     public function add_dynamic(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $file = $_FILES ? $_FILES : json('400','至少传一张图片');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['content'] = I('post.content') ? I('post.content') : json('404','缺少参数 content');
@@ -265,6 +270,7 @@ class IndexController extends CommonController {
         $where['area'] = I('post.area') ? I('post.area') : 0;
 
         $where['addtime'] = $data['addtime'] = time();
+        $where['proid'] = $data['proid'] = $proid;
         $table = M('dynamic');
         $data['pid'] = $table->add($where);
         if ($data['pid']){
@@ -296,6 +302,7 @@ class IndexController extends CommonController {
 
     //一键现场楼层相册格式
     public function dynamic_photo(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('dynamic');
@@ -303,7 +310,7 @@ class IndexController extends CommonController {
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->group('t_dynamic.building')
-            ->order('t_dynamic.building asc')->limit($pages,20)->select();
+            ->where("t_dynamic.proid = $proid")->order('t_dynamic.building asc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
         }elseif($pages > 1){
@@ -315,6 +322,7 @@ class IndexController extends CommonController {
 
     //一键现场楼层相册内图片
     public function dynamic_photo_img(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
@@ -327,7 +335,7 @@ class IndexController extends CommonController {
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
-            ->where("t_dynamic.building = $id")->count();
+            ->where("t_dynamic.building = $id and t_dynamic.proid = $proid")->count();
         $data['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->join('left join t_floor on t_floor.id = t_dynamic.floor')
@@ -336,7 +344,7 @@ class IndexController extends CommonController {
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
-            ->where("t_dynamic.building = $id")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
+            ->where("t_dynamic.building = $id and t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         if ($data['img']){
             json('200','成功',$data);
         }elseif($pages > 1){
@@ -348,6 +356,7 @@ class IndexController extends CommonController {
 
     //一键现场时间格式
     public function dynamic_date_img(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('dynamic');
@@ -358,10 +367,11 @@ class IndexController extends CommonController {
             ->join('left join t_admin on t_admin.id = t_dynamic.uid')
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
-            ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')->count();
+            ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
+            ->where("t_dynamic.proid = $proid")->count();
         $data['date'] = $table->field('FROM_UNIXTIME(t_dynamic.addtime,"%Y-%m-%d") datetime')
             ->group('datetime')
-            ->order('t_dynamic.addtime desc')->limit($pages,20)->select();
+            ->where("t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         foreach ($data['date'] as $key=>$val){
             $data['date'][$key]['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
                 ->join('left join t_building on t_building.id = t_dynamic.building')
@@ -371,7 +381,7 @@ class IndexController extends CommonController {
                 ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
                 ->join('left join t_role on t_role.id = t_role_user.role_id')
                 ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
-                ->where("FROM_UNIXTIME(t_dynamic.addtime,'%Y-%m-%d') = '{$val['datetime']}'")->order('t_dynamic.addtime desc')->select();
+                ->where("FROM_UNIXTIME(t_dynamic.addtime,'%Y-%m-%d') = '{$val['datetime']}' and t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->select();
         }
         if ($data['date']){
             json('200','成功',$data);
@@ -384,6 +394,7 @@ class IndexController extends CommonController {
 
     //获取下级总控大纲
     public function total_task_tree(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : 0;
         $type = I('post.type') ? I('post.type') : 1;
         if ($type == 2){
@@ -393,10 +404,10 @@ class IndexController extends CommonController {
         }else{
             $table = M('task');
         }
-        $data = $table->field('id,title')->where("pid = '{$id}'")->order('id asc')->select();
+        $data = $table->field('id,title')->where("pid = '{$id}' and proid = '{$proid}'")->order('id asc')->select();
         $arr = array();
         foreach ($data as $val){
-            if ($table->where("pid = '{$val['id']}'")->find()){
+            if ($table->where("pid = '{$val['id']}' and proid = '{$proid}'")->find()){
                 $arr[] = $val;
             }
         }
@@ -409,16 +420,17 @@ class IndexController extends CommonController {
 
     //总控任务实体任务
     public function total_task(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $page = I('post.page') ? I('post.page') : 1;
         $type = I('post.type') ? I('post.type') : 1;
         $table = D('Task');
         if ($type == 2){
-            $res = $table->month_task_tree($id);
+            $res = $table->month_task_tree($id,$proid);
         }elseif($type == 3){
-            $res = $table->week_task_tree($id);
+            $res = $table->week_task_tree($id,$proid);
         }else{
-            $res = $table->task_tree($id);
+            $res = $table->task_tree($id,$proid);
         }
         if ($res){
             $data = array_page($res,$page);
@@ -434,12 +446,13 @@ class IndexController extends CommonController {
 
     //个人资料
     public function user_info(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('admin');
         $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.addtime,t_role.name')
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
-            ->where("t_admin.id = $id")->find();
+            ->where("t_admin.id = $id and t_admin.proid = $proid")->find();
         if ($data){
             json('200','成功',$data);
         }else{
@@ -449,6 +462,7 @@ class IndexController extends CommonController {
 
     //修改个人资料
     public function user_edit(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $where['sex'] = (I('post.sex') == 1 || I('post.sex') == 2) ? I('post.sex') : 1;
         if($_FILES['simg']){
@@ -470,6 +484,7 @@ class IndexController extends CommonController {
                 json('400','头像上传失败');
             }
         }
+        $where['proid'] = $proid;
         $table = M('admin');
         $data = $table->save($where);
         if ($data){
@@ -481,6 +496,7 @@ class IndexController extends CommonController {
 
     //发布施工日志
     public function buildlog_add(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['addtime'] = I('post.addtime') ? I('post.addtime') : json('404','缺少参数 addtime');
         if (checkTime($where['addtime'])){
@@ -514,7 +530,7 @@ class IndexController extends CommonController {
             $where['record'] = I('post.record');
             if(mb_strlen($where['record'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
-
+        $where['proid'] = $proid;
         $table = M('buildlog');
         $data = $table->add($where);
         if ($data){
@@ -526,6 +542,7 @@ class IndexController extends CommonController {
 
     //我的施工日志列表
     public function buildlog_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $type = I('post.type') ? I('post.type') : 0;
         $page = I('post.page') ? I('post.page') : 1;
@@ -543,6 +560,7 @@ class IndexController extends CommonController {
             $where['t_buildlog.addtime'] = array('egt',time()-6*30*24*60*60);
         }
         $where['t_buildlog.uid'] = $uid;
+        $where['t_buildlog.proid'] = $proid;
         $table = M('buildlog');
         $data = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.uid,substring(t_buildlog.prorecord,1,10) title,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
             ->join('left join t_building on t_building.id = t_buildlog.building')
@@ -563,13 +581,14 @@ class IndexController extends CommonController {
 
     //我的施工日志详情
     public function buildlog_info(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('buildlog');
         $data = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
             ->join('left join t_building on t_building.id = t_buildlog.building')
             ->join('left join t_floor on t_floor.id = t_buildlog.floor')
             ->join('left join t_area on t_area.id = t_buildlog.area')
-            ->where("t_buildlog.id = $id")->find();
+            ->where("t_buildlog.id = $id and t_buildlog.proid = $proid")->find();
         if ($data){
             json('200','成功',$data);
         }else{
@@ -579,6 +598,7 @@ class IndexController extends CommonController {
 
     //修改我的施工日志
     public function buildlog_edit(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $where['addtime'] = I('post.addtime') ? I('post.addtime') : json('404','缺少参数 addtime');
         if (checkTime($where['addtime'])){
@@ -611,7 +631,7 @@ class IndexController extends CommonController {
             $where['record'] = I('post.record');
             if(mb_strlen($where['record'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
-
+        $where['proid'] = $proid;
         $table = M('buildlog');
         $data = $table->save($where);
         if ($data){
@@ -623,6 +643,7 @@ class IndexController extends CommonController {
 
     //整合施工日志列表
     public function buildlog_all_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $type = I('post.type') ? I('post.type') : 0;
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
@@ -638,6 +659,7 @@ class IndexController extends CommonController {
         }elseif($type == 3){
             $where['addtime'] = array('egt',time()-6*30*24*60*60);
         }
+        $where['proid'] = $proid;
         $table = M('buildlog');
         $data = $table->field('addtime,substring(t_buildlog.prorecord,1,10) title')
             ->group('addtime')
@@ -653,6 +675,7 @@ class IndexController extends CommonController {
 
     //整合施工日志详情
     public function buildlog_all_info(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $addtime = I('post.addtime') ? I('post.addtime') : json('404','缺少参数 addtime');
         $table = M('buildlog');
         $res = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_role.name')
@@ -662,7 +685,7 @@ class IndexController extends CommonController {
             ->join('left join t_admin on t_admin.id = t_buildlog.uid')
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
-            ->where("t_buildlog.addtime = $addtime")->select();
+            ->where("t_buildlog.addtime = $addtime and t_buildlog.proid = $proid")->select();
         foreach ($res as $val){
             $data['addtime'] = $val['addtime'];
             $data['weather'] = $val['weather'];
@@ -687,12 +710,14 @@ class IndexController extends CommonController {
 
     //夜间许可证列表
     public function night_card(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $type = I('post.type') ? I('post.type') : 1;
         if ($type == 1){
             $where['t_night_card.stoptime'] = array('egt',time());
         }else{
             $where['t_night_card.stoptime'] = array('lt',time());
         }
+        $where['t_night_card.proid'] = $proid;
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('night_card');
@@ -710,6 +735,7 @@ class IndexController extends CommonController {
 
     //申请动火证
     public function add_fire_card(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['starttime'] = I('post.starttime') ? I('post.starttime') : json('404','缺少参数 starttime');
         if (checkTimeDate($where['starttime'])){
@@ -735,7 +761,10 @@ class IndexController extends CommonController {
         $where['desc'] = I('post.desc') ? I('post.desc') : json('404','缺少参数 desc');
 
         $table = M('fire_card');
+
         $where['addtime'] = time();
+        $where['proid'] = $proid;
+
         $res = $table->add($where);
         if ($res){
             json('200','申请成功');
@@ -746,6 +775,7 @@ class IndexController extends CommonController {
 
     //我的动火证列表
     public function my_fire_card(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $type = I('post.type') ? I('post.type') : 1;
         if ($type == 1){
             $where['t_fire_card.stoptime'] = array('egt',time());
@@ -759,6 +789,7 @@ class IndexController extends CommonController {
             $where['_complex'] = $where1;
         }
         $where['t_fire_card.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_fire_card.proid'] = $proid;
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('fire_card');
@@ -778,17 +809,22 @@ class IndexController extends CommonController {
 
     //管理端动火证列表
     public function fire_card_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $type = I('post.type') ? I('post.type') : 1;
         if ($type == 1){
             $where['t_fire_card.stoptime'] = array('egt',time());
             $where['t_fire_card.state'] = 1;
+            $where['t_fire_card.proid'] = $proid;
         }else{
             $map['t_fire_card.stoptime'] = array('lt',time());
             $map['t_fire_card.state'] = 1;
-            $where['_complex'] = $map;
-            $where['t_fire_card.state']  = array('neq',1);
-            $where['_logic'] = 'or';
+            $where1['_complex'] = $map;
+            $where1['t_fire_card.state']  = array('neq',1);
+            $where1['_logic'] = 'or';
+            $where['_complex'] = $where1;
+            $where['t_fire_card.proid'] = $proid;
         }
+
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('fire_card');
@@ -808,11 +844,13 @@ class IndexController extends CommonController {
 
     //已通过正在使用动火证列表
     public function fire_card_suss_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
 
         $where['t_fire_card.stoptime'] = array('egt',time());
         $where['t_fire_card.state'] = 2;
+        $where['t_fire_card.proid'] = $proid;
 
         $table = M('fire_card');
         $data = $table->field('t_fire_card.id,t_fire_card.starttime,t_fire_card.stoptime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_fire_card.state')
@@ -831,6 +869,7 @@ class IndexController extends CommonController {
 
     //动火证详情
     public function fire_card_info(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('fire_card');
         $data = $table->field('t_fire_card.id,t_fire_card.uid,t_fire_card.starttime,t_fire_card.stoptime,t_fire_card.builder,t_fire_card.look_fire,t_fire_card.is_fire,t_fire_card.desc,t_fire_card.sid,IFNULL(a.username,"") susername,t_admin.username,t_role.name,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
@@ -841,7 +880,7 @@ class IndexController extends CommonController {
             ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
             ->join('left join t_role on t_role.id = t_role_user.role_id')
             ->join('left join t_admin a on a.id = t_fire_card.sid')
-            ->where("t_fire_card.id = $id")->find();
+            ->where("t_fire_card.id = $id and t_fire_card.proid = $proid")->find();
         if ($data){
             json('200','成功',$data);
         }else{
@@ -851,9 +890,11 @@ class IndexController extends CommonController {
 
     //审核动火证
     public function fire_card_state(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $where['sid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['state'] = I('post.state') == 2 ? 2 : 3;
+        $where['proid'] = I('post.state') = $proid;
         $table = M('fire_card');
         $res = $table->field('stoptime,state')->find($where['id']);
         if ($res['stoptime'] < time()) json('400','审核无效，动火证已过期');
@@ -869,6 +910,7 @@ class IndexController extends CommonController {
 
     //关于我们
     public function about(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $table = M('base','t_','DB_CONFIG2');
         $data = $table->field('title,phone,email,description as descript,android,ios')->find();
         json('200','成功',$data);
@@ -876,6 +918,7 @@ class IndexController extends CommonController {
 
     //意见反馈
     public function add_feedback(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $table = M('feedback','t_','DB_CONFIG2');
         $where = I('post.');
         if ($table->add($where)){
@@ -941,9 +984,11 @@ class IndexController extends CommonController {
 
     //APP启动更新
     public function app_state(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
 
         $where['logintime'] = time();
+        $where['proid'] = $proid;
         $where['state'] = 2;
         $data = M('admin')->where("id = $uid")->save($where);
         if($data){
@@ -955,6 +1000,7 @@ class IndexController extends CommonController {
 
     //联系人列表
     public function contacts_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $table = M('team');
         $data = $table->field('id,title')->where("id != 8")->order('ord asc')->select();
@@ -962,7 +1008,7 @@ class IndexController extends CommonController {
         foreach ($data as $key=>$val){
             $data[$key]['user'] = $admin->field('t_admin.id,t_admin.username,t_admin.simg,t_admin.online,t_level.title')
                 ->join('left join t_level on t_level.id = t_admin.level')
-                ->where("t_admin.id != '{$uid}' and t_level.pid = '{$val['id']}'")->order('t_admin.online desc,t_admin.level desc')->select();
+                ->where("t_admin.id != '{$uid}' and t_level.pid = '{$val['id']}' and t_admin.proid = '{$proid}'")->order('t_admin.online desc,t_admin.level desc')->select();
         }
         if($data){
             json('200','成功',$data);
@@ -971,25 +1017,82 @@ class IndexController extends CommonController {
         }
     }
 
-    //
-    public function word_view(){
-        $filename = './Public/upfile/123123.doc';
-        $content = shell_exec('antiword -w 0 UTF-8.txt '.$filename);
-        print_r($content);
-        //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
-
+    //创建群组
+    public function addgroup(){
+        $where['proid'] = $map['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = $map['user_id'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
+        if(isset($_POST['desc'])) $where['desc'] = I('post.desc');
+        $where['addtime'] = $map['addtime'] = time();
+        $table = M('groups');
+        $map['groups_id'] = $table->add($where);
+        if ($map['groups_id']){
+            $groupsuser = M('groupsuser');
+            $map['level'] = 9;
+            $id = $groupsuser->add($map);
+            if ($id){
+                $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
+                $r = $rongyun->groupCreate($where['uid'], $map['groups_id'], $where['title']);
+                $rong = json_decode($r);
+                if($rong->code == 200){
+                    $data['groups_id'] = $map['groups_id'];
+                    json('200','成功',$data);
+                }else {
+                    $groupsuser->delete($id);
+                    $table->delete($map['groups_id']);
+                    json('404','系统内部错误');
+                }
+            }else{
+                $table->delete($map['groups_id']);
+                json('400','群组创建失败');
+            }
+        }else {
+            json('400','群组创建失败');
+        }
     }
 
-    public function php_shell(){
-
-        echo shell_exec('cd /var/www/html/jollycolors/building');
-        echo 123;
-        echo shell_exec('git pull');
-
+    //发送群邀请
+    public function groupbyfriend(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
+        $arr = explode(',', $uid);
+        $admin = M('admin');
+        $groupsuser = M('groupsuser');
+        $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
+        foreach($arr as $val){
+            $res = $admin->field('t_admin.username,t_level.title')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where("t_admin.id = '{$val}' and t_admin.proid = '{$where['proid']}'")->find();
+                if ($res){
+                    $where['user_id'] = $val;
+                    $id = $groupsuser->add($where);
+                    if($id){
+                        $r = $rongyun->groupJoin($val,$where['groups_id']);
+                        $rong = json_decode($r);
+                        if($rong->code == 200){
+                            $content = "{'content':'{$res['title']} {$res['username']}加入本群.'}";
+                            $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
+                            json('200','成功');
+                        }else {
+                            $groupsuser->delete($id);
+                            json('404','系统内部错误');
+                        }
+                    }
+                }
+        }
+        json('200');
     }
 
 
 
+//    public function word_view(){
+//        $filename = './Public/upfile/123123.doc';
+//        $content = shell_exec('antiword -w 0 UTF-8.txt '.$filename);
+//        print_r($content);
+//        //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
+//
+//    }
 //    public function add_dynamic(){
 //        if (I('post.ids')){
 //            $ids = explode(',', I('post.ids'));
