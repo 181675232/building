@@ -6,7 +6,7 @@ use Think;
 use Think\Exception;
 use Api\Controller\CommonController;
 
-class IndexController extends CommonController { 
+class IndexController extends CommonController {
 	//基本配置
     //url
     private $url = 'http://101.200.81.192:8082';
@@ -15,20 +15,20 @@ class IndexController extends CommonController {
 	private $title = 'JollyBuilding';
 	private $app_key='bea2018a7e27f608345fa373';
 	private $master_secret = 'f050562fffc5362275eb3219';
-	
+
 	//融云
 	private $appKey = '8brlm7ufr41w3';
 	private $appSecret = '7dYWxJCyLIA';
-	
+
 	//oss
 //	private $url = 'http://jolly.img-cn-beijing.aliyuncs.com'; //外网
 //	private $url_nei = 'oss-cn-beijing-internal.aliyuncs.com';
 //	private $AccessKeyID='0zHXT3orDFaVxFWn';
 //	private $AccessKeySecret = 'yjBwj2Om9l4Bu8qSu7yx3XOAcSxFhv';
-	
+
 	//测试
 	public function test(){
-		
+
 	}
 
     //短信登录
@@ -121,7 +121,7 @@ class IndexController extends CommonController {
             json('400','请先注册');
         }
     }
-    
+
     //发送验证码(不检测调用)
     public function yzm(){
         $phone = I('post.phone') ? I('post.phone') : json('404','缺少参数 phone');
@@ -167,7 +167,7 @@ class IndexController extends CommonController {
             json('400','新密码不能和原密码相同');
         }
     }
-    
+
     //修改密码
     public function passedit(){
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
@@ -195,7 +195,7 @@ class IndexController extends CommonController {
         }else {
             json('400','新密码不能和原密码相同');
         }
-    }  
+    }
 
     //一键现场默认页
     public function dynamic_list(){
@@ -894,7 +894,7 @@ class IndexController extends CommonController {
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $where['sid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['state'] = I('post.state') == 2 ? 2 : 3;
-        $where['proid'] = I('post.state') = $proid;
+        $where['proid'] = $proid;
         $table = M('fire_card');
         $res = $table->field('stoptime,state')->find($where['id']);
         if ($res['stoptime'] < time()) json('400','审核无效，动火证已过期');
@@ -1084,6 +1084,89 @@ class IndexController extends CommonController {
         json('200');
     }
 
+    //退出群
+    public function groupquit(){
+        if (I('post.')){
+            $where['user_id'] = I('post.user_id');
+            $where['group_id'] = $where1['group_id'] = I('post.group_id');
+            $where1['user_id'] = I('post.id');
+            $table = M('groupuser');
+            $message = M('message');
+            if (I('post.id')){
+                $res1 = $table->where($where)->find();
+                $res2 = $table->where($where1)->find();
+                if ($res1['level'] >= $res2['level']){
+                    json('400','没有操作权限');
+                }
+            }
+            if ($table->where($where)->delete()){
+                $groups = M('groups');
+                $user = M('user');
+                $groupsinfo = $groups->find($where['group_id']);
+                $userinfo = $user->find($where['user_id']);
+                $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
+                $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
+                if($r){
+                    $rong = json_decode($r);
+                    if($rong->code == 200){
+                        $data['state'] = 0;
+                        $data['uid'] = $where['user_id'];
+                        $data['title'] = $userinfo['username'].'退出了'.$groupsinfo['title'].'群组';
+                        $data['content'] = $userinfo['username'].'退出了'.$groupsinfo['title'].'群组';
+                        $data['addtime'] = time();
+                        $data['type'] = 'group';
+                        $data['typeid'] = $groupsinfo['id'];
+                        $data['msg_type']  = ($groupsinfo['type'] == 2) ? 2 : 1;
+                        $message->add($data);
+                        $jpush = new \Org\Util\Jpush($this->app_key,$this->master_secret);
+                        $userdata = $table->field('t_user.jpushid')
+                            ->join('left join t_user on t_user.id = t_groupuser.user_id')
+                            ->where("t_groupuser.group_id = '{$where['group_id']}' and t_groupuser.level > 3")->select();
+                        foreach ($userdata as $val){
+                            if ($val['jpushid']){
+                                $jpushid[] = $val['jpushid'];
+                            }
+                        }
+                        $array['type'] = ($groupsinfo['type'] == 2) ? 'privategroup' : 'groupmessage';
+                        $content = $data['title'];
+                        if ($jpushid){
+                            $jpush->push($jpushid, $this->title,$content,$array);
+                        }
+                        if (I('post.id')){
+                            $data['title'] = '您被移除了'.$groupsinfo['title'].'群组';
+                            $data['content'] = '您被移除了'.$groupsinfo['title'].'群组';
+                            $data['type'] = 'user';
+                            $message_num = M('message_num');
+                            $where123['type'] = 3;
+                            $where123['uid'] = $data['uid'];
+                            if ($message_num->where($where123)->find()){
+                                $message_num->where($where123)->setInc('num');
+                            }else {
+                                $where123['num'] = 1;
+                                $message_num->add($where123);
+                            }
+                            $message->add($data);
+                            $jpushuserid[0] = $userinfo['jpushid'];
+                            $array['type'] = 'message';
+                            $content = $data['title'];
+                            if ($jpushuserid){
+                                $jpush->push($jpushuserid, $this->title,$content,$array);
+                            }
+                        }
+                        json('200');
+                    }else {
+                        json('400','rongyun error1');
+                    }
+                }else {
+                    json('400','rongyun error2');
+                }
+            }else {
+                json('400','操作失败');
+            }
+        }
+        json('404');
+    }
+
 
 
 //    public function word_view(){
@@ -1130,7 +1213,7 @@ class IndexController extends CommonController {
 //            }
 //        }
 //    }
-	
-	
-	
+
+
+
 }
