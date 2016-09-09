@@ -1062,7 +1062,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupJoin($val,$where['groups_id']);
                     $rong = json_decode($r);
                     if($rong->code == 200){
-                        $content = "{'content':'{$res['title']} {$res['username']}加入本群.'}";
+                        $content = "{'message':'{$res['title']} {$res['username']}加入本群.'}";
                         $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
                     }else {
                         $groupsuser->delete($id);
@@ -1091,7 +1091,7 @@ class IndexController extends CommonController {
             $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
-                $content = "{'content':'{$res['title']} {$res['username']}退出本群.'}";
+                $content = "{'message':'{$res['title']} {$res['username']}退出本群.'}";
                 $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
                 json('200','成功');
             }else {
