@@ -181,7 +181,7 @@ class Rongyun{
      * @param string $pushData  针对 iOS 平台，Push 通知附加的 payload 字段，字段名为 appData。(可选)
      * @return json|xml
      */
-    public function messageSystemPublish($fromUserId,$toUserId = array(),$objectName,$content,$pushContent='',$pushData = '') {
+    public function messageSystemPublish($fromUserId,$toUserId = array(),$content,$objectName = 'RC:TxtMsg',$pushContent='',$pushData = '') {
         try{
             if(empty($fromUserId))
                 throw new Exception('发送人用户 Id 不能为空');

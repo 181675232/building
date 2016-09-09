@@ -203,13 +203,12 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $pages = ($page - 1)*20;
         $table = M('dynamic');
-        $data = $table->field('t_dynamic.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+        $data = $table->field('t_dynamic.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->join('left join t_floor on t_floor.id = t_dynamic.floor')
             ->join('left join t_area on t_area.id = t_dynamic.area')
             ->join('left join t_admin on t_admin.id = t_dynamic.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         if ($data){
             $img = M('img')->field('id,simg,pid')->where('type = "dynamic"')->select();
@@ -327,22 +326,20 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('dynamic');
-        $data['count'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+        $data['count'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->join('left join t_floor on t_floor.id = t_dynamic.floor')
             ->join('left join t_area on t_area.id = t_dynamic.area')
             ->join('left join t_admin on t_admin.id = t_dynamic.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
             ->where("t_dynamic.building = $id and t_dynamic.proid = $proid")->count();
-        $data['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+        $data['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->join('left join t_floor on t_floor.id = t_dynamic.floor')
             ->join('left join t_area on t_area.id = t_dynamic.area')
             ->join('left join t_admin on t_admin.id = t_dynamic.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
             ->where("t_dynamic.building = $id and t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         if ($data['img']){
@@ -360,26 +357,24 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('dynamic');
-        $data['count'] = $table->field('t_img.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+        $data['count'] = $table->field('t_img.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->join('left join t_floor on t_floor.id = t_dynamic.floor')
             ->join('left join t_area on t_area.id = t_dynamic.area')
             ->join('left join t_admin on t_admin.id = t_dynamic.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
             ->where("t_dynamic.proid = $proid")->count();
         $data['date'] = $table->field('FROM_UNIXTIME(t_dynamic.addtime,"%Y-%m-%d") datetime')
             ->group('datetime')
             ->where("t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         foreach ($data['date'] as $key=>$val){
-            $data['date'][$key]['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+            $data['date'][$key]['img'] = $table->field('t_img.id,t_img.simg img,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
                 ->join('left join t_building on t_building.id = t_dynamic.building')
                 ->join('left join t_floor on t_floor.id = t_dynamic.floor')
                 ->join('left join t_area on t_area.id = t_dynamic.area')
                 ->join('left join t_admin on t_admin.id = t_dynamic.uid')
-                ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-                ->join('left join t_role on t_role.id = t_role_user.role_id')
+                ->join('left join t_level on t_level.id = t_admin.level')
                 ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
                 ->where("FROM_UNIXTIME(t_dynamic.addtime,'%Y-%m-%d') = '{$val['datetime']}' and t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->select();
         }
@@ -449,9 +444,8 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('admin');
-        $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.addtime,t_role.name')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+        $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.addtime,t_level.title name')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_admin.id = $id and t_admin.proid = $proid")->find();
         if ($data){
             json('200','成功',$data);
@@ -562,13 +556,12 @@ class IndexController extends CommonController {
         $where['t_buildlog.uid'] = $uid;
         $where['t_buildlog.proid'] = $proid;
         $table = M('buildlog');
-        $data = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.uid,substring(t_buildlog.prorecord,1,10) title,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_role.name')
+        $data = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.uid,substring(t_buildlog.prorecord,1,10) title,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_building on t_building.id = t_buildlog.building')
             ->join('left join t_floor on t_floor.id = t_buildlog.floor')
             ->join('left join t_area on t_area.id = t_buildlog.area')
             ->join('left join t_admin on t_admin.id = t_buildlog.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->where($where)->order('t_buildlog.addtime desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
@@ -678,13 +671,12 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $addtime = I('post.addtime') ? I('post.addtime') : json('404','缺少参数 addtime');
         $table = M('buildlog');
-        $res = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_role.name')
+        $res = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_level.title name')
             ->join('left join t_building on t_building.id = t_buildlog.building')
             ->join('left join t_floor on t_floor.id = t_buildlog.floor')
             ->join('left join t_area on t_area.id = t_buildlog.area')
             ->join('left join t_admin on t_admin.id = t_buildlog.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_buildlog.addtime = $addtime and t_buildlog.proid = $proid")->select();
         foreach ($res as $val){
             $data['addtime'] = $val['addtime'];
@@ -872,13 +864,12 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('fire_card');
-        $data = $table->field('t_fire_card.id,t_fire_card.uid,t_fire_card.starttime,t_fire_card.stoptime,t_fire_card.builder,t_fire_card.look_fire,t_fire_card.is_fire,t_fire_card.desc,t_fire_card.sid,IFNULL(a.username,"") susername,t_admin.username,t_role.name,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
+        $data = $table->field('t_fire_card.id,t_fire_card.uid,t_fire_card.starttime,t_fire_card.stoptime,t_fire_card.builder,t_fire_card.look_fire,t_fire_card.is_fire,t_fire_card.desc,t_fire_card.sid,IFNULL(a.username,"") susername,t_admin.username,t_level.title name,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
             ->join('left join t_building on t_building.id = t_fire_card.building')
             ->join('left join t_floor on t_floor.id = t_fire_card.floor')
             ->join('left join t_area on t_area.id = t_fire_card.area')
             ->join('left join t_admin on t_admin.id = t_fire_card.uid')
-            ->join('left join t_role_user on t_role_user.user_id = t_admin.id')
-            ->join('left join t_role on t_role.id = t_role_user.role_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_admin a on a.id = t_fire_card.sid')
             ->where("t_fire_card.id = $id and t_fire_card.proid = $proid")->find();
         if ($data){
@@ -1003,7 +994,7 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $table = M('team');
-        $data = $table->field('id,title')->where("id != 8")->order('ord asc')->select();
+        $data = $table->field('id,title')->order('ord asc')->select();
         $admin = M('admin');
         foreach ($data as $key=>$val){
             $data[$key]['user'] = $admin->field('t_admin.id,t_admin.username,t_admin.simg,t_admin.online,t_level.title')
@@ -1064,109 +1055,184 @@ class IndexController extends CommonController {
             $res = $admin->field('t_admin.username,t_level.title')
                 ->join('left join t_level on t_level.id = t_admin.level')
                 ->where("t_admin.id = '{$val}' and t_admin.proid = '{$where['proid']}'")->find();
-                if ($res){
-                    $where['user_id'] = $val;
-                    $id = $groupsuser->add($where);
-                    if($id){
-                        $r = $rongyun->groupJoin($val,$where['groups_id']);
-                        $rong = json_decode($r);
-                        if($rong->code == 200){
-                            $content = "{'content':'{$res['title']} {$res['username']}加入本群.'}";
-                            $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
-                            json('200','成功');
-                        }else {
-                            $groupsuser->delete($id);
-                            json('404','系统内部错误');
-                        }
-                    }
-                }
-        }
-        json('200');
-    }
-
-    //退出群
-    public function groupquit(){
-        if (I('post.')){
-            $where['user_id'] = I('post.user_id');
-            $where['group_id'] = $where1['group_id'] = I('post.group_id');
-            $where1['user_id'] = I('post.id');
-            $table = M('groupuser');
-            $message = M('message');
-            if (I('post.id')){
-                $res1 = $table->where($where)->find();
-                $res2 = $table->where($where1)->find();
-                if ($res1['level'] >= $res2['level']){
-                    json('400','没有操作权限');
-                }
-            }
-            if ($table->where($where)->delete()){
-                $groups = M('groups');
-                $user = M('user');
-                $groupsinfo = $groups->find($where['group_id']);
-                $userinfo = $user->find($where['user_id']);
-                $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
-                $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
-                if($r){
+            if ($res){
+                $where['user_id'] = $val;
+                $id = $groupsuser->add($where);
+                if($id){
+                    $r = $rongyun->groupJoin($val,$where['groups_id']);
                     $rong = json_decode($r);
                     if($rong->code == 200){
-                        $data['state'] = 0;
-                        $data['uid'] = $where['user_id'];
-                        $data['title'] = $userinfo['username'].'退出了'.$groupsinfo['title'].'群组';
-                        $data['content'] = $userinfo['username'].'退出了'.$groupsinfo['title'].'群组';
-                        $data['addtime'] = time();
-                        $data['type'] = 'group';
-                        $data['typeid'] = $groupsinfo['id'];
-                        $data['msg_type']  = ($groupsinfo['type'] == 2) ? 2 : 1;
-                        $message->add($data);
-                        $jpush = new \Org\Util\Jpush($this->app_key,$this->master_secret);
-                        $userdata = $table->field('t_user.jpushid')
-                            ->join('left join t_user on t_user.id = t_groupuser.user_id')
-                            ->where("t_groupuser.group_id = '{$where['group_id']}' and t_groupuser.level > 3")->select();
-                        foreach ($userdata as $val){
-                            if ($val['jpushid']){
-                                $jpushid[] = $val['jpushid'];
-                            }
-                        }
-                        $array['type'] = ($groupsinfo['type'] == 2) ? 'privategroup' : 'groupmessage';
-                        $content = $data['title'];
-                        if ($jpushid){
-                            $jpush->push($jpushid, $this->title,$content,$array);
-                        }
-                        if (I('post.id')){
-                            $data['title'] = '您被移除了'.$groupsinfo['title'].'群组';
-                            $data['content'] = '您被移除了'.$groupsinfo['title'].'群组';
-                            $data['type'] = 'user';
-                            $message_num = M('message_num');
-                            $where123['type'] = 3;
-                            $where123['uid'] = $data['uid'];
-                            if ($message_num->where($where123)->find()){
-                                $message_num->where($where123)->setInc('num');
-                            }else {
-                                $where123['num'] = 1;
-                                $message_num->add($where123);
-                            }
-                            $message->add($data);
-                            $jpushuserid[0] = $userinfo['jpushid'];
-                            $array['type'] = 'message';
-                            $content = $data['title'];
-                            if ($jpushuserid){
-                                $jpush->push($jpushuserid, $this->title,$content,$array);
-                            }
-                        }
-                        json('200');
+                        $content = "{'content':'{$res['title']} {$res['username']}加入本群.'}";
+                        $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
                     }else {
-                        json('400','rongyun error1');
+                        $groupsuser->delete($id);
+                        json('404','系统内部错误');
                     }
-                }else {
-                    json('400','rongyun error2');
                 }
-            }else {
-                json('400','操作失败');
             }
         }
-        json('404');
+        json('200','成功');
     }
 
+    //退出群组
+    public function groupquit(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['groups_id'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $table = M('groupsuser');
+        $level = $table->where($where)->getField('level');
+        if($level == 9) json('400','对不起，群主不能退出群组');
+        $admin = M('admin');
+        if ($table->where($where)->delete()){
+            $res = $admin->field('t_admin.username,t_level.title')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where("t_admin.id = '{$where['user_id']}' and t_admin.proid = '{$where['proid']}'")->find();
+            $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
+            $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
+            $rong = json_decode($r);
+            if($rong->code == 200){
+                $content = "{'content':'{$res['title']} {$res['username']}退出本群.'}";
+                $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
+                json('200','成功');
+            }else {
+                json('400','系统内部错误');
+            }
+        }else {
+            json('400','操作失败');
+        }
+    }
+
+    //移出群组
+    public function tichu_group(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['groups_id'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $table = M('groupsuser');
+        $level = $table->where("proid = '{$where['proid']}' and user_id = '{$uid}' and groups_id = '{$where['groups_id']}'")->getField('level');
+        if($level != 9) json('400','对不起，您没有操作权限');
+        $groups = M('groups');
+        if ($table->where($where)->delete()){
+            $res = $groups->field('title')->where("id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->find();
+            $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
+            $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
+            $rong = json_decode($r);
+            if($rong->code == 200){
+                $content = "{'content':'{您被移出 {$res['title']} 群组.'}";
+                $rongyun->messageSystemPublish(1,$where['user_id'],$content);
+                json('200','成功');
+            }else {
+                json('400','系统内部错误');
+            }
+        }else {
+            json('400','操作失败');
+        }
+    }
+
+    //解散群组
+    public function groupdismiss(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['groups_id'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $table = M('groupsuser');
+        $level = $table->where("proid = '{$where['proid']}' and user_id = '{user_id}' and groups_id = '{$where['groups_id']}'")->getField('level');
+        if($level != 9) json('400','对不起，您没有操作权限');
+        $groups = M('groups');
+        $res = $groups->field('title')->where("id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->find();
+        if ($res) {
+            if ($groups->delete($where['groups_id'])) {
+                $arr = $table->where("groups_id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->getField('user_id',true);
+                if ($table->where("groups_id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->delete()) {
+                    $rongyun = new  \Org\Util\Rongyun($this->appKey, $this->appSecret);
+                    $r = $rongyun->groupDismiss($where['user_id'], $where['group_id']);
+                    $rong = json_decode($r);
+                    if ($rong->code == 200) {
+                        $content = "{'content':'{您所在的群组 {$res['title']} 解散了.'}";
+                        $rongyun->messageSystemPublish(1, $arr, $content);
+                        json('200', '成功');
+                    } else {
+                        json('400', '系统内部错误');
+                    }
+                } else {
+                    json('400', '操作失败');
+                }
+            }
+        }else{
+            json('400','此群组不存在');
+        }
+    }
+
+    //我的群组
+    public function mygroups(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('groupsuser');
+        $data = $table->field('t_groups.id,t_groups.addtime,t_groups.title,t_groups.desc,t_groupsuser.level')
+            ->join('left join t_groups on t_groups.id = t_groupsuser.groups_id')
+            ->where("t_groupsuser.user_id = '{$where['user_id']}' and t_groups.state = 1 and t_groups.proid = '{$where['proid']}'")->order('t_groupsuser.id desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }else {
+            json('400','没有群组');
+        }
+    }
+
+    //群组信息
+    public function groups_info(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('groups');
+        $data = $table->field('t_groups.id,t_groups.addtime,t_groups.title,t_groups.desc,t_groups.uid,t_admin.username,t_admin.simg,t_level.title name')
+            ->join('left join t_admin on t_admin.id = t_groups.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where("t_groups.id = '{$where['id']}' and t_groups.state = 1 and t_groups.proid = '{$where['proid']}'")->find();
+        if ($data){
+            json('200','成功',$data);
+        }else {
+            json('400','群组不存在或已禁用');
+        }
+    }
+
+    //群组成员
+    public function groupsuser(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
+        $table = M('groupsuser');
+        $data = $table->field('t_admin.id,t_groupsuser.level,t_admin.username,t_admin.simg,t_level.name')
+            ->join('left join t_admin on t_admin.id = t_groupsuser.user_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where($where)->order('t_groupsuser.level desc,t_groupsuser.id asc')->select();
+        if ($data){
+            json('200','成功',$data);
+        }else {
+            json('400','没有成员');
+        }
+    }
+
+    //可入群人员列表
+    public function join_groups_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $admin = M('admin');
+        $groupsuser = M('groupsuser');
+        $user = $admin->field('t_admin.id,t_admin.username,t_admin.simg,t_admin.online,t_level.title')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where("t_admin.id != '{$uid}' and t_admin.proid = '{$proid}'")->order('t_admin.online desc,t_admin.level desc')->select();
+        $res = $groupsuser->where("groups_id = $id and proid = $proid")->getField('user_id',true);
+        foreach ($user as $val){
+            if (!in_array($val['id'],$res)){
+                $data[] = $val;
+            }
+        }
+        if($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有可邀请人员');
+        }
+    }
 
 
 //    public function word_view(){
