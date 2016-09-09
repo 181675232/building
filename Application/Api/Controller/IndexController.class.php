@@ -1111,6 +1111,7 @@ class IndexController extends CommonController {
         $table = M('groupsuser');
         $level = $table->where("proid = '{$where['proid']}' and user_id = '{$uid}' and groups_id = '{$where['groups_id']}'")->getField('level');
         if($level != 9) json('400','对不起，您没有操作权限');
+        if ($where['user_id'] == $uid) json('400','对不起，您不能将自己移出群组');
         $groups = M('groups');
         if ($table->where($where)->delete()){
             $res = $groups->field('title')->where("id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->find();
@@ -1232,6 +1233,24 @@ class IndexController extends CommonController {
         }else{
             json('400','没有可邀请人员');
         }
+    }
+
+    //获取所有分包
+    public function get_user_fenbao(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $admin = M('admin');
+        $data = $admin->field('id,username')->where("level = 79 and proid = $proid")->order('id asc')->select();
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //创建日任务
+    public function add_day_task(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+
     }
 
 
