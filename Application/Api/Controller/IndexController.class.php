@@ -1078,7 +1078,7 @@ class IndexController extends CommonController {
     public function groupquit(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
-        $where['groups_id'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
         $table = M('groupsuser');
         $level = $table->where($where)->getField('level');
         if($level == 9) json('400','对不起，群主不能退出群组');
@@ -1107,7 +1107,7 @@ class IndexController extends CommonController {
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
-        $where['groups_id'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
         $table = M('groupsuser');
         $level = $table->where("proid = '{$where['proid']}' and user_id = '{$uid}' and groups_id = '{$where['groups_id']}'")->getField('level');
         if($level != 9) json('400','对不起，您没有操作权限');
@@ -1134,9 +1134,9 @@ class IndexController extends CommonController {
     public function groupdismiss(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
-        $where['groups_id'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
         $table = M('groupsuser');
-        $level = $table->where("proid = '{$where['proid']}' and user_id = '{user_id}' and groups_id = '{$where['groups_id']}'")->getField('level');
+        $level = $table->where("proid = '{$where['proid']}' and user_id = '{$where['user_id']}' and groups_id = '{$where['groups_id']}'")->getField('level');
         if($level != 9) json('400','对不起，您没有操作权限');
         $groups = M('groups');
         $res = $groups->field('title')->where("id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->find();
