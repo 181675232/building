@@ -1369,7 +1369,7 @@ class IndexController extends CommonController {
         json('200','成功');
     }
 
-    //管理
+    //管理端全部日任务
     public function manage_day_task(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
@@ -1377,6 +1377,8 @@ class IndexController extends CommonController {
         $message->where($where)->setField('state',2);
         json('200','成功');
     }
+
+
 
 
 
