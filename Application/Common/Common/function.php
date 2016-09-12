@@ -594,3 +594,36 @@ function getMenuTree($arrCat, $parent_id = 0, $level = 0)
 
     return $arrTree;
 }
+
+//推送
+function jpush( $jpushid, $content, $array = array(), $content_type = '',$type = 1 )
+{
+    $key           = C( 'jpush' );
+    $jpush         = new \Org\Util\Jpush( $key['key'], $key['secret'] );
+    $array['time'] = time();
+    if( $type == 1 ){
+        $return = $jpush->push( $jpushid, $key['title'], $content, $array );
+    }elseif( $type == 2 ){
+        $return = $jpush->pushMessage( $jpushid, $key['title'], $content, $content_type, $array );
+    }
+
+    return $return->json;
+}
+
+function send_curl( $url, $data = array(), $time_out = 1 )
+{
+    $ch = curl_init();
+    curl_setopt( $ch, CURLOPT_URL, $url );
+    curl_setopt( $ch, CURLOPT_POST, 1 );
+    if( $data != '' ){
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
+    }
+    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+    curl_setopt( $ch, CURLOPT_CONNECTTIMEOUT, 30 );
+    curl_setopt( $ch, CURLOPT_TIMEOUT, $time_out );
+    curl_setopt( $ch, CURLOPT_HEADER, false );
+    $file_contents = curl_exec( $ch );
+    curl_close( $ch );
+
+    return $file_contents;
+}

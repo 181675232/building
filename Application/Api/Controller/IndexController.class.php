@@ -11,10 +11,7 @@ class IndexController extends CommonController {
     //url
     private $url = 'http://101.200.81.192:8082';
 
-	//Jpush key
-	private $title = 'JollyBuilding';
-	private $app_key='bea2018a7e27f608345fa373';
-	private $master_secret = 'f050562fffc5362275eb3219';
+
 
 	//融云
 	private $appKey = '8brlm7ufr41w3';
@@ -1026,7 +1023,7 @@ class IndexController extends CommonController {
                 $r = $rongyun->groupCreate($where['uid'], $map['groups_id'], $where['title']);
                 $rong = json_decode($r);
                 if($rong->code == 200){
-                    $data['groups_id'] = $map['groups_id'];
+                    $data['groupsid'] = $map['groups_id'];
                     json('200','成功',$data);
                 }else {
                     $groupsuser->delete($id);
@@ -1249,6 +1246,9 @@ class IndexController extends CommonController {
 
     //创建日任务
     public function add_day_task(){
+        $arr = json_decode(I('post.json'));
+        print_r($arr);
+        exit;
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
@@ -1281,22 +1281,37 @@ class IndexController extends CommonController {
             $map['uid'] = $where['user_id'];
             $map['addtime'] = time();
             if (M('message')->add($map)) {
-                $jpush = new \Org\Util\Jpush($this->app_key, $this->master_secret);
-                $user_info = M('admin')->field('jpushid')->find($map['uid']);
-                if ($user_info['jpushid']) {
-                    $jpushid[] = $user_info['jpushid'];
-                }
-                $array['type'] = $map['type'];
-                $array['typeid'] = $map['typeid'];
-                $content = '您收到一条日任务安排';
-                if ($jpushid) {
-                    $jpush->push($jpushid, $this->title, $content, $array);
-                }
+                $push['ids'] = $map['uid'];
+                $push['type'] = $map['type'];
+                $push['typeid'] = $map['typeid'];
+                $push['content'] = '您收到一条日任务安排';
+                send_curl($this->url.'/Api/Index/push',$push);
             }
             json('200','成功');
         }else{
             json('400','任务发布失败');
         }
+    }
+
+    //推送
+    public function push(){
+        $type = I('post.type')?I('post.type'):'';
+        $typeid = I('post.typeid')?I('post.typeid'):'';
+        $ids = I('post.ids')?I('post.ids'):'';
+        $content = I('post.content')?I('post.content'):'';
+        $map['id']   = array( 'in', $ids );
+        $jpushid = M('admin')->where($map)->getField('jpushid',true);
+        if ($jpushid){
+            if (isset($type)) $arr['type'] = $type;
+            if (isset($typeid)) $arr['typeid'] = $typeid;
+            $return = jpush( $jpushid, $content, $arr);
+            if( $return ){
+                json( '200', '成功!' );
+            }else{
+                json( '400', '失败1!' );
+            }
+        }
+        json( '400', '失败2!' );
     }
 
     //我的消息列表
