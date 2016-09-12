@@ -1368,6 +1368,15 @@ class IndexController extends CommonController {
         json('200','成功');
     }
 
+    //全部设为已读
+    public function state_message1(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $message = M('message');
+        $message->where($where)->setField('state',2);
+        json('200','成功');
+    }
+
 
 
 
