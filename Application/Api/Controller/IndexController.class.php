@@ -1236,7 +1236,7 @@ class IndexController extends CommonController {
     public function get_user_fenbao(){
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $admin = M('admin');
-        $data = $admin->field('id,username')->where("level = 79 and proid = $proid")->order('id asc')->select();
+        $data = $admin->field('id,simg,username')->where("level = 79 and proid = $proid")->order('id asc')->select();
         if ($data){
             json('200','成功',$data);
         }else{
@@ -1246,27 +1246,27 @@ class IndexController extends CommonController {
 
     //创建日任务
     public function add_day_task(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $arr = json_decode($_POST['json']);
         foreach ($arr as $val){
-            if (!$arr['proid']) json('404',$val['title'].'缺少参数 proid');
-            if (!$arr['uid']) json('404',$val['title'].'缺少参数 uid');
-            if (!$arr['user_id']) json('404',$val['title'].'缺少参数 user_id');
-            if (!$arr['building']) json('404',$val['title'].'缺少参数 proid');
-            if (!$arr['floor']) json('404',$val['title'].'缺少参数 floor');
-            if (!$arr['title']) json('404','缺少参数 title');
-            if (checkTimeDate($arr['time'])) json('404','时间格式不正确');
+            if (!$val->uid) json('404',$val->title.' 缺少参数 uid');
+            if (!$val->user_id) json('404',$val->title.' 缺少参数 user_id');
+            if (!$val->building) json('404',$val->title.' 缺少参数 proid');
+            if (!$val->floor) json('404',$val->title.' 缺少参数 floor');
+            if (!$val->title) json('404','缺少参数 title');
+            if (!checkTimeDate($val->time)) json('404',$val->title.' 时间格式不正确');
         }
-
         foreach ($arr as $val){
             $where = array();
-            $where['proid'] = $val['proid'];
-            $where['uid'] = $val['uid'];
-            $where['user_id'] = $val['user_id'];
-            $time = $val['time'];
-            $where['building'] = $val['building'];
-            $where['floor'] = $val['floor'];
-            $where['area'] = $val['area'] ? $val['area'] : 0;
-            if (isset($val['desc'])) $where['desc'] = $val['desc'];
+            $where['proid'] = $proid;
+            $where['uid'] = $val->uid;
+            $where['user_id'] = $val->user_id;
+            $time = $val->time;
+            $where['building'] = $val->building;
+            $where['title'] = $val->title;
+            $where['floor'] = $val->floor;
+            $where['area'] = $val->area ? $val->area : 0;
+            if (isset($val->desc)) $where['desc'] = $val->desc;
             $starttime = date('Y-m-d',strtotime($time));
             $where['starttime'] = $starttime.' 08:00';
             $where['stoptime'] = $time;
@@ -1290,9 +1290,10 @@ class IndexController extends CommonController {
                     $push['content'] = '您收到一条日任务安排';
                     send_curl($this->url.'/Api/Index/push',$push);
                 }
-                json('200','成功');
+
             }
         }
+        json('200','成功');
     }
 
     //推送
@@ -1368,14 +1369,16 @@ class IndexController extends CommonController {
         json('200','成功');
     }
 
-    //全部设为已读
-    public function state_message1(){
+    //管理
+    public function manage_day_task(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $message = M('message');
         $message->where($where)->setField('state',2);
         json('200','成功');
     }
+
+
 
 
 
