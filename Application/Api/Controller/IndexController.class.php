@@ -1246,50 +1246,52 @@ class IndexController extends CommonController {
 
     //创建日任务
     public function add_day_task(){
-        $arr = json_decode(I('post.json'));
-        print_r($arr);
-        exit;
-        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
-        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
-        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
-        $time = I('post.time') ? I('post.time') : json('404','缺少参数 time');
+        $arr = json_decode($_POST['json']);
+        foreach ($arr as $val){
+            if (!$arr['proid']) json('404',$val['title'].'缺少参数 proid');
+            if (!$arr['uid']) json('404',$val['title'].'缺少参数 uid');
+            if (!$arr['user_id']) json('404',$val['title'].'缺少参数 user_id');
+            if (!$arr['building']) json('404',$val['title'].'缺少参数 proid');
+            if (!$arr['floor']) json('404',$val['title'].'缺少参数 floor');
+            if (!$arr['title']) json('404','缺少参数 title');
+            if (checkTimeDate($arr['time'])) json('404','时间格式不正确');
+        }
 
-        $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
-        $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
-        $where['area'] = I('post.area') ? I('post.area') : 0;
-
-        if (checkTimeDate($time)){
+        foreach ($arr as $val){
+            $where = array();
+            $where['proid'] = $val['proid'];
+            $where['uid'] = $val['uid'];
+            $where['user_id'] = $val['user_id'];
+            $time = $val['time'];
+            $where['building'] = $val['building'];
+            $where['floor'] = $val['floor'];
+            $where['area'] = $val['area'] ? $val['area'] : 0;
+            if (isset($val['desc'])) $where['desc'] = $val['desc'];
             $starttime = date('Y-m-d',strtotime($time));
             $where['starttime'] = $starttime.' 08:00';
             $where['stoptime'] = $time;
             $where['addtime'] = date('Y-m-d H:i',time());
-            if (strtotime($time) < time()) json('400','结束时间不能小于当前时间');
-        }else{
-            json('404','时间格式不正确');
-        }
-        if (isset($_POST['desc'])) $where['desc'] = $_POST['desc'];
 
-        $table = M('day_task');
-        $res = $table->add($where);
-        if($res) {
-            $map['title'] = $starttime.' 日任务';
-            $map['content'] = $where['title'];
-            $map['type'] = 'day_task';
-            $map['typeid'] = $res;
-            $map['proid'] = $where['proid'];
-            $map['uid'] = $where['user_id'];
-            $map['addtime'] = time();
-            if (M('message')->add($map)) {
-                $push['ids'] = $map['uid'];
-                $push['type'] = $map['type'];
-                $push['typeid'] = $map['typeid'];
-                $push['content'] = '您收到一条日任务安排';
-                send_curl($this->url.'/Api/Index/push',$push);
+            $table = M('day_task');
+            $res = $table->add($where);
+            if($res) {
+                $ids[] = $res;
+                $map['title'] = $starttime.' 日任务';
+                $map['content'] = $where['title'];
+                $map['type'] = 'day_task';
+                $map['typeid'] = $res;
+                $map['proid'] = $where['proid'];
+                $map['uid'] = $where['user_id'];
+                $map['addtime'] = time();
+                if (M('message')->add($map)) {
+                    $push['ids'] = $map['uid'];
+                    $push['type'] = $map['type'];
+                    $push['typeid'] = $map['typeid'];
+                    $push['content'] = '您收到一条日任务安排';
+                    send_curl($this->url.'/Api/Index/push',$push);
+                }
+                json('200','成功');
             }
-            json('200','成功');
-        }else{
-            json('400','任务发布失败');
         }
     }
 
