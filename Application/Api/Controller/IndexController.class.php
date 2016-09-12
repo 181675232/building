@@ -1088,7 +1088,7 @@ class IndexController extends CommonController {
                 ->join('left join t_level on t_level.id = t_admin.level')
                 ->where("t_admin.id = '{$where['user_id']}' and t_admin.proid = '{$where['proid']}'")->find();
             $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
-            $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
+            $r = $rongyun->groupQuit($where['user_id'],$where['groups_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
                 $content = "{'message':'{$res['title']} {$res['username']}退出本群.'}";
@@ -1116,7 +1116,7 @@ class IndexController extends CommonController {
         if ($table->where($where)->delete()){
             $res = $groups->field('title')->where("id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->find();
             $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
-            $r = $rongyun->groupQuit($where['user_id'],$where['group_id']);
+            $r = $rongyun->groupQuit($where['user_id'],$where['groups_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
                 $content = "{'content':'{您被移出 {$res['title']} 群组.'}";
@@ -1145,7 +1145,7 @@ class IndexController extends CommonController {
                 $arr = $table->where("groups_id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->getField('user_id',true);
                 if ($table->where("groups_id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->delete()) {
                     $rongyun = new  \Org\Util\Rongyun($this->appKey, $this->appSecret);
-                    $r = $rongyun->groupDismiss($where['user_id'], $where['group_id']);
+                    $r = $rongyun->groupDismiss($where['user_id'], $where['groups_id']);
                     $rong = json_decode($r);
                     if ($rong->code == 200) {
                         $content = "{'content':'{您所在的群组 {$res['title']} 解散了.'}";
