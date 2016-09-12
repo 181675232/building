@@ -1249,9 +1249,112 @@ class IndexController extends CommonController {
 
     //创建日任务
     public function add_day_task(){
-        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
+        $time = I('post.time') ? I('post.time') : json('404','缺少参数 time');
 
+        $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
+        $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
+        $where['area'] = I('post.area') ? I('post.area') : 0;
+
+        if (checkTimeDate($time)){
+            $starttime = date('Y-m-d',strtotime($time));
+            $where['starttime'] = $starttime.' 08:00';
+            $where['stoptime'] = $time;
+            $where['addtime'] = date('Y-m-d H:i',time());
+            if (strtotime($time) < time()) json('400','结束时间不能小于当前时间');
+        }else{
+            json('404','时间格式不正确');
+        }
+        if (isset($_POST['desc'])) $where['desc'] = $_POST['desc'];
+
+        $table = M('day_task');
+        $res = $table->add($where);
+        if($res) {
+            $map['title'] = $starttime.' 日任务';
+            $map['content'] = $where['title'];
+            $map['type'] = 'day_task';
+            $map['typeid'] = $res;
+            $map['proid'] = $where['proid'];
+            $map['uid'] = $where['user_id'];
+            $map['addtime'] = time();
+            if (M('message')->add($map)) {
+                $jpush = new \Org\Util\Jpush($this->app_key, $this->master_secret);
+                $user_info = M('admin')->field('jpushid')->find($map['uid']);
+                if ($user_info['jpushid']) {
+                    $jpushid[] = $user_info['jpushid'];
+                }
+                $array['type'] = $map['type'];
+                $array['typeid'] = $map['typeid'];
+                $content = '您收到一条日任务安排';
+                if ($jpushid) {
+                    $jpush->push($jpushid, $this->title, $content, $array);
+                }
+            }
+            json('200','成功');
+        }else{
+            json('400','任务发布失败');
+        }
     }
+
+    //我的消息列表
+    public function message_list(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $data = M('message')->field('id,title,addtime,state')->where($where)->order('addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //消息详情
+    public function message_info(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $message = M('message');
+        $data = $message->field('id,content,addtime,type,typeid')->where($where)->find();
+        if ($data){
+            $message->where($where)->setField('state','2');
+            json('200','成功',$data);
+        }else{
+            json('400','消息不存在或已删除');
+        }
+    }
+
+    //删除消息
+    public function del_message(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $message = M('message');
+        $data = $message->where($where)->delete();
+        if ($data){
+            json('200','成功');
+        }else{
+            json('400','消息不存在或已删除');
+        }
+    }
+
+    //全部设为已读
+    public function state_message(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $message = M('message');
+        $message->where($where)->setField('state',2);
+        json('200','成功');
+    }
+
+
+
+
+
 
 
 //    public function word_view(){
@@ -1260,43 +1363,6 @@ class IndexController extends CommonController {
 //        print_r($content);
 //        //$content = shell_exec(‘/usr/local/bin/antiword -m UTF-8.txt ’.$filename);
 //
-//    }
-//    public function add_dynamic(){
-//        if (I('post.ids')){
-//            $ids = explode(',', I('post.ids'));
-//            $message = M('message');
-//            $user = M('user');
-//            $userinfo = $user->find(I('post.uid'));
-//            $data1['title'] = $userinfo['username'].' 发布了新动态';
-//            $data1['content'] = $where['title'];
-//            $data1['type'] = 'dynamic';
-//            $data1['typeid'] = $data['pid'];
-//            $data1['state'] = 0;
-//            $jpush = new \Org\Util\Jpush($this->app_key,$this->master_secret);
-//            $message_num = M('message_num');
-//            $where123['type'] = 3;
-//            foreach ($ids as $val){
-//                $data1['uid'] = $val;
-//                $where123['uid'] = $data1['uid'];
-//                if ($message_num->where($where123)->find()){
-//                    $message_num->where($where123)->setInc('num');
-//                }else {
-//                    $where123['num'] = 1;
-//                    $message_num->add($where123);
-//                }
-//                if ($message->add($data1)){
-//                    $userdata = $user->field('jpushid')->find($val);
-//                    if ($userdata['jpushid']){
-//                        $jpushid[] = $userdata['jpushid'];
-//                    }
-//                }
-//            }
-//            $array['type'] = 'message';
-//            $content = $data1['title'];
-//            if ($jpushid){
-//                $jpush->push($jpushid, $this->title,$content,$array);
-//            }
-//        }
 //    }
 
 
