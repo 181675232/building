@@ -478,8 +478,9 @@ class IndexController extends CommonController {
         $where['proid'] = $proid;
         $table = M('admin');
         $data = $table->save($where);
+        $res['simg'] = $where['simg'];
         if ($data){
-            json('200','成功');
+            json('200','成功',$res);
         }else{
             json('400','没有任何修改');
         }
@@ -1530,17 +1531,55 @@ class IndexController extends CommonController {
         }
     }
 
-    //任务开始
-    public function start_day_task1(){
-        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
-        $map['state'] = 2;
-        $map['truestarttime'] = date('Y-m-d H:i:s',time());
-        $table = M('day_task');
-        if ($table->where($where)->save($map)){
+    //添加任务进度
+    public function add_task_schedule(){
+        $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
+        $where['bai'] = I('post.bai') ? I('post.bai') : json('404','缺少参数 bai');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $file = $_FILES ? $_FILES : json('400','至少传一张图片');
+        if (isset($_POST['title'])) $where['title'] = $_POST['title'];
+        $task = M('day_task');
+        $res = $task->field('bai')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
+        if ($res['bai'] > $where['bai']) json('400','新的进度必须大于上次的进度');
+        if ($res['bai'] == 1) json('400','此任务已经完成');
+        $table = M('task_schedule');
+        $where['addtime'] = time();
+        $data['pid'] = $table->add($where);
+        if ($data['pid']){
+            if ($where['bai'] == 1){
+                $map['state'] = 3;
+                $map['truestoptime'] = date('Y-m-d H:i:s',time());
+            }
+            $map['bai'] = $where['bai'];
+            $where1['id'] = $where['pid'];
+            $where1['proid'] = $where['proid'];
+            if (!$task->where($where1)->save($map)){
+                $table->where("id = '{$data['pid']}' and proid = '{$where['proid']}'")->delete();
+            }
+            $data['type'] = 'task_schedule';
+            $data['addtime'] = time();
+            $img = M('img');
+            foreach ($file as $val){
+                $rand = '';
+                for ($i=0;$i<6;$i++){
+                    $rand.=rand(0,9);
+                }
+                $type = explode('.', $val['name']);
+                $simg = date('YmdHis').$rand.'.'.end($type);
+                $dir = date('Y-m-d');
+                if (!is_dir('./Public/upfile/'.$dir)){
+                    mkdir('./Public/upfile/'.$dir,0777);
+                }
+                if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                    $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                    create_thumb($simg,$dir);
+                    $img->add($data);
+                }
+            }
             json('200','成功');
-        }else{
-            json('400','重复操作');
+        }else {
+            json('400','发布失败');
         }
     }
 
