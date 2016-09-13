@@ -1059,7 +1059,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupJoin($val,$where['groups_id']);
                     $rong = json_decode($r);
                     if($rong->code == 200){
-                        $content = '{\"message\":\"请在聊天中注意人身财产安全\",\"extra\":\"\"}';
+                        $content = '{"message":"请在聊天中注意人身财产安全","extra":""}';
                         $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
                     }else {
                         $groupsuser->delete($id);
