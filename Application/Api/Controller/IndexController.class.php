@@ -1059,7 +1059,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupJoin($val,$where['groups_id']);
                     $rong = json_decode($r);
                     if($rong->code == 200){
-                        $content = "{'message':'{$res['title']} {$res['username']}加入本群.'}";
+                        $content = "{'message':'{$res['title']} {$res['username']}加入本群.','extra':''}";
                         $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
                     }else {
                         $groupsuser->delete($id);
@@ -1494,6 +1494,30 @@ class IndexController extends CommonController {
 
     //我发布的未完成任务列表
     public function myadd_nofinish_task(){
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $where['t_day_task.state'] = array('neq',3);
+        $table = M('day_task');
+        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->join('left join t_admin on t_admin.id = t_day_task.user_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where($where)->order('t_day_task.stoptime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //我发布的未完成任务列表
+    public function start_day_task(){
         $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $page = I('post.page') ? I('post.page') : 1;
