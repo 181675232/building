@@ -1110,12 +1110,18 @@ class IndexController extends CommonController {
         if($level != 9) json('400','对不起，您没有操作权限');
         if ($where['user_id'] == $uid) json('400','对不起，您不能将自己移出群组');
         $groups = M('groups');
+        $admin = M('admin');
         if ($table->where($where)->delete()){
+            $ress = $admin->field('t_admin.username,t_level.title')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where("t_admin.id = '{$where['user_id']}' and t_admin.proid = '{$where['proid']}'")->find();
             $res = $groups->field('title')->where("id = '{$where['groups_id']}' and proid = '{$where['proid']}'")->find();
             $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
             $r = $rongyun->groupQuit($where['user_id'],$where['groups_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
+                $content = "{'message':'{$ress['title']} {$ress['username']}被移除本群.'}";
+                $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
                 $content = "{'content':'{您被移出 {$res['title']} 群组.'}";
                 $rongyun->messageSystemPublish(1,$where['user_id'],$content);
                 json('200','成功');
@@ -1280,6 +1286,7 @@ class IndexController extends CommonController {
                 $map['content'] = $where['title'];
                 $map['type'] = 'day_task';
                 $map['typeid'] = $res;
+                $map['user_id'] = $where['uid'];
                 $map['proid'] = $where['proid'];
                 $map['uid'] = $where['user_id'];
                 $map['addtime'] = time();
@@ -1290,7 +1297,6 @@ class IndexController extends CommonController {
                     $push['content'] = '您收到一条日任务安排';
                     send_curl($this->url.'/Api/Index/push',$push);
                 }
-
             }
         }
         json('200','成功');
@@ -1319,11 +1325,13 @@ class IndexController extends CommonController {
 
     //我的消息列表
     public function message_list(){
-        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_message.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_message.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
-        $data = M('message')->field('id,title,addtime,state')->where($where)->order('addtime desc')->limit($pages,20)->select();
+        $data = M('message')->field('t_message.id,t_message.title,t_message.user_id uid,t_admin.simg,t_message.addtime,t_message.state,t_message.type,t_message.typeid,t_message.content')
+            ->join('left join t_admin on t_message.user_id = t_admin.id')
+            ->where($where)->order('t_message.addtime desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
         }elseif($pages > 1){
@@ -1373,9 +1381,26 @@ class IndexController extends CommonController {
     public function manage_day_task(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('day_task');
+        $data = $table->field('t_day_task.id,t_day_task')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->join('left join t_admin on t_admin.id = t_day_task.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_admin a as  on a.id = t_day_task.user_id')
+            ->join('left join t_level l on l.id = a.level')
+            ->where("t_day_task.proid = '{$where['proid']}'")->order('t_day_task.addtime desc')->limit($pages,20)->select();
 
-        $message->where($where)->setField('state',2);
-        json('200','成功');
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
     }
 
 
