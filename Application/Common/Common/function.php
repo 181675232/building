@@ -627,3 +627,16 @@ function send_curl( $url, $data = array(), $time_out = 1 )
 
     return $file_contents;
 }
+
+function get_month_week_day(){
+    //本日
+    $arr['beginday'] = strtotime(date('Y-m-d',time()));
+    $arr['endday'] = strtotime(date('Y-m-d 23:59:59',time()));
+    //php获取本周起始时间戳和结束时间戳
+    $arr['beginweek'] = mktime(0,0,0,date('m'),date('d')-(date('w') ? date('w') : 7)+1,date('Y'));
+    $arr['endweek'] = mktime(23,59,59,date('m'),date('d')-(date('w') ? date('w') : 7)+7,date('Y'));
+    //php获取本月起始时间戳和结束时间戳
+    $arr['beginmonth'] = mktime(0,0,0,date('m'),1,date('Y'));
+    $arr['endmonth'] = mktime(23,59,59,date('m'),date('t'),date('Y'));
+    return $arr;
+}

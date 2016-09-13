@@ -441,7 +441,7 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('admin');
-        $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.addtime,t_level.title name')
+        $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.desc,t_admin.addtime,t_level.title name')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_admin.id = $id and t_admin.proid = $proid")->find();
         if ($data){
@@ -996,7 +996,7 @@ class IndexController extends CommonController {
         foreach ($data as $key=>$val){
             $data[$key]['user'] = $admin->field('t_admin.id,t_admin.username,t_admin.simg,t_admin.online,t_level.title')
                 ->join('left join t_level on t_level.id = t_admin.level')
-                ->where("t_admin.id != '{$uid}' and t_level.pid = '{$val['id']}' and t_admin.proid = '{$proid}'")->order('t_admin.online desc,t_admin.level desc')->select();
+                ->where("t_level.pid = '{$val['id']}' and t_admin.proid = '{$proid}'")->order('t_admin.online desc,t_admin.level desc')->select();
         }
         if($data){
             json('200','成功',$data);
@@ -1327,6 +1327,7 @@ class IndexController extends CommonController {
     public function message_list(){
         $where['t_message.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_message.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        if (I('post.type')) $where['t_message.type'] = I('post.type');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $data = M('message')->field('t_message.id,t_message.title,t_message.user_id uid,t_admin.simg,t_message.addtime,t_message.state,t_message.type,t_message.typeid,t_message.content')
@@ -1379,21 +1380,27 @@ class IndexController extends CommonController {
 
     //管理端全部日任务
     public function manage_day_task(){
+        if (I('post.keyword')){
+            $keyword = I('post.keyword');
+            $where['content'] = array('like',"%{$keyword}%");
+        }
+        if (I('post.building')) $where['buildingid'] = I('post.building');
+        if (I('post.starttime')) $where['statrtime'] = array('egt',I('post.starttime'));
+        if (I('post.stoptime')) $where['statrtime'] = array('elt',I('post.stoptime'));
+        $type = I('post.type') ? I('post.type') : 0;
+        if ($type == 1){
+            $where['state'] = array('neq',3);
+            $where['stoptime'] = array('egt',date('Y-m-d H:i:s',time()));
+        }elseif ($type == 2){
+            $where['state'] = array('neq',3);
+        }elseif ($type == 3){
+            $where['state'] = 3;
+        }
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
-        $table = M('day_task');
-        $data = $table->field('t_day_task.id,t_day_task')
-            ->join('left join t_building on t_building.id = t_day_task.building')
-            ->join('left join t_floor on t_floor.id = t_day_task.floor')
-            ->join('left join t_area on t_area.id = t_day_task.area')
-            ->join('left join t_admin on t_admin.id = t_day_task.uid')
-            ->join('left join t_level on t_level.id = t_admin.level')
-            ->join('left join t_admin a as  on a.id = t_day_task.user_id')
-            ->join('left join t_level l on l.id = a.level')
-            ->where("t_day_task.proid = '{$where['proid']}'")->order('t_day_task.addtime desc')->limit($pages,20)->select();
-
+        $table = M('all_day_task');
+        $data = $table->where($where)->order('stoptime desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
         }elseif($pages > 1){
@@ -1403,7 +1410,111 @@ class IndexController extends CommonController {
         }
     }
 
+    //发布人任务列表
+    public function release_user_task_list(){
+        $type = I('post.type') ? I('post.type') : 0;
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $date = get_month_week_day();
+        if ($type == 1){
+            $map['t_day_task.stoptime'] = array(array('egt',$date['beginday']),array('elt',$date['endday']));
+            $map['t_day_task.state'] = array('neq',3);
+            $map['_logic'] = 'or';
+            $where['_complex'] = $map;
+        }elseif ($type == 2){
+            $map['t_day_task.stoptime'] = array(array('egt',$date['beginweek']),array('elt',$date['endweek']));
+            $map['t_day_task.state'] = array('neq',3);
+            $map['_logic'] = 'or';
+            $where['_complex'] = $map;
+        }elseif ($type == 3){
+            $map['t_day_task.stoptime'] = array(array('egt',$date['beginmonth']),array('elt',$date['endmonth']));
+            $map['t_day_task.state'] = array('neq',3);
+            $map['_logic'] = 'or';
+            $where['_complex'] = $map;
+        }
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $table = M('day_task');
+        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->join('left join t_admin on t_admin.id = t_day_task.user_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where($where)->order('t_day_task.stoptime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
 
+    //接收人任务列表
+    public function receive_user_task_list(){
+        $type = I('post.type') ? I('post.type') : 0;
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $date = get_month_week_day();
+        if ($type == 1){
+            $map['t_day_task.stoptime'] = array(array('egt',$date['beginday']),array('elt',$date['endday']));
+            $map['t_day_task.state'] = array('neq',3);
+            $map['_logic'] = 'or';
+            $where['_complex'] = $map;
+        }elseif ($type == 2){
+            $map['t_day_task.stoptime'] = array(array('egt',$date['beginweek']),array('elt',$date['endweek']));
+            $map['t_day_task.state'] = array('neq',3);
+            $map['_logic'] = 'or';
+            $where['_complex'] = $map;
+        }elseif ($type == 3){
+            $map['t_day_task.stoptime'] = array(array('egt',$date['beginmonth']),array('elt',$date['endmonth']));
+            $map['t_day_task.state'] = array('neq',3);
+            $map['_logic'] = 'or';
+            $where['_complex'] = $map;
+        }
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $table = M('day_task');
+        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->join('left join t_admin on t_admin.id = t_day_task.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where($where)->order('t_day_task.stoptime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //我发布的未完成任务列表
+    public function myadd_nofinish_task(){
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $where['t_day_task.state'] = array('neq',3);
+        $table = M('day_task');
+        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->join('left join t_admin on t_admin.id = t_day_task.user_id')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where($where)->order('t_day_task.stoptime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
 
 
 
