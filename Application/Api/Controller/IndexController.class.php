@@ -1059,8 +1059,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupJoin($val,$where['groups_id']);
                     $rong = json_decode($r);
                     if($rong->code == 200){
-                        //$content = "{'message':'{$res['title']} {$res['username']}加入本群.','extra':''}";
-                        $content = "{'message':'1','extra':' '}";
+                        $content = '{\"message\":\"请在聊天中注意人身财产安全\",\"extra\":\"\"}';
                         $rongyun->messageGroupPublish($val,$where['groups_id'],$content);
                     }else {
                         $groupsuser->delete($id);
@@ -1524,14 +1523,25 @@ class IndexController extends CommonController {
         $map['state'] = 2;
         $map['truestarttime'] = date('Y-m-d H:i:s',time());
         $table = M('day_task');
+        if ($table->where($where)->save($map)){
+            json('200','成功');
+        }else{
+            json('400','重复操作');
+        }
+    }
 
-//        if ($data){
-//            json('200','成功',$data);
-//        }elseif($pages > 1){
-//            json('400','已经是最后一页');
-//        }else{
-//            json('400','重复操作');
-//        }
+    //任务开始
+    public function start_day_task1(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $map['state'] = 2;
+        $map['truestarttime'] = date('Y-m-d H:i:s',time());
+        $table = M('day_task');
+        if ($table->where($where)->save($map)){
+            json('200','成功');
+        }else{
+            json('400','重复操作');
+        }
     }
 
 
