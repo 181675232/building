@@ -1088,7 +1088,7 @@ class IndexController extends CommonController {
             $r = $rongyun->groupQuit($where['user_id'],$where['groups_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
-                $content = "{'message':'{$res['title']} {$res['username']}退出本群.'}";
+                $content = '{"message":"'.$res['title'].' '.$res['username'].'退出本群"}';
                 $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
                 json('200','成功');
             }else {
@@ -1120,9 +1120,9 @@ class IndexController extends CommonController {
             $r = $rongyun->groupQuit($where['user_id'],$where['groups_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
-                $content = "{'message':'{$ress['title']} {$ress['username']}被移除本群.'}";
+                $content = '{"message":"'.$ress['title'].' '.$ress['username'].'退出本群"}';
                 $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
-                $content = "{'content':'{您被移出 {$res['title']} 群组.'}";
+                $content = '{"content":" 您被移出'.$res['title'].'群组"}';
                 $rongyun->messageSystemPublish(1,$where['user_id'],$content);
                 json('200','成功');
             }else {
@@ -1151,7 +1151,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupDismiss($where['user_id'], $where['groups_id']);
                     $rong = json_decode($r);
                     if ($rong->code == 200) {
-                        $content = "{'content':'{您所在的群组 {$res['title']} 解散了.'}";
+                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了"}';
                         $rongyun->messageSystemPublish(1, $arr, $content);
                         json('200', '成功');
                     } else {
