@@ -1626,7 +1626,7 @@ class IndexController extends CommonController {
             ->join('left join t_level l on l.id = a.level')
             ->where($where)->find();
         $schedule = M('task_schedule');
-        $data['schedule'] = $schedule->field('t_task_schedule.id,FROM_UNIXTIME(t_task_schedule.addtime,"%Y-%m-%d %H:%i") datetime,t_task_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
+        $data['schedule'] = $schedule->field('t_task_schedule.id,t_task_schedule.bai,FROM_UNIXTIME(t_task_schedule.addtime,"%Y-%m-%d %H:%i") datetime,t_task_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_admin on t_admin.id = t_task_schedule.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_task_schedule.proid = '{$where['t_day_task.proid']}' and t_task_schedule.pid = '{$where['t_day_task.id']}'")->order('t_task_schedule.addtime desc')->select();
@@ -1640,6 +1640,57 @@ class IndexController extends CommonController {
             json('400','失败');
         }
 
+    }
+
+    //分包今日任务
+    public function fenbao_day_task(){
+        $type = I('post.type') ? I('post.type') : 1;
+        $date = get_month_week_day();
+        $map['stoptime'] = array(array('egt',$date['beginday']),array('elt',$date['endday']));
+        if ($type == 1){
+            $map['state'] = array('neq',3);
+            $map['_logic'] = 'or';
+        }else{
+            $map['state'] = 3;
+        }
+        $where['_complex'] = $map;
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('all_day_task');
+        $data = $table->where($where)->order('stoptime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //分包历史任务
+    public function fenbao_all_day_task(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        if (I('post.keyword')){
+            $keyword = I('post.keyword');
+            $where['content'] = array('like',"%{$keyword}%");
+        }
+        if (I('post.building')) $where['buildingid'] = I('post.building');
+        if (I('post.starttime')) $where['statrtime'] = array('egt',I('post.starttime'));
+        if (I('post.stoptime')) $where['statrtime'] = array('elt',I('post.stoptime'));
+        $table = M('all_day_task');
+        $data = $table->where($where)->order('stoptime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
     }
 
 
