@@ -1386,8 +1386,8 @@ class IndexController extends CommonController {
             $where['content'] = array('like',"%{$keyword}%");
         }
         if (I('post.building')) $where['buildingid'] = I('post.building');
-        if (I('post.starttime')) $where['statrtime'] = array('egt',I('post.starttime'));
-        if (I('post.stoptime')) $where['statrtime'] = array('elt',I('post.stoptime'));
+        if (I('post.starttime')) $where['starttime'] = array('egt',I('post.starttime'));
+        if (I('post.stoptime')) $where['starttime'] = array('elt',I('post.stoptime'));
         $type = I('post.type') ? I('post.type') : 0;
         if ($type == 1){
             $where['state'] = array('neq',3);
@@ -1680,8 +1680,8 @@ class IndexController extends CommonController {
             $where['content'] = array('like',"%{$keyword}%");
         }
         if (I('post.building')) $where['buildingid'] = I('post.building');
-        if (I('post.starttime')) $where['statrtime'] = array('egt',I('post.starttime'));
-        if (I('post.stoptime')) $where['statrtime'] = array('elt',I('post.stoptime'));
+        if (I('post.starttime')) $where['starttime'] = array('egt',I('post.starttime'));
+        if (I('post.stoptime')) $where['starttime'] = array('elt',I('post.stoptime'));
         $table = M('all_day_task');
         $data = $table->where($where)->order('stoptime desc')->limit($pages,20)->select();
         if ($data){
@@ -1691,6 +1691,205 @@ class IndexController extends CommonController {
         }else{
             json('400','没有数据');
         }
+    }
+
+    //所有任务分布
+    public function all_day_task_table(){
+        $where['t_all_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.starttime')) $where['t_all_day_task.starttime'] = array('egt',I('post.starttime'));
+        if (I('post.stoptime')) $where['t_all_day_task.starttime'] = array('elt',I('post.stoptime'));
+        $table = M('all_day_task');
+        $sum = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        //土建部门
+        $arr = array();
+        $where['t_admin.level'] = 15;
+        $arr['title'] = '土建';
+        $arr['count'] = $tujian = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['tu_bai'] = round($arr['count']/$sum,2);
+        $where['t_all_day_task.state'] = 3;
+        $count = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['bai'] = round($count/$arr['count'],2);
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        $data['groups'][] = $arr;
+        //钢筋部门
+        $arr = array();
+        $where['t_admin.level'] = 14;
+        $arr['title'] = '钢筋';
+        $arr['count'] = $gangjin = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['tu_bai'] = round($arr['count']/$sum,2);
+        $where['t_all_day_task.state'] = 3;
+        $count = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['bai'] = round($count/$arr['count'],2);
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        $data['groups'][] = $arr;
+        //机电部门
+        $arr = array();
+        $where['t_admin.level'] = 13;
+        $arr['title'] = '机电';
+        $arr['count'] = $jidian = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['tu_bai'] = round($arr['count']/$sum,2);
+        $where['t_all_day_task.state'] = 3;
+        $count = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['bai'] = round($count/$arr['count'],2);
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        $data['groups'][] = $arr;
+
+        //土建内部
+        $where['t_admin.level'] = 15;
+        $data['tujian'] = $table->field('t_all_day_task.uid,t_all_day_task.username,t_all_day_task.simg,t_all_day_task.name,count(t_all_day_task.id) as count')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        $where['t_all_day_task.state'] = 3;
+        $count = $table->field('t_all_day_task.uid,count(t_all_day_task.id) as count')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        foreach ($data['tujian'] as $key=>$val){
+            $data['tujian'][$key]['tu_bai'] = round($val['count']/$tujian,2);
+            foreach ($count as $value){
+                if ($val['uid'] == $value['uid']){
+                    $data['tujian'][$key]['bai'] = round($value['count']/$val['count'],2);
+                }
+            }
+            if(!$data['tujian'][$key]['bai']) $data['tujian'][$key]['bai'] = 0;
+        }
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+
+        //钢筋内部
+        $where['t_admin.level'] = 14;
+        $data['gangjin'] = $table->field('t_all_day_task.uid,t_all_day_task.username,t_all_day_task.simg,t_all_day_task.name,count(t_all_day_task.id) as count')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        $where['t_all_day_task.state'] = 3;
+        $count = $table->field('t_all_day_task.uid,count(t_all_day_task.id) as count')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        foreach ($data['gangjin'] as $key=>$val){
+            $data['gangjin'][$key]['tu_bai'] = round($val['count']/$gangjin,2);
+            foreach ($count as $value){
+                if ($val['uid'] == $value['uid']){
+                    $data['gangjin'][$key]['bai'] = round($value['count']/$val['count'],2);
+                }
+            }
+            if(!$data['gangjin'][$key]['bai']) $data['gangjin'][$key]['bai'] = 0;
+        }
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+
+        //机电内部
+        $where['t_admin.level'] = 13;
+        $data['jidian'] = $table->field('t_all_day_task.uid,t_all_day_task.username,t_all_day_task.simg,t_all_day_task.name,count(t_all_day_task.id) as count')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        $where['t_all_day_task.state'] = 3;
+        $count = $table->field('t_all_day_task.uid,count(t_all_day_task.id) as count')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        foreach ($data['jidian'] as $key=>$val){
+            $data['jidian'][$key]['tu_bai'] = round($val['count']/$jidian,2);
+            foreach ($count as $value){
+                if ($val['uid'] == $value['uid']){
+                    $data['jidian'][$key]['bai'] = round($value['count']/$val['count'],2);
+                }
+            }
+            if(!$data['jidian'][$key]['bai']) $data['jidian'][$key]['bai'] = 0;
+        }
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+
+        json('200','成功',$data);
+    }
+
+    //延时任务分布
+    public function delayed_day_task_table(){
+        $where['_string'] = "(t_all_day_task.stoptime < now() and (t_all_day_task.state != 3)) or t_all_day_task.truestoptime > t_all_day_task.stoptime";
+        $where['t_all_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.starttime')) $where['t_all_day_task.starttime'] = array('egt',I('post.starttime'));
+        if (I('post.stoptime')) $where['t_all_day_task.starttime'] = array('elt',I('post.stoptime'));
+        $table = M('all_day_task');
+        $sum = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        //土建部门
+        $arr = array();
+        $where['t_admin.level'] = 15;
+        $arr['title'] = '土建';
+        $arr['count'] = $tujian = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['tu_bai'] = round($arr['count']/$sum,2);
+        $count = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->sum('bai');
+        $arr['bai'] = round($count/$arr['count'],2);
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        $data['groups'][] = $arr;
+        //钢筋部门
+        $arr = array();
+        $where['t_admin.level'] = 14;
+        $arr['title'] = '钢筋';
+        $arr['count'] = $gangjin = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['tu_bai'] = round($arr['count']/$sum,2);
+        $count = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->sum('bai');
+        $arr['bai'] = round($count/$arr['count'],2);
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        $data['groups'][] = $arr;
+        //机电部门
+        $arr = array();
+        $where['t_admin.level'] = 13;
+        $arr['title'] = '机电';
+        $arr['count'] = $jidian = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->count();
+        $arr['tu_bai'] = round($arr['count']/$sum,2);
+        $count = $table->join('left join t_admin on t_admin.id = t_all_day_task.uid')->where($where)->sum('bai');
+        $arr['bai'] = round($count/$arr['count'],2);
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        $data['groups'][] = $arr;
+
+        //土建内部
+        $where['t_admin.level'] = 15;
+        $data['tujian'] = $table->field('t_all_day_task.uid,t_all_day_task.username,t_all_day_task.simg,t_all_day_task.name,count(t_all_day_task.id) as count,sum(bai) as bai')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        foreach ($data['tujian'] as $key=>$val){
+            $data['tujian'][$key]['tu_bai'] = round($val['count']/$tujian,2);
+            $data['tujian'][$key]['bai'] = round($val['bai']/$val['count'],2);
+        }
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+
+        //钢筋内部
+        $where['t_admin.level'] = 14;
+        $data['gangjin'] = $table->field('t_all_day_task.uid,t_all_day_task.username,t_all_day_task.simg,t_all_day_task.name,count(t_all_day_task.id) as count,sum(bai) as bai')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        foreach ($data['gangjin'] as $key=>$val){
+            $data['gangjin'][$key]['tu_bai'] = round($val['count']/$gangjin,2);
+            $data['gangjin'][$key]['bai'] = round($val['bai']/$val['count'],2);
+        }
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+
+        //机电内部
+        $where['t_admin.level'] = 13;
+        $data['jidian'] = $table->field('t_all_day_task.uid,t_all_day_task.username,t_all_day_task.simg,t_all_day_task.name,count(t_all_day_task.id) as count,sum(bai) as bai')
+            ->join('left join t_admin on t_admin.id = t_all_day_task.uid')
+            ->group('t_admin.id')
+            ->where($where)->select();
+        foreach ($data['jidian'] as $key=>$val){
+            $data['jidian'][$key]['tu_bai'] = round($val['count']/$jidian,2);
+            $data['jidian'][$key]['bai'] = round($val['bai']/$val['count'],2);
+        }
+        unset($where['t_admin.level']);
+        unset($where['t_all_day_task.state']);
+        json('200','成功',$data);
     }
 
 
