@@ -1583,6 +1583,65 @@ class IndexController extends CommonController {
         }
     }
 
+    //日任务加急提醒
+    public function day_task_urgent(){
+        $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('day_task');
+        $res = $table->where($where)->find();
+        if($res) {
+            $map['title'] = date('Y-m-d',strtotime($res['starttime'])).'日任务加急提醒';
+            $map['content'] = $res['title'];
+            $map['type'] = 'day_task';
+            $map['typeid'] = $res['id'];
+            $map['user_id'] = $res['uid'];
+            $map['proid'] = $where['proid'];
+            $map['uid'] = $res['user_id'];
+            $map['addtime'] = time();
+            if (M('message')->add($map)) {
+                $push['ids'] = $map['uid'];
+                $push['type'] = $map['type'];
+                $push['typeid'] = $map['typeid'];
+                $push['content'] = '日任务加急提醒';
+                send_curl($this->url.'/Api/Index/push',$push);
+            }
+            json('200','成功');
+        }else{
+            json('400','失败');
+        }
+    }
+
+    //日任务详情
+    public function day_task_info(){
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('day_task');
+        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.desc,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,a.username fusername,a.simg fsimg,l.title fname,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->join('left join t_admin on t_admin.id = t_day_task.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_admin a on a.id = t_day_task.user_id')
+            ->join('left join t_level l on l.id = a.level')
+            ->where($where)->find();
+        $schedule = M('task_schedule');
+        $data['schedule'] = $schedule->field('t_task_schedule.id,FROM_UNIXTIME(t_task_schedule.addtime,"%Y-%m-%d %H:%i") datetime,t_task_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
+            ->join('left join t_admin on t_admin.id = t_task_schedule.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where("t_task_schedule.proid = '{$where['t_day_task.proid']}' and t_task_schedule.pid = '{$where['t_day_task.id']}'")->order('t_task_schedule.addtime desc')->select();
+        $img = M('img');
+        foreach ($data['schedule'] as $key=>$val){
+            $data['schedule'][$key]['img'] = $img->where("pid = '{$val['id']}' and type = 'task_schedule'")->getField('simg',true);
+        }
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','失败');
+        }
+
+    }
+
 
 
 
