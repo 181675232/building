@@ -1477,7 +1477,7 @@ class IndexController extends CommonController {
             $where['_complex'] = $map;
         }
         $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_day_task.user_id'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $table = M('day_task');
         $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
             ->join('left join t_building on t_building.id = t_day_task.building')
