@@ -441,7 +441,7 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('admin');
-        $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.desc,t_admin.addtime,t_level.title name')
+        $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.desc,t_admin.addtime,t_admin.level,t_level.title name')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_admin.id = $id and t_admin.proid = $proid")->find();
         if ($data){
