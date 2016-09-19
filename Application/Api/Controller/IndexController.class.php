@@ -1896,7 +1896,7 @@ class IndexController extends CommonController {
 
     //
     public function tongji(){
-
+        echo 1;
     }
 
 
