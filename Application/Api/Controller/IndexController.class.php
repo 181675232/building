@@ -1174,8 +1174,10 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('groupsuser');
-        $data = $table->field('t_groups.id,t_groups.addtime,t_groups.title,t_groups.desc,t_groupsuser.level')
+        $data = $table->field('t_groups.id,t_groups.addtime,t_groups.title,t_groups.desc,t_groupsuser.level,t_groups.uid,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_groups on t_groups.id = t_groupsuser.groups_id')
+            ->join('left join t_admin on t_admin.id = t_groups.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_groupsuser.user_id = '{$where['user_id']}' and t_groups.state = 1 and t_groups.proid = '{$where['proid']}'")->order('t_groupsuser.id desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
