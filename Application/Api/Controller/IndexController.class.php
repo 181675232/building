@@ -1894,6 +1894,11 @@ class IndexController extends CommonController {
         json('200','成功',$data);
     }
 
+    //
+    public function tongji(){
+
+    }
+
 
 
 
