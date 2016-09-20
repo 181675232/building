@@ -757,6 +757,7 @@ class IndexController extends CommonController {
 
         $res = $table->add($where);
         if ($res){
+            //推送
             json('200','申请成功');
         }else{
             json('400','申请失败');
@@ -891,6 +892,7 @@ class IndexController extends CommonController {
         $where['statetime'] = time();
         $data = $table->save($where);
         if ($data){
+            //推送
             json('200','操作成功');
         }else{
             json('400','审核失败');
@@ -1503,7 +1505,7 @@ class IndexController extends CommonController {
         $pages = ($page - 1)*20;
         $where['t_day_task.state'] = array('neq',3);
         $table = M('day_task');
-        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id uid,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
             ->join('left join t_building on t_building.id = t_day_task.building')
             ->join('left join t_floor on t_floor.id = t_day_task.floor')
             ->join('left join t_area on t_area.id = t_day_task.area')
@@ -1894,11 +1896,164 @@ class IndexController extends CommonController {
         json('200','成功',$data);
     }
 
-    //
-    public function tongji(){
-        echo 1;
+    //楼任务分布
+    public function task_building_tongji(){
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
+        $type = I('post.type') ? I('post.type') : 0;
+        $date = get_month_week_day();
+        if ($type == 1){
+            $startimt = $date['beginyestoday'];
+            $stoptime = $date['endyestoday'];
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }elseif ($type == 2){
+            $startimt = $date['beginweek'];
+            $stoptime = $date['endweek'];
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }elseif ($type == 3){
+            $startimt = $date['beginmonth'];
+            $stoptime = $date['endmonth'];
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }elseif($type == 4){
+            $startimt = I('post.starttime') ? I('post.starttime') : json('404','缺少参数 starttime');
+            $stoptime = I('post.stoptime') ? I('post.stoptime') : json('404','缺少参数 stoptime');
+            $where['t_day_task.starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+        }
+        $table = M('day_task');
+        $data = M('building')->field('id,title,area')->find($where['building']);
+        $data['starttime'] = $startimt ? date('Y-m-d H:i',$startimt) : '';
+        $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$stoptime) : '';
+        if ($data){
+            $count = $table->where($where)->count();
+            $where['state'] = 3;
+            $cc = $table->where($where)->count();
+            $data['bai'] = round($cc/$count,2);
+            unset($where['state']);
+            $data['floor'] = $table->field('t_day_task.floor,t_floor.title,count(t_day_task.floor) as count')
+                ->join('left join t_floor on t_floor.id = t_day_task.floor')
+                ->group('t_day_task.floor')
+                ->where($where)->order('t_day_task.floor desc')->select();
+            foreach ($data['floor'] as $key=>$val){
+                $data['floor'][$key]['cc'] = $table->where("floor = '{$val['floor']}' and state = 3")->count();
+            }
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
     }
 
+    //首页
+    public function index(){
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $date = get_month_week_day();
+        $table = M('day_task');
+        $time = date('Y/m月d日',time());
+        $weekarray=array("日","一","二","三","四","五","六");
+        $data['date'] = $time." 星期".$weekarray[date("w")];
+        $count = $table->where($where)->count();
+        $where['state'] = 3;
+        $cc = $table->where($where)->count();
+        $res['title'] = '项目总进度';
+        $res['bai'] = round($cc/$count,2);
+        $data['task'][] = $res;
+        $res = array();
+        unset($where['state']);
+        $startimt = $date['beginmonth'];
+        $stoptime = $date['endmonth'];
+        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        $count = $table->where($where)->count();
+        $where['state'] = 3;
+        $cc = $table->where($where)->count();
+        $res['title'] = '本月计划完成度';
+        $res['bai'] = round($cc/$count,2);
+        $data['task'][] = $res;
+        $res = array();
+        unset($where['state']);
+        $startimt = $date['beginweek'];
+        $stoptime = $date['endweek'];
+        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        $count = $table->where($where)->count();
+        $where['state'] = 3;
+        $cc = $table->where($where)->count();
+        $res['title'] = '本周计划完成度';
+        $res['bai'] = round($cc/$count,2);
+        $data['task'][] = $res;
+        $res = array();
+        unset($where['state']);
+        $startimt = $date['beginyestoday'];
+        $stoptime = $date['endyestoday'];
+        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        $count = $table->where($where)->count();
+        $where['state'] = 3;
+        $cc = $table->where($where)->count();
+        $res['title'] = '昨日计划完成度';
+        $res['bai'] = round($cc/$count,2);
+        $data['task'][] = $res;
+        json('200','成功',$data);
+    }
+
+    //日周月总计划总览
+    public function all_task_tongji(){
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $type = I('post.type') ? I('post.type') : 0;
+        $date = get_month_week_day();
+        if ($type == 1){
+            $startimt = $date['beginyestoday'];
+            $stoptime = $date['endyestoday'];
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }elseif ($type == 2){
+            $startimt = $date['beginweek'];
+            $stoptime = $date['endweek'];
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }elseif ($type == 3){
+            $startimt = $date['beginmonth'];
+            $stoptime = $date['endmonth'];
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }
+        $table = M('day_task');
+        $data['starttime'] = $startimt ? $startimt : '';
+        $data['stoptime'] = $stoptime ? $stoptime : '';
+        if ($data){
+            $count = $table->where($where)->count();
+            $where['state'] = 3;
+            $cc = $table->where($where)->count();
+            $data['bai'] = round($cc/$count,2);
+            unset($where['state']);
+            $data['building'] = $table->field('t_day_task.building,t_building.title,t_building.area,count(t_day_task.building) as count')
+                ->join('left join t_building on t_building.id = t_day_task.building')
+                ->group('t_day_task.building')
+                ->where($where)->order('t_day_task.building asc')->select();
+            foreach ($data['building'] as $key=>$val){
+                $data['building'][$key]['cc'] = $table->where("building = '{$val['building']}' and state = 3")->count();
+                $data['building'][$key]['bai'] = round($data['building'][$key]['cc']/$val['count'],2);
+            }
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //获取天气
+    function tianqi(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $city = M('product')->where("id = $proid")->getField('city');
+        $res = tianqi($city);
+        if ($res['reason'] == 'successed!'){
+            unset($res['result']['data']['realtime']['wind']['offset']);
+            unset($res['result']['data']['realtime']['wind']['windspeed']);
+            json('200','成功',$res['result']['data']['realtime']);
+        }else{
+            json('400','获取失败');
+        }
+    }
+
+    //获取责任分包
+    function get_qs_fenbao(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $building = I('post.building') ? I('post.building') : json('404','缺少参数 building');
+        $floor = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
+
+    }
 
 
 

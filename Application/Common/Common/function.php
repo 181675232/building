@@ -629,6 +629,9 @@ function send_curl( $url, $data = array(), $time_out = 1 )
 }
 
 function get_month_week_day(){
+    //昨日
+    $arr['beginyestoday'] = strtotime(date('Y-m-d',time())) - 24*60*60;
+    $arr['endyestoday'] = strtotime(date('Y-m-d',time())) - 1;
     //本日
     $arr['beginday'] = strtotime(date('Y-m-d',time()));
     $arr['endday'] = strtotime(date('Y-m-d 23:59:59',time()));
@@ -639,4 +642,27 @@ function get_month_week_day(){
     $arr['beginmonth'] = mktime(0,0,0,date('m'),1,date('Y'));
     $arr['endmonth'] = mktime(23,59,59,date('m'),date('t'),date('Y'));
     return $arr;
+}
+//天气
+function tianqi($city,$type = ''){
+    //************1.根据城市查询天气************
+    $url = "http://op.juhe.cn/onebox/weather/query";
+    $key = C('juhe');
+    $params = array(
+        "cityname" => $city,//要查询的城市，如：温州、上海、北京
+        "key" => $key['tianqi_key'],//应用APPKEY(应用详细页查询)
+        "dtype" => $type,//返回数据的格式,xml或json，默认json
+    );
+    //$paramstring = http_build_query($params);
+    $content = send_curl($url,$params,60);
+    $result = json_decode($content,true);
+    if($result){
+        if($result['error_code']=='0'){
+            return $result;
+        }else{
+            return 0;
+        }
+    }else{
+        return 0;
+    }
 }
