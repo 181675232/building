@@ -457,6 +457,24 @@ function yzm($phone)
 	$data['code'] = $vcodes;
 	return json('200','成功！',$data);
 }
+function sms($phone,$content)
+{
+    $username = 'caimantangcn';		//用户账号
+    $password = 'caimantang123';	//密码
+    $apikey = 'e1127a31a9dd2dee4ec9cc325da5b580';//密码
+    $mobile	 = '86'.$phone;	//号手机码
+
+    $content = $content.'【JollyShop】';//内容
+
+    $result = sendSMS($username,$password,$mobile,$content,$apikey);
+    if ($result){
+        return 1;
+    }else{
+        return 0;
+    }
+
+}
+
 function sendSMS($username,$password,$mobile,$content,$apikey)
 {
 	$url = 'http://m.5c.com.cn/api/send/?';

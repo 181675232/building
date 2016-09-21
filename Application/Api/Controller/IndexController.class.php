@@ -1095,7 +1095,7 @@ class IndexController extends CommonController {
             $r = $rongyun->groupQuit($where['user_id'],$where['groups_id']);
             $rong = json_decode($r);
             if($rong->code == 200){
-                $content = '{"message":"'.$res['title'].' '.$res['username'].'退出本群"}';
+                $content = '{"message":"'.$res['title'].' '.$res['username'].'退出本群","extra":"'.$where['groups_id'].'"}';
                 $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
                 json('200','成功');
             }else {
@@ -1129,7 +1129,7 @@ class IndexController extends CommonController {
             if($rong->code == 200){
                 $content = '{"message":"'.$ress['title'].' '.$ress['username'].'退出本群"}';
                 $rongyun->messageGroupPublish($where['user_id'],$where['groups_id'],$content);
-                $content = '{"content":" 您被移出'.$res['title'].'群组"}';
+                $content = '{"content":" 您被移出'.$res['title'].'群组","extra":"'.$where['groups_id'].'"}';
                 $rongyun->messageSystemPublish(1,$where['user_id'],$content);
                 json('200','成功');
             }else {
@@ -1158,7 +1158,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupDismiss($where['user_id'], $where['groups_id']);
                     $rong = json_decode($r);
                     if ($rong->code == 200) {
-                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了"}';
+                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了","extra":"'.$where['groups_id'].'"}';
                         $rongyun->messageSystemPublish(1, $arr, $content);
                         json('200', '成功');
                     } else {
@@ -2129,7 +2129,7 @@ class IndexController extends CommonController {
         $where['type'] = I('post.type') ? I('post.type') : 1;
         if ($_POST['title']) $where['title'] = $_POST['title'];
         $table = M('qs');
-        $where['addtime'] = time();
+        $where['addtime'] = $data['addtime'] = time();
         $data['pid'] = $table->add($where);
         if ($data['pid']){
             $data['type'] = 'qs';
@@ -2151,7 +2151,6 @@ class IndexController extends CommonController {
                     $img->add($data);
                 }
             }
-
             $map['title'] = date('Y-m-d',strtotime($res['starttime'])).'质量安全问题';
             $map['content'] = $resss['title'].' '.$ress['title'].' '.$res['title'] ;
             $map['type'] = 'qs';
@@ -2167,10 +2166,23 @@ class IndexController extends CommonController {
                 $push['content'] = '质量安全问题';
                 send_curl($this->url.'/Api/Index/push',$push);
             }
+            if ($where['type'] > 1){
+                $phone = M('admin')->where("id = '{$where['user_id']}'")->getField('phone');
+                if ($phone){
+                    sms($phone,$map['title'].',请尽快查看！');
+                }
+            }
             json('200','成功');
         }else {
             json('400','发布失败');
         }
+    }
+
+    //问题列表
+    function qs_list(){
+        $table = M('qs');
+        $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        print_r($data);
     }
 
 
