@@ -1197,7 +1197,7 @@ class IndexController extends CommonController {
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('groups');
-        $data = $table->field('t_groups.id,t_groups.addtime,t_groups.title,t_groups.desc,t_groups.uid,t_admin.username,t_admin.simg,t_level.title name')
+        $data = $table->field('t_groups.id,t_groups.addtime,t_groups.title,t_groups.desc,t_groups.uid,t_admin.level,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_admin on t_admin.id = t_groups.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->where("t_groups.id = '{$where['id']}' and t_groups.state = 1 and t_groups.proid = '{$where['proid']}'")->find();
@@ -2112,7 +2112,6 @@ class IndexController extends CommonController {
         $where['stoptime'] = I('post.stoptime') ? I('post.stoptime') : json('404','缺少参数 stoptime');
         if (checkTimeDate($where['stoptime'])){
             $where['stoptime'] = strtotime($where['stoptime']);
-            if ($where['stoptime'] < $where['starttime']) json('400','开始时间不能大于结束时间');
             if ($where['stoptime'] < time()) json('400','结束时间不能小于当前时间');
         }else{
             json('404','时间格式不正确');
@@ -2181,11 +2180,42 @@ class IndexController extends CommonController {
     //问题列表
     function qs_list(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.bid')) $where['bid'] = I('post.bid');
+        if (I('post.uid')) $where['uid'] = I('post.uid');
+        if (I('post.user_id')) $where['user_id'] = I('post.user_id');
+        if (I('post.building')) $where['buildingid'] = I('post.building');
+        if (I('post.starttime')){
+            $starttime = I('post.starttime');
+            if (checkTimeDate($starttime)){
+                $starttime = strtotime($starttime);
+                $where['stoptime'] = array('egt',$starttime);
+            }else{
+                json('404','时间格式不正确');
+            }
+        }
+        if (I('post.stoptime')) {
+            $stoptime = I('post.stoptime');
+            if (checkTimeDate($stoptime)) {
+                $stoptime = strtotime($stoptime);
+                if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                $where['stoptime'] = array('elt',$stoptime);
+            } else {
+                json('404', '时间格式不正确');
+            }
+        }
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
-        $table = M('qs');
-        $table->field()
+        $table = M('all_qs');
+        $data = $table->field('id,building,floor,area,type,issue,uid,username,simg,name,user_id,fusername,fsimg,fname,stoptime,state')
             ->where($where)->limit($pages,20)->order('addtime desc')->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+
     }
 
 
