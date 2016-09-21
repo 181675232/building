@@ -1158,7 +1158,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupDismiss($where['user_id'], $where['groups_id']);
                     $rong = json_decode($r);
                     if ($rong->code == 200) {
-                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了","extra":"'.$where['groups_id'].'"}';
+                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了","extra":"1"}';
                         $rongyun->messageSystemPublish(1, $arr, $content);
                         json('200', '成功');
                     } else {
@@ -2122,7 +2122,7 @@ class IndexController extends CommonController {
         $res = $issue->field('id,title')->where("id = '{$where['pid']}'")->find();
         $ress = $issue->field('id,title')->where("id = '{$res['id']}'")->find();
         $resss = $issue->field('id,title')->where("id = '{$ress['id']}'")->find();
-
+        $where['bid'] = $resss['id'];
         $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
         $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
         $where['area'] = I('post.area') ? I('post.area') : 0;
@@ -2180,8 +2180,8 @@ class IndexController extends CommonController {
 
     //问题列表
     function qs_list(){
-        $table = M('qs');
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $table = M('qs');
         print_r($data);
     }
 
