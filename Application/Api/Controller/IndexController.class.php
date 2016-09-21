@@ -1158,7 +1158,7 @@ class IndexController extends CommonController {
                     $r = $rongyun->groupDismiss($where['user_id'], $where['groups_id']);
                     $rong = json_decode($r);
                     if ($rong->code == 200) {
-                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了","extra":"1"}';
+                        $content = '{"content":" 您所在的群组'.$res['title'].'解散了","extra":"'.$where['groups_id'].'"}';
                         $rongyun->messageSystemPublish(1, $arr, $content);
                         json('200', '成功');
                     } else {
@@ -2073,7 +2073,7 @@ class IndexController extends CommonController {
     function get_issue(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $table = M('issue');
-        $data = $table->field('id,title')->where($where)->select();
+        $data = $table->field('id,title')->where("pid = 0")->select();
         foreach ($data as $key=>$val){
             $data[$key]['catid'] = $table->field('id,title')->where("pid = '{$val['id']}' and proid = '{$where['proid']}'")->select();
             foreach ($data[$key]['catid'] as $k=>$v){
@@ -2119,7 +2119,7 @@ class IndexController extends CommonController {
         }
         $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
         $issue = M('issue');
-        $res = $issue->field('id,title')->where("id = '{$where['pid']}'")->find();
+        $res = $issue->field('id,title')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
         $ress = $issue->field('id,title')->where("id = '{$res['id']}'")->find();
         $resss = $issue->field('id,title')->where("id = '{$ress['id']}'")->find();
         $where['bid'] = $resss['id'];
@@ -2181,8 +2181,11 @@ class IndexController extends CommonController {
     //问题列表
     function qs_list(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
         $table = M('qs');
-        print_r($data);
+        $table->field()
+            ->where($where)->limit($pages,20)->order('addtime desc')->select();
     }
 
 
