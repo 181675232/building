@@ -2150,7 +2150,7 @@ class IndexController extends CommonController {
                     $img->add($data);
                 }
             }
-            $map['title'] = date('Y-m-d',strtotime($res['starttime'])).'质量安全问题';
+            $map['title'] = date('Y-m-d',$where['stoptime']).'质量安全问题';
             $map['content'] = $resss['title'].' '.$ress['title'].' '.$res['title'] ;
             $map['type'] = 'qs';
             $map['typeid'] = $data['pid'];
@@ -2184,6 +2184,12 @@ class IndexController extends CommonController {
         if (I('post.uid')) $where['uid'] = I('post.uid');
         if (I('post.user_id')) $where['user_id'] = I('post.user_id');
         if (I('post.building')) $where['buildingid'] = I('post.building');
+        if (I('post.type')) $where['type'] = I('post.type');
+        if (I('post.state')) $where['state'] = I('post.state');
+        if (I('post.pid')){
+            $pid = I('post.pid');
+            $where['_string'] = "bid2 = $pid or bid3 = $pid";
+        }
         if (I('post.starttime')){
             $starttime = I('post.starttime');
             if (checkTimeDate($starttime)){
@@ -2203,6 +2209,7 @@ class IndexController extends CommonController {
                 json('404', '时间格式不正确');
             }
         }
+        $where['state'] = array('neq',5);
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('all_qs');
@@ -2215,12 +2222,252 @@ class IndexController extends CommonController {
         }else{
             json('400','没有数据');
         }
-
     }
 
+    //开始问题
+    function qs_start(){
+        $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = $data['uid'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['id'] = $data['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('qs');
+        $res = $table->field('uid,stoptime,state')->where($where)->find();
+        if ($res){
+            if ($res['state'] == 5) json('400','问题已取消');
+            if (!$table->where($where)->setField('state',2)){
+                json('400','重复操作');
+            }
+            $data['title'] = '确认开始';
+            $data['addtime'] = time();
+            if (M('qs_schedule')->add($data)){
+                $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
+                $map['content'] = '质量安全问题确认开始';
+                $map['type'] = 'qs';
+                $map['typeid'] = $data['pid'];
+                $map['user_id'] = $where['user_id'];
+                $map['proid'] = $where['proid'];
+                $map['uid'] = $res['uid'];
+                $map['addtime'] = time();
+                if (M('message')->add($map)) {
+                    $push['ids'] = $map['uid'];
+                    $push['type'] = $map['type'];
+                    $push['typeid'] = $map['typeid'];
+                    $push['content'] = '质量安全问题确认开始';
+                    send_curl($this->url.'/Api/Index/push',$push);
+                }
+                json('200','成功');
+            }else{
+                json('400','操作失败');
+            }
+        }else{
+            json('400','问题不存在');
+        }
+    }
 
+    //问题完成提交
+    function qs_confirm(){
+        $where['proid'] = $data1['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['user_id'] = $data1['uid'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $file = $_FILES ? $_FILES : json('400','至少传一张图片');
+        if(isset($_POST['title'])) $data1['title'] = $_POST['title'];
+        $table = M('qs');
+        $res = $table->field('uid,stoptime')->where($where)->find();
+        if ($res){
+            if (!$table->where($where)->setField('state',3)){
+                json('400','重复操作');
+            }
+            $data1['addtime'] = $data['addtime'] = time();
+            $data['pid'] = M('qs_schedule')->add($data1);
+            if ($data['pid']){
+                $data['type'] = 'qs_schedule';
+                $img = M('img');
+                foreach ($file as $val){
+                    $rand = '';
+                    for ($i=0;$i<6;$i++){
+                        $rand.=rand(0,9);
+                    }
+                    $type = explode('.', $val['name']);
+                    $simg = date('YmdHis').$rand.'.'.end($type);
+                    $dir = date('Y-m-d');
+                    if (!is_dir('./Public/upfile/'.$dir)){
+                        mkdir('./Public/upfile/'.$dir,0777);
+                    }
+                    if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                        $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                        create_thumb($simg,$dir);
+                        $img->add($data);
+                    }
+                }
+                $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
+                $map['content'] = '质量安全问题已完成，请查看';
+                $map['type'] = 'qs';
+                $map['typeid'] = $data1['pid'];
+                $map['user_id'] = $where['user_id'];
+                $map['proid'] = $where['proid'];
+                $map['uid'] = $res['uid'];
+                $map['addtime'] = time();
+                if (M('message')->add($map)) {
+                    $push['ids'] = $map['uid'];
+                    $push['type'] = $map['type'];
+                    $push['typeid'] = $map['typeid'];
+                    $push['content'] = '质量安全问题已完成';
+                    send_curl($this->url.'/Api/Index/push',$push);
+                }
+                json('200','成功');
+            }else{
+                json('400','操作失败');
+            }
+        }else{
+            json('400','问题不存在');
+        }
+    }
 
+    //问题不合格
+    function qs_state(){
+        $where['proid'] = $data1['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $data1['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
+        $table = M('qs');
+        $res = $table->field('user_id,stoptime')->where($where)->find();
+        if ($res){
+            if (!$table->where($where)->setField('state',2)){
+                json('400','重复操作');
+            }
+            $data1['addtime'] = time();
+            if (M('qs_schedule')->add($data1)){
+                $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
+                $map['content'] = '质量安全问题不合格，请尽快查看';
+                $map['type'] = 'qs';
+                $map['typeid'] = $data1['pid'];
+                $map['user_id'] = $where['uid'];
+                $map['proid'] = $where['proid'];
+                $map['uid'] = $res['user_id'];
+                $map['addtime'] = time();
+                if (M('message')->add($map)) {
+                    $push['ids'] = $map['uid'];
+                    $push['type'] = $map['type'];
+                    $push['typeid'] = $map['typeid'];
+                    $push['content'] = '质量安全问题不合格';
+                    send_curl($this->url.'/Api/Index/push',$push);
+                }
+                json('200','成功');
+            }else{
+                json('400','操作失败');
+            }
+        }else{
+            json('400','问题不存在');
+        }
+    }
 
+    //问题核销
+    function qs_finish(){
+        $where['proid'] = $data1['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('qs');
+        $res = $table->field('user_id,stoptime')->where($where)->find();
+        if ($res){
+            if (!$table->where($where)->setField('state',4)){
+                json('400','重复操作');
+            }
+            $data1['title'] = '确认完成';
+            $data1['addtime'] = time();
+            if (M('qs_schedule')->add($data1)){
+                $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
+                $map['content'] = '质量安全问题已完成';
+                $map['type'] = 'qs';
+                $map['typeid'] = $data1['pid'];
+                $map['user_id'] = $where['uid'];
+                $map['proid'] = $where['proid'];
+                $map['uid'] = $res['user_id'];
+                $map['addtime'] = time();
+                if (M('message')->add($map)) {
+                    $push['ids'] = $map['uid'];
+                    $push['type'] = $map['type'];
+                    $push['typeid'] = $map['typeid'];
+                    $push['content'] = '质量安全问题已完成';
+                    send_curl($this->url.'/Api/Index/push',$push);
+                }
+                json('200','成功');
+            }else{
+                json('400','操作失败');
+            }
+        }else{
+            json('400','问题不存在');
+        }
+    }
+
+    //问题取消
+    function qs_del(){
+        $where['proid'] = $data1['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('qs');
+        $res = $table->field('user_id,stoptime,state')->where($where)->find();
+        if ($res){
+            if ($res['state'] != 1){
+                json('400','问题已被确认，无法取消');
+            }
+            if (!$table->where($where)->setField('state',5)){
+                json('400','重复操作');
+            }
+            $data1['title'] = '问题被取消';
+            $data1['addtime'] = time();
+            if (M('qs_schedule')->add($data1)){
+                $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
+                $map['content'] = '质量安全问题已取消';
+                $map['type'] = 'qs';
+                $map['typeid'] = $data1['pid'];
+                $map['user_id'] = $where['uid'];
+                $map['proid'] = $where['proid'];
+                $map['uid'] = $res['user_id'];
+                $map['addtime'] = time();
+                if (M('message')->add($map)) {
+                    $push['ids'] = $map['uid'];
+                    $push['type'] = $map['type'];
+                    $push['typeid'] = $map['typeid'];
+                    $push['content'] = '质量安全问题已取消';
+                    send_curl($this->url.'/Api/Index/push',$push);
+                }
+                json('200','成功');
+            }else{
+                json('400','操作失败');
+            }
+        }else{
+            json('400','问题不存在');
+        }
+    }
+
+    //问题详情
+    public function qs_info(){
+        $where['proid'] = $data1['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('all_qs');
+        $data = $table->field('id,building,floor,area,x,y,title,issue,type,uid,username,simg,phone,name,user_id,fusername,fsimg,fphone,fname,stoptime,state')
+            ->where($where)->order('addtime desc')->limit($pages,20)->find();
+        $data['time'] = ''.time();
+        if ($data){
+            $img = M('img');
+            $data['img'] = $img->where("pid = '{$data['id']}' and type = 'qs' and proid = '{$where['proid']}'")->getField('simg',true);
+            $schedule = M('qs_schedule');
+            $data['schedule'] = $schedule->field('t_qs_schedule.id,t_qs_schedule.title,t_qs_schedule.addtime,t_qs_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
+                ->join('left join t_admin on t_admin.id = t_qs_schedule.uid')
+                ->join('left join t_level on t_admin.level = t_level.id')
+                ->where("t_qs_schedule.pid = '{$data['id']}' and t_qs_schedule.proid = '{$where['proid']}'")->order('t_qs_schedule.addtime desc')->select();
+            foreach ($data['schedule'] as $key=>$val){
+                $data['schedule'][$key]['img'] = $img->where("pid = '{$val['id']}' and type = 'qs_schedule' and proid = '{$where['proid']}'")->getField('simg',true);
+                $data['schedule'][$key]['img'] = $data['schedule'][$key]['img'] ? $data['schedule'][$key]['img'] : array();
+            }
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
 
 
 
