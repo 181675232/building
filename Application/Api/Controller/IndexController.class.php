@@ -1939,7 +1939,7 @@ class IndexController extends CommonController {
                 ->where($where)->order('t_day_task.floor asc')->select();
             foreach ($data['floor'] as $key=>$val){
                 $where['floor'] = $val['floor'];
-                $where['state'] = 2;
+                $where['state'] = 3;
                 $data['floor'][$key]['cc'] = $table->where($where)->count();
             }
             json('200','成功',$data);
