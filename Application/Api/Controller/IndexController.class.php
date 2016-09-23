@@ -1936,7 +1936,7 @@ class IndexController extends CommonController {
             $data['floor'] = $table->field('t_day_task.floor,t_floor.title,count(t_day_task.floor) as count')
                 ->join('left join t_floor on t_floor.id = t_day_task.floor')
                 ->group('t_day_task.floor')
-                ->where($where)->order('t_day_task.floor desc')->select();
+                ->where($where)->order('t_day_task.floor asc')->select();
             foreach ($data['floor'] as $key=>$val){
                 $where['floor'] = $val['floor'];
                 $where['state'] = 2;
@@ -2187,7 +2187,7 @@ class IndexController extends CommonController {
         if (I('post.user_id')) $where['user_id'] = I('post.user_id');
         if (I('post.building')) $where['buildingid'] = I('post.building');
         if (I('post.type')) $where['type'] = I('post.type');
-        if (I('post.state')) $where['state'] = I('post.state');
+        if (I('post.state')) $state = I('post.state');
         if (I('post.pid')){
             $pid = I('post.pid');
             $where['_string'] = "bid2 = $pid or bid3 = $pid";
@@ -2211,7 +2211,11 @@ class IndexController extends CommonController {
                 json('404', '时间格式不正确');
             }
         }
-        $where['state'] = array('neq',5);
+        if ($state){
+            $where['state'] = array(array('neq',5),array('eq',$state));
+        }else{
+            $where['state'] = array('neq',5);
+        }
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('all_qs');
@@ -2562,14 +2566,17 @@ class IndexController extends CommonController {
 
     //我发布的罚款
     public function my_find_list(){
-        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_find.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_find.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('find');
-        //$data = $table->field()
-        //    ->where()->order('t_find.addtime desc')->
-
+        $data = $table->field("t_find.id,t_find.title,t_find.uid,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+            ->join('left join t_admin on t_admin.id = t_find.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_admin a on a.id = t_find.user_id')
+            ->join('left join t_level l on l.id = a.level')
+            ->where($where)->order('t_find.addtime desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
         }elseif($pages > 1){
@@ -2578,9 +2585,27 @@ class IndexController extends CommonController {
             json('400','没有数据');
         }
     }
+
     //我被罚款的列表
     public function find_me_list(){
-
+        $where['t_find.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_find.user_id'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('find');
+        $data = $table->field("t_find.id,t_find.title,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+            ->join('left join t_admin on t_admin.id = t_find.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_admin a on a.id = t_find.user_id')
+            ->join('left join t_level l on l.id = a.level')
+            ->where($where)->order('t_find.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
     }
 
 
