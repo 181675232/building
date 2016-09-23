@@ -1938,7 +1938,9 @@ class IndexController extends CommonController {
                 ->group('t_day_task.floor')
                 ->where($where)->order('t_day_task.floor desc')->select();
             foreach ($data['floor'] as $key=>$val){
-                $data['floor'][$key]['cc'] = $table->where("floor = '{$val['floor']}' and state = 3")->count();
+                $where['floor'] = $val['floor'];
+                $where['state'] = 2;
+                $data['floor'][$key]['cc'] = $table->where($where)->count();
             }
             json('200','成功',$data);
         }else{
@@ -2019,24 +2021,24 @@ class IndexController extends CommonController {
         $table = M('day_task');
         $data['starttime'] = $startimt ? $startimt : '';
         $data['stoptime'] = $stoptime ? $stoptime : '';
-        if ($data){
-            $count = $table->where($where)->count();
+
+        $count = $table->where($where)->count();
+        $where['state'] = 3;
+        $cc = $table->where($where)->count();
+        $data['bai'] = round($cc/$count,2);
+        unset($where['state']);
+        $data['building'] = $table->field('t_day_task.building,t_building.title,t_building.area,count(t_day_task.building) as count')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->group('t_day_task.building')
+            ->where($where)->order('t_day_task.building asc')->select();
+        foreach ($data['building'] as $key=>$val){
+            $where['building'] = $val['building'];
             $where['state'] = 3;
-            $cc = $table->where($where)->count();
-            $data['bai'] = round($cc/$count,2);
-            unset($where['state']);
-            $data['building'] = $table->field('t_day_task.building,t_building.title,t_building.area,count(t_day_task.building) as count')
-                ->join('left join t_building on t_building.id = t_day_task.building')
-                ->group('t_day_task.building')
-                ->where($where)->order('t_day_task.building asc')->select();
-            foreach ($data['building'] as $key=>$val){
-                $data['building'][$key]['cc'] = $table->where("building = '{$val['building']}' and state = 3")->count();
-                $data['building'][$key]['bai'] = round($data['building'][$key]['cc']/$val['count'],2);
-            }
-            json('200','成功',$data);
-        }else{
-            json('400','没有数据');
+            $data['building'][$key]['cc'] = $table->where($where)->count();
+            $data['building'][$key]['bai'] = round($data['building'][$key]['cc']/$val['count'],2);
         }
+        json('200','成功',$data);
+
     }
 
     //获取天气
@@ -2090,8 +2092,8 @@ class IndexController extends CommonController {
     //获取层图纸
     function get_floor_simg(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
-        $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
+        $where['pid'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
+        $where['id'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
         $table = M('floor');
         $data['simg'] = $table->where($where)->getField('simg');
         if ($data){
@@ -2324,17 +2326,39 @@ class IndexController extends CommonController {
 
     //问题不合格
     function qs_state(){
-        $where['proid'] = $data1['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['proid'] = $data1['proid'] = $data['proid']  = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $data1['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
+        $file = $_FILES ? $_FILES : '';
         $table = M('qs');
         $res = $table->field('user_id,stoptime')->where($where)->find();
         if ($res){
             if (!$table->where($where)->setField('state',2)){
                 json('400','重复操作');
             }
-            $data1['addtime'] = time();
+            $data1['addtime'] = $data['addtime'] = time();
+            if($file){
+                $data['type'] = 'qs_schedule';
+                $img = M('img');
+                foreach ($file as $val){
+                    $rand = '';
+                    for ($i=0;$i<6;$i++){
+                        $rand.=rand(0,9);
+                    }
+                    $type = explode('.', $val['name']);
+                    $simg = date('YmdHis').$rand.'.'.end($type);
+                    $dir = date('Y-m-d');
+                    if (!is_dir('./Public/upfile/'.$dir)){
+                        mkdir('./Public/upfile/'.$dir,0777);
+                    }
+                    if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                        $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                        create_thumb($simg,$dir);
+                        $img->add($data);
+                    }
+                }
+            }
             if (M('qs_schedule')->add($data1)){
                 $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
                 $map['content'] = '质量安全问题不合格，请尽快查看';
@@ -2450,6 +2474,8 @@ class IndexController extends CommonController {
             ->where($where)->order('addtime desc')->limit($pages,20)->find();
         $data['time'] = ''.time();
         if ($data){
+            $floor = M('floor');
+            $data['tuzhi'] = $floor->where("pid = '{$data['building']}' and id = '{$data['floor']}' and proid = '{$where['proid']}'")->getField('simg');
             $img = M('img');
             $data['img'] = $img->where("pid = '{$data['id']}' and type = 'qs' and proid = '{$where['proid']}'")->getField('simg',true);
             $schedule = M('qs_schedule');
@@ -2468,6 +2494,107 @@ class IndexController extends CommonController {
             json('400','没有数据');
         }
     }
+
+    //罚款
+    public function add_find(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $admin = M('admin');
+        $user = $admin->field('id,username')->where("proid = '{$where['proid']}' and id = '{$where['user_id']}'")->find();
+        if (!$admin) json('404','分包不存在');
+        $where['price'] = I('post.price') ? I('post.price') : json('404','缺少参数 price');
+        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
+        if ($where['price'] < 0) json('400','罚款金额必须大于零');
+        $where['addtime'] = time();
+        $table = M('find');
+        $res = $table->add($where);
+        if ($res){
+            if (!$admin->where("proid = '{$where['proid']}' and id = '{$where['user_id']}'")->setDec('money',$where['price'])){
+                $table->delete($res);
+                json('400','操作失败');
+            }
+            $message = M('message');
+            //推送罚款人
+            $map1['title'] = date('Y-m-d',time()).'罚款通知';
+            $map1['content'] = '您被罚款'.$where['price'].'元';
+            $map1['type'] = 'find';
+            $map1['typeid'] = $res;
+            $map1['user_id'] = $where['uid'];
+            $map1['uid'] = $where['user_id'];
+            $map1['proid'] = $where['proid'];
+            $map1['addtime'] = time();
+
+            if ($message->add($map1)){
+                $push1['ids'] = $map1['uid'];
+                $push1['type'] = $map1['type'];
+                $push1['typeid'] = $map1['typeid'];
+                $push1['content'] = '罚款通知';
+                send_curl($this->url.'/Api/Index/push',$push1);
+            }
+
+            //推送所有人
+            $id = $admin->where("proid = '{$where['proid']}' and id != '{$where['user_id']}'")->getField('id',true);
+            $ids = implode(',',$id);
+
+            $map['title'] = date('Y-m-d',time()).'罚款公告';
+            $map['content'] = $user['username'].'被罚款'.$where['price'].'元';
+            $map['type'] = 'system';
+            $map['typeid'] = 0;
+            $map['user_id'] = 1;
+            $map['proid'] = $where['proid'];
+            $map['addtime'] = time();
+            foreach ($id as $val){
+                $map['uid'] = $val;
+                $message->add($map);
+            }
+
+            $push['ids'] = $ids;
+            $push['type'] = 'system';
+            $push['typeid'] = 0;
+            $push['content'] = '罚款公告';
+            send_curl($this->url.'/Api/Index/push',$push);
+            json('200','成功');
+        }else{
+            json('400','操作失败');
+        }
+    }
+
+    //我发布的罚款
+    public function my_find_list(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('find');
+        //$data = $table->field()
+        //    ->where()->order('t_find.addtime desc')->
+
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+    //我被罚款的列表
+    public function find_me_list(){
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
