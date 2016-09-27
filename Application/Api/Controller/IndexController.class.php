@@ -2687,7 +2687,7 @@ class IndexController extends CommonController {
     //发布紧急预警
     public function add_warning(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $file = $_FILES ? $_FILES : json('400','至少传一张图片');
+        $file = $_FILES;
         if($file['mp3']){
             $where['count'] = I('post.count') ? I('post.count') : json('404','缺少参数 count');
             $rand = '';
@@ -2720,27 +2720,27 @@ class IndexController extends CommonController {
 
         $data['pid'] = $table->add($where);
         if ($data['pid']){
-
-            $data['type'] = 'warning';
-            $img = M('img');
-            foreach ($file as $val){
-                $rand = '';
-                for ($i=0;$i<6;$i++){
-                    $rand.=rand(0,9);
-                }
-                $type = explode('.', $val['name']);
-                $simg = date('YmdHis').$rand.'.'.end($type);
-                $dir = date('Y-m-d');
-                if (!is_dir('./Public/upfile/'.$dir)){
-                    mkdir('./Public/upfile/'.$dir,0777);
-                }
-                if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
-                    $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
-                    create_thumb($simg,$dir);
-                    $img->add($data);
+            if ($file){
+                $data['type'] = 'warning';
+                $img = M('img');
+                foreach ($file as $val){
+                    $rand = '';
+                    for ($i=0;$i<6;$i++){
+                        $rand.=rand(0,9);
+                    }
+                    $type = explode('.', $val['name']);
+                    $simg = date('YmdHis').$rand.'.'.end($type);
+                    $dir = date('Y-m-d');
+                    if (!is_dir('./Public/upfile/'.$dir)){
+                        mkdir('./Public/upfile/'.$dir,0777);
+                    }
+                    if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                        $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                        create_thumb($simg,$dir);
+                        $img->add($data);
+                    }
                 }
             }
-
             $ids = I('post.ids');
             $admin = M('admin');
             $user = M('warning_user');
@@ -2748,7 +2748,7 @@ class IndexController extends CommonController {
                 $push['ids'] = $ids;
                 $res = explode(',',$ids);
             }else{
-                $res = $admin->where("proid = '{$where['proid']}'")->getField('id',true);
+                $res = $admin->where("proid = '{$where['proid']}' and id != '{$where['uid']}'")->getField('id',true);
                 $push['ids'] = $ids;
             }
             $map['pid'] = $data['pid'];
@@ -2773,11 +2773,95 @@ class IndexController extends CommonController {
 
     //紧急预警列表
     public function warning_list(){
-
+        $where['t_warning_user.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_warning_user.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('warning_user');
+        $data = $table->field('t_warning.id,t_warning.title,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime,t_warning_user.state')
+            ->join('left join t_admin on t_admin.id = t_warning_user.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_warning on t_warning.id = t_warning_user.pid')
+            ->where($where)->order('t_warning.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
     }
 
+    //紧急预警首页
+    public function warning_index(){
+        $where['t_warning_user.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_warning_user.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $table = M('warning_user');
+        $data = $table->field('t_warning.title,t_warning.addtime')
+            ->join('left join t_warning on t_warning.id = t_warning_user.pid')
+            ->where($where)->order('t_warning.addtime desc')->find();
+        if ($data){
+            $where['t_warning_user.state'] = 1;
+            $data['count'] = $table->field('t_warning.id')
+                ->join('left join t_warning on t_warning.id = t_warning_user.pid')
+                ->where($where)->count();
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
 
+    //确认紧急预警
+    public function warning_state(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
+        $table = M('warning_user');
+        $map['state'] = 2;
+        $map['addtime'] = time();
+        $data = $table->where($where)->setField($map);
+        if ($data){
+            json('200','成功');
+        }else{
+            json('400','操作失败');
+        }
+    }
 
+    //紧急预警详情
+    public function warning_info(){
+        $where['t_warning.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_warning.id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $table = M('warning');
+        $data = $table->field('t_warning.id,t_warning.title,t_warning.mp3,t_warning.count,t_warning_group.title as type,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime')
+            ->join("left join t_warning_user on t_warning.id = t_warning_user.pid and t_warning_user.uid = $uid")
+            ->join('left join t_admin on t_admin.id = t_warning_user.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_warning_group on t_warning_group.id = t_warning.pid')
+            ->where($where)->find();
+
+        $img = M('img')->where("pid = '{$data['id']}' and type = 'warning' and proid = '{$where['t_warning.proid']}'")->getField('simg',true);
+        $data['img'] = $img ? $img : array();
+        $user = M('warning_user')->field('t_warning_user.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning_user.state,t_warning_user.addtime')
+            ->join('left join t_admin on t_admin.id = t_warning_user.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->where("t_warning_user.proid = '{$where['t_warning.proid']}' and t_warning_user.pid = '{$where['t_warning.id']}'")->order('t_warning_user.state desc,t_warning_user.addtime asc')->select();
+        $data['user'] = $user ? $user : array();
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //单条消息设为已读
+    public function state_one_message(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $message = M('message');
+        $message->where($where)->setField('state',2);
+        json('200','成功');
+    }
 
 
 
