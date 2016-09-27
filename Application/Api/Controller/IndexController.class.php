@@ -2636,7 +2636,7 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('find');
-        $data = $table->field("t_find.id,t_find.title,t_find.uid,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+        $data = $table->field("t_find.id,t_find.title,t_find.price,t_find.uid,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
             ->join('left join t_admin on t_admin.id = t_find.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_admin a on a.id = t_find.user_id')
@@ -2658,7 +2658,7 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('find');
-        $data = $table->field("t_find.id,t_find.title,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+        $data = $table->field("t_find.id,t_find.title,t_find.price,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
             ->join('left join t_admin on t_admin.id = t_find.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_admin a on a.id = t_find.user_id')
@@ -2771,7 +2771,10 @@ class IndexController extends CommonController {
         }
     }
 
+    //紧急预警列表
+    public function warning_list(){
 
+    }
 
 
 
