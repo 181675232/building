@@ -2246,6 +2246,55 @@ class IndexController extends CommonController {
         }
     }
 
+    //问题数量
+    function qs_count(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.bid')) $where['bid'] = I('post.bid');
+        if (I('post.uid')) $where['uid'] = I('post.uid');
+        if (I('post.user_id')) $where['user_id'] = I('post.user_id');
+        if (I('post.building')) $where['buildingid'] = I('post.building');
+        if (I('post.type')) $where['type'] = I('post.type');
+        if (I('post.pid')){
+            $pid = I('post.pid');
+            $where['_string'] = "bid2 = $pid or bid3 = $pid";
+        }
+        if (I('post.starttime')){
+            $starttime = I('post.starttime');
+            if (checkTimeDate($starttime)){
+                $starttime = strtotime($starttime);
+                $where['stoptime'] = array('egt',$starttime);
+            }else{
+                json('404','时间格式不正确');
+            }
+        }
+        if (I('post.stoptime')) {
+            $stoptime = I('post.stoptime');
+            if (checkTimeDate($stoptime)) {
+                $stoptime = strtotime($stoptime);
+                if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                $where['stoptime'] = array('elt',$stoptime);
+            } else {
+                json('404', '时间格式不正确');
+            }
+        }
+
+        $table = M('all_qs');
+        $data['all'] = $table->field('id')->where($where)->count();
+        $where['state'] = 1;
+        $data['count1'] = $table->field('id')->where($where)->count();
+        $where['state'] = 2;
+        $data['count2'] = $table->field('id')->where($where)->count();
+        $where['state'] = 3;
+        $data['count3'] = $table->field('id')->where($where)->count();
+        $where['state'] = 4;
+        $data['count4'] = $table->field('id')->where($where)->count();
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
     //开始问题
     function qs_start(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
@@ -2624,14 +2673,40 @@ class IndexController extends CommonController {
         }
     }
 
-    //发布整改
-    function add_reform(){
+    //获取紧急预警分类
+    public function get_warning_group(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $data = M('warning_group')->field('id,title')->select();
+        if ($data){
+            json('200','成功',$data);
+        }else {
+            json('400','发布失败');
+        }
+    }
+
+    //发布紧急预警
+    public function add_warning(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $file = $_FILES ? $_FILES : json('400','至少传一张图片');
+        if($file['mp3']){
+            $where['count'] = I('post.count') ? I('post.count') : json('404','缺少参数 count');
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['mp3']['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['mp3']['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['mp3'] = '/Public/upfile/'.$dir.'/'.$simg;
+            }
+            unset($file['mp3']);
+        }
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
-        $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
-        $where['x'] = I('post.x') ? I('post.x') : json('404','缺少参数 x');
-        $where['y'] = I('post.y') ? I('post.y') : json('404','缺少参数 y');
+        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
         $where['stoptime'] = I('post.stoptime') ? I('post.stoptime') : json('404','缺少参数 stoptime');
         if (checkTimeDate($where['stoptime'])){
             $where['stoptime'] = strtotime($where['stoptime']);
@@ -2640,21 +2715,13 @@ class IndexController extends CommonController {
             json('404','时间格式不正确');
         }
         $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
-        $issue = M('issue');
-        $res = $issue->field('id,title')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
-        $ress = $issue->field('id,title')->where("id = '{$res['id']}'")->find();
-        $resss = $issue->field('id,title')->where("id = '{$ress['id']}'")->find();
-        $where['bid'] = $resss['id'];
-        $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
-        $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
-        $where['area'] = I('post.area') ? I('post.area') : 0;
-        $where['type'] = I('post.type') ? I('post.type') : 1;
-        if ($_POST['title']) $where['title'] = $_POST['title'];
-        $table = M('qs');
+        $table = M('warning');
         $where['addtime'] = $data['addtime'] = time();
+
         $data['pid'] = $table->add($where);
         if ($data['pid']){
-            $data['type'] = 'qs';
+
+            $data['type'] = 'warning';
             $img = M('img');
             foreach ($file as $val){
                 $rand = '';
@@ -2673,27 +2740,31 @@ class IndexController extends CommonController {
                     $img->add($data);
                 }
             }
-            $map['title'] = date('Y-m-d',$where['stoptime']).'质量安全问题';
-            $map['content'] = $resss['title'].' '.$ress['title'].' '.$res['title'] ;
-            $map['type'] = 'qs';
-            $map['typeid'] = $data['pid'];
-            $map['user_id'] = $where['uid'];
-            $map['proid'] = $where['proid'];
-            $map['uid'] = $where['user_id'];
-            $map['addtime'] = time();
-            if (M('message')->add($map)) {
-                $push['ids'] = $map['uid'];
-                $push['type'] = $map['type'];
-                $push['typeid'] = $map['typeid'];
-                $push['content'] = '质量安全问题';
-                send_curl($this->url.'/Api/Index/push',$push);
+
+            $ids = I('post.ids');
+            $admin = M('admin');
+            $user = M('warning_user');
+            if ($ids){
+                $push['ids'] = $ids;
+                $res = explode(',',$ids);
+            }else{
+                $res = $admin->where("proid = '{$where['proid']}'")->getField('id',true);
+                $push['ids'] = $ids;
             }
-            if ($where['type'] > 1){
-                $phone = M('admin')->where("id = '{$where['user_id']}'")->getField('phone');
-                if ($phone){
-                    sms($phone,$map['title'].',请尽快查看！');
-                }
+            $map['pid'] = $data['pid'];
+            $map['proid'] = $data['proid'];
+            foreach ($res as $val){
+                $map['uid'] = $val;
+                $user->add($map);
             }
+            $push['type'] = 'warning';
+            $push['typeid'] = $data['pid'];
+            $push['content'] = date('Y-m-d',time()).'紧急预警';
+            send_curl($this->url.'/Api/Index/push',$push);
+//            $phone = M('admin')->where("id = '{$where['user_id']}'")->getField('phone');
+//            if ($phone){
+//                sms($phone,$push['content'].',请尽快查看！');
+//            }
             json('200','成功');
         }else {
             json('400','发布失败');
