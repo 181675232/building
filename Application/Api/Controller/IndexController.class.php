@@ -879,7 +879,7 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $id = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('fire_card');
-        $data = $table->field('t_fire_card.id,t_fire_card.uid,t_fire_card.starttime,t_fire_card.stoptime,t_fire_card.builder,t_fire_card.look_fire,t_fire_card.is_fire,t_fire_card.desc,t_fire_card.sid,IFNULL(a.username,"") susername,t_admin.username,t_level.title name,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
+        $data = $table->field('t_fire_card.id,t_fire_card.uid,t_fire_card.simg fire_simg,t_fire_card.starttime,t_fire_card.stoptime,t_fire_card.builder,t_fire_card.look_fire,t_fire_card.is_fire,t_fire_card.desc,t_fire_card.sid,IFNULL(a.username,"") susername,t_admin.username,t_level.title name,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
             ->join('left join t_building on t_building.id = t_fire_card.building')
             ->join('left join t_floor on t_floor.id = t_fire_card.floor')
             ->join('left join t_area on t_area.id = t_fire_card.area')
@@ -901,6 +901,25 @@ class IndexController extends CommonController {
         $where['sid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['state'] = I('post.state') == 2 ? 2 : 3;
         $where['proid'] = $proid;
+        if($_FILES['simg']){
+            $file = $_FILES['simg'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','图片上传失败');
+            }
+        }
         $table = M('fire_card');
         $res = $table->field('stoptime,state')->find($where['id']);
         if ($res['stoptime'] < time()) json('400','审核无效，动火证已过期');
@@ -2029,6 +2048,12 @@ class IndexController extends CommonController {
             $startimt = $date['beginmonth'];
             $stoptime = $date['endmonth'];
             $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        }else{
+            if (I('post.statetime') && I('post.stoptime')){
+                $startimt = I('post.statetime');
+                $stoptime = I('post.stoptime');
+                $where['t_day_task.starttime'] = array(array('egt',$startimt),array('elt',date($stoptime)));
+            }
         }
         $table = M('day_task');
         $data['starttime'] = $startimt ? $startimt : '';
@@ -2225,7 +2250,7 @@ class IndexController extends CommonController {
         }
         if ($state){
             if($state == 9){
-                $where['state'] = array(array('eq',1),array('eq',2));
+                $where['state'] = array(array('eq',1),array('eq',2),'or');
             }else{
                 $where['state'] = array(array('neq',5),array('eq',$state));
             }
