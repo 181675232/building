@@ -25,19 +25,9 @@ class IndexController extends CommonController {
 
 	//测试
 	public function test(){
-        $table = M('floor');
-        $task = M('day_task');
-        $res = $task->find(474);
-        $where['pid'] = 1;
-        $where['proid'] = 1;
-        $where['simg'] = '/Public/upfile/ceshitu.jpg';
-        unset($res['id']);
-        $res['area'] = 0;
-        for ($i=10;$i<=100;$i++){
-            $where['title'] = $i.'层';
-            $res['floor']= $table->add($where);
-            $task->add($res);
-        }
+        $str = "撒地方纪律就dsf";
+        echo $s = unicode_encode($str);
+        echo unicode_decode($s);
 	}
 
     //短信登录
@@ -2360,19 +2350,19 @@ class IndexController extends CommonController {
         if ($type == 1){
             $startimt = $date['beginday'];
             $stoptime = $date['endday'];
-            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
         }elseif ($type == 2){
             $startimt = $date['beginweek'];
             $stoptime = $date['endweek'];
-            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
         }elseif ($type == 3){
             $startimt = $date['beginmonth'];
             $stoptime = $date['endmonth'];
-            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
         }elseif ($type == 4){
             $startimt = $date['beginyear'];
             $stoptime = $date['endyear'];
-            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
         }else{
             if (I('post.starttime')){
                 $starttime = I('post.starttime');
@@ -2396,8 +2386,8 @@ class IndexController extends CommonController {
         }
         $where['state'] = array('neq',5);
         $table = M('all_qs');
-        $data['starttime'] = $startimt ? $startimt : '';
-        $data['stoptime'] = $stoptime ? $stoptime : '';
+        $data['starttime'] = $startimt ? date('Y-m-d H:i',$startimt) : '';
+        $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$startimt) : '';
         $res = $table->field('id,state,level')->where($where)->select();
         if (!$res){
             json('400','没有数据');
