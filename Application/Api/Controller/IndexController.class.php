@@ -502,6 +502,37 @@ class IndexController extends CommonController {
         }
     }
 
+    //获取个人今日发布任务
+    public function user_day_task(){
+        $date = get_month_week_day();
+        $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
+        $map['t_day_task.truestoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
+        $map['t_day_task.state'] = array('neq',3);
+        $map['_logic'] = 'or';
+        $where['_complex'] = $map;
+        $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $table = M('day_task');
+        $res = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.stoptime')
+            ->join('left join t_building on t_building.id = t_day_task.building')
+            ->join('left join t_floor on t_floor.id = t_day_task.floor')
+            ->join('left join t_area on t_area.id = t_day_task.area')
+            ->where($where)->order('t_day_task.stoptime desc')->select();
+        if ($res){
+            foreach ($res as $val){
+                $time = strtotime(date('Y-m-d 23:59:59',strtotime($val['stoptime'])));
+                if ($date['endday'] > $time){
+                    $data['y'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'% 延期任务';
+                }else{
+                    $data['x'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'% 今日任务';
+                }
+            }
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
     //发布施工日志
     public function buildlog_add(){
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
@@ -1457,17 +1488,17 @@ class IndexController extends CommonController {
         $pages = ($page - 1)*20;
         $date = get_month_week_day();
         if ($type == 1){
-            $map['t_day_task.stoptime'] = array(array('egt',$date['beginday']),array('elt',$date['endday']));
+            $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
             $map['t_day_task.state'] = array('neq',3);
             $map['_logic'] = 'or';
             $where['_complex'] = $map;
         }elseif ($type == 2){
-            $map['t_day_task.stoptime'] = array(array('egt',$date['beginweek']),array('elt',$date['endweek']));
+            $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginweek'])),array('elt',date('Y-m-d H:i',$date['endweek'])));
             $map['t_day_task.state'] = array('neq',3);
             $map['_logic'] = 'or';
             $where['_complex'] = $map;
         }elseif ($type == 3){
-            $map['t_day_task.stoptime'] = array(array('egt',$date['beginmonth']),array('elt',$date['endmonth']));
+            $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginmonth'])),array('elt',date('Y-m-d H:i',$date['endmonth'])));
             $map['t_day_task.state'] = array('neq',3);
             $map['_logic'] = 'or';
             $where['_complex'] = $map;
@@ -1498,17 +1529,17 @@ class IndexController extends CommonController {
         $pages = ($page - 1)*20;
         $date = get_month_week_day();
         if ($type == 1){
-            $map['t_day_task.stoptime'] = array(array('egt',$date['beginday']),array('elt',$date['endday']));
+            $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
             $map['t_day_task.state'] = array('neq',3);
             $map['_logic'] = 'or';
             $where['_complex'] = $map;
         }elseif ($type == 2){
-            $map['t_day_task.stoptime'] = array(array('egt',$date['beginweek']),array('elt',$date['endweek']));
+            $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginweek'])),array('elt',date('Y-m-d H:i',$date['endweek'])));
             $map['t_day_task.state'] = array('neq',3);
             $map['_logic'] = 'or';
             $where['_complex'] = $map;
         }elseif ($type == 3){
-            $map['t_day_task.stoptime'] = array(array('egt',$date['beginmonth']),array('elt',$date['endmonth']));
+            $map['t_day_task.stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginmonth'])),array('elt',date('Y-m-d H:i',$date['endmonth'])));
             $map['t_day_task.state'] = array('neq',3);
             $map['_logic'] = 'or';
             $where['_complex'] = $map;
@@ -1685,7 +1716,7 @@ class IndexController extends CommonController {
     public function fenbao_day_task(){
         $type = I('post.type') ? I('post.type') : 1;
         $date = get_month_week_day();
-        $map['stoptime'] = array(array('egt',$date['beginday']),array('elt',$date['endday']));
+        $map['stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
         if ($type == 1){
             $map['state'] = array('neq',3);
             $map['_logic'] = 'or';
@@ -2157,9 +2188,9 @@ class IndexController extends CommonController {
         }
         $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
         $issue = M('issue');
-        $res = $issue->field('id,title')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
-        $ress = $issue->field('id,title')->where("id = '{$res['id']}'")->find();
-        $resss = $issue->field('id,title')->where("id = '{$ress['id']}'")->find();
+        $res = $issue->field('id,title,pid')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
+        $ress = $issue->field('id,title,pid')->where("id = '{$res['pid']}'")->find();
+        $resss = $issue->field('id,title')->where("id = '{$ress['pid']}'")->find();
         $where['bid'] = $resss['id'];
         $where['building'] = I('post.building') ? I('post.building') : json('404','缺少参数 building');
         $where['floor'] = I('post.floor') ? I('post.floor') : json('404','缺少参数 floor');
@@ -2319,6 +2350,147 @@ class IndexController extends CommonController {
             json('400','没有数据');
         }
     }
+
+    //质量安全问题统计
+    function qs_tongji(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.bid')) $where['bid'] = I('post.bid');
+        $type = I('post.type') ? I('post.type') : 0;
+        $date = get_month_week_day();
+        if ($type == 1){
+            $startimt = $date['beginday'];
+            $stoptime = $date['endday'];
+            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+        }elseif ($type == 2){
+            $startimt = $date['beginweek'];
+            $stoptime = $date['endweek'];
+            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+        }elseif ($type == 3){
+            $startimt = $date['beginmonth'];
+            $stoptime = $date['endmonth'];
+            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+        }elseif ($type == 4){
+            $startimt = $date['beginyear'];
+            $stoptime = $date['endyear'];
+            $where['starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+        }else{
+            if (I('post.starttime')){
+                $starttime = I('post.starttime');
+                if (checkTimeDate($starttime)){
+                    $starttime = strtotime($starttime);
+                    $where['stoptime'] = array('egt',$starttime);
+                }else{
+                    json('404','时间格式不正确');
+                }
+            }
+            if (I('post.stoptime')) {
+                $stoptime = I('post.stoptime');
+                if (checkTimeDate($stoptime)) {
+                    $stoptime = strtotime($stoptime);
+                    if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                    $where['stoptime'] = array('elt',$stoptime);
+                } else {
+                    json('404', '时间格式不正确');
+                }
+            }
+        }
+        $where['state'] = array('neq',5);
+        $table = M('all_qs');
+        $data['starttime'] = $startimt ? $startimt : '';
+        $data['stoptime'] = $stoptime ? $stoptime : '';
+        $res = $table->field('id,state,level')->where($where)->select();
+        if (!$res){
+            json('400','没有数据');
+        }
+
+        $res0['type'] = 0; //类型
+        $res1['type'] = 1;
+        $res2['type'] = 2;
+        $res3['type'] = 3;
+        $res4['type'] = 4;
+        $res13['type'] = $res113['type'] = $res213['type'] = $res313['type'] =  $res413['type'] = 13;
+        $res14['type'] = $res114['type'] = $res214['type'] = $res314['type'] =  $res414['type'] = 14;
+        $res15['type'] = $res115['type'] = $res215['type'] = $res315['type'] =  $res415['type'] = 15;
+
+        $res0['count'] = $res1['count'] = $res2['count'] = $res3['count'] = $res4['count'] = $res113['count'] = $res114['count'] = $res115['count']
+            = $res213['count'] = $res214['count'] = $res215['count'] = $res313['count'] = $res314['count'] = $res315['count'] = $res13['count'] = $res14['count'] = $res15['count']
+            = $res413['count'] = $res414['count'] = $res415['count'] = 0;
+        $res0['count'] = count($res); //总数
+        $res0['bai'] = 1; //百分比
+        foreach ($res as $val){
+            if ($val['state'] == 1) $res1['count'] ++;
+            if ($val['state'] == 2) $res2['count'] ++;
+            if ($val['state'] == 3) $res3['count'] ++;
+            if ($val['state'] == 4) $res4['count'] ++;
+            if ($val['level'] == 13) $res13['count'] ++;
+            if ($val['level'] == 14) $res14['count'] ++;
+            if ($val['level'] == 15) $res15['count'] ++;
+            if ($val['state'] == 1 && $val['level'] == 13) $res113['count'] ++;
+            if ($val['state'] == 1 && $val['level'] == 14) $res114['count'] ++;
+            if ($val['state'] == 1 && $val['level'] == 15) $res115['count'] ++;
+            if ($val['state'] == 2 && $val['level'] == 13) $res213['count'] ++;
+            if ($val['state'] == 2 && $val['level'] == 14) $res214['count'] ++;
+            if ($val['state'] == 2 && $val['level'] == 15) $res215['count'] ++;
+            if ($val['state'] == 3 && $val['level'] == 13) $res313['count'] ++;
+            if ($val['state'] == 3 && $val['level'] == 14) $res314['count'] ++;
+            if ($val['state'] == 3 && $val['level'] == 15) $res315['count'] ++;
+            if ($val['state'] == 4 && $val['level'] == 13) $res413['count'] ++;
+            if ($val['state'] == 4 && $val['level'] == 14) $res414['count'] ++;
+            if ($val['state'] == 4 && $val['level'] == 15) $res415['count'] ++;
+        }
+        $data['all'][] = $res0;
+        $res1['bai'] = round($res1['count']/$res0['count'],2);
+        $data['all'][] = $res1;
+        $res2['bai'] = round($res2['count']/$res0['count'],2);
+        $data['all'][] = $res2;
+        $res3['bai'] = round($res3['count']/$res0['count'],2);
+        $data['all'][] = $res3;
+        $res4['bai'] = round($res4['count']/$res0['count'],2);
+        $data['all'][] = $res4;
+
+        $res13['bai'] = round($res13['count']/$res0['count'],2);
+        $data['distribution']['all'][] = $res13;
+        $res14['bai'] = round($res14['count']/$res0['count'],2);
+        $data['distribution']['all'][] = $res14;
+        $res15['bai'] = round($res15['count']/$res0['count'],2);
+        $data['distribution']['all'][] = $res15;
+
+        $res113['bai'] = round($res113['count']/$res1['count'],2);
+        $data['distribution']['type1'][] = $res113;
+        $res114['bai'] = round($res114['count']/$res1['count'],2);
+        $data['distribution']['type1'][] = $res114;
+        $res115['bai'] = round($res115['count']/$res1['count'],2);
+        $data['distribution']['type1'][] = $res115;
+
+        $res213['bai'] = round($res213['count']/$res2['count'],2);
+        $data['distribution']['type2'][] = $res213;
+        $res214['bai'] = round($res214['count']/$res2['count'],2);
+        $data['distribution']['type2'][] = $res214;
+        $res215['bai'] = round($res215['count']/$res2['count'],2);
+        $data['distribution']['type2'][] = $res215;
+
+        $res313['bai'] = round($res313['count']/$res3['count'],2);
+        $data['distribution']['type3'][] = $res313;
+        $res314['bai'] = round($res314['count']/$res3['count'],2);
+        $data['distribution']['type3'][] = $res314;
+        $res315['bai'] = round($res315['count']/$res3['count'],2);
+        $data['distribution']['type3'][] = $res315;
+
+        $res413['bai'] = round($res413['count']/$res4['count'],2);
+        $data['distribution']['type4'][] = $res413;
+        $res414['bai'] = round($res414['count']/$res4['count'],2);
+        $data['distribution']['type4'][] = $res414;
+        $res415['bai'] = round($res415['count']/$res4['count'],2);
+        $data['distribution']['type4'][] = $res415;
+
+
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
 
     //开始问题
     function qs_start(){
@@ -2642,7 +2814,6 @@ class IndexController extends CommonController {
                 $map['uid'] = $val;
                 $message->add($map);
             }
-
             $push['ids'] = $ids;
             $push['type'] = 'system';
             $push['typeid'] = 0;

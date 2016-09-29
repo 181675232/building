@@ -659,6 +659,9 @@ function get_month_week_day(){
     //php获取本月起始时间戳和结束时间戳
     $arr['beginmonth'] = mktime(0,0,0,date('m'),1,date('Y'));
     $arr['endmonth'] = mktime(23,59,59,date('m'),date('t'),date('Y'));
+    //php获取本年起始时间戳和结束时间戳
+    $arr['beginyear'] = mktime(0,0,0,1,1,date('Y'));
+    $arr['endyear'] = mktime(23,59,59,12,date('t'),date('Y'));
     return $arr;
 }
 //天气
