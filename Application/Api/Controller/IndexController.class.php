@@ -2333,7 +2333,7 @@ class IndexController extends CommonController {
                 json('404', '时间格式不正确');
             }
         }
-
+        $where['state'] = array('neq',5);
         $table = M('all_qs');
         $data['all'] = $table->field('id')->where($where)->count();
         $where['state'] = 1;
