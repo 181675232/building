@@ -2387,7 +2387,7 @@ class IndexController extends CommonController {
         $where['state'] = array('neq',5);
         $table = M('all_qs');
         $data['starttime'] = $startimt ? date('Y-m-d H:i',$startimt) : '';
-        $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$startimt) : '';
+        $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$stoptime) : '';
         $res = $table->field('id,state,level')->where($where)->select();
         if (!$res){
             json('400','没有数据');
