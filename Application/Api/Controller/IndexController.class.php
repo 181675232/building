@@ -3054,6 +3054,14 @@ class IndexController extends CommonController {
         json('200','成功');
     }
 
+    //工种列表
+    public function work_list(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $table = M('work');
+        //$data = $table->field('id,title')->select();
+        //json('200','成功',$data);
+    }
+
 
 
 
