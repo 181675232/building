@@ -1599,9 +1599,6 @@ class IndexController extends CommonController {
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $file = $_FILES ? $_FILES : '';
         if (isset($_POST['title'])) $where['title'] = $_POST['title'];
-        if (!($file || $where['title'])){
-            json('400','图片或描述必须填写一样');
-        }
         $task = M('day_task');
         $res = $task->field('bai')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
         if ($res['bai'] > $where['bai']) json('400','新的进度必须大于上次的进度');
