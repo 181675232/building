@@ -2587,7 +2587,7 @@ class IndexController extends CommonController {
     function qs_state(){
         $where['proid'] = $data1['proid'] = $data['proid']  = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
-        $where['id'] = $data1['pid'] = $data['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $data1['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
         $file = $_FILES ? $_FILES : '';
         $table = M('qs');
@@ -2597,28 +2597,8 @@ class IndexController extends CommonController {
                 json('400','重复操作');
             }
             $data1['addtime'] = $data['addtime'] = time();
-            if($file){
-                $data['type'] = 'qs_schedule';
-                $img = M('img');
-                foreach ($file as $val){
-                    $rand = '';
-                    for ($i=0;$i<6;$i++){
-                        $rand.=rand(0,9);
-                    }
-                    $type = explode('.', $val['name']);
-                    $simg = date('YmdHis').$rand.'.'.end($type);
-                    $dir = date('Y-m-d');
-                    if (!is_dir('./Public/upfile/'.$dir)){
-                        mkdir('./Public/upfile/'.$dir,0777);
-                    }
-                    if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
-                        $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
-                        create_thumb($simg,$dir);
-                        $img->add($data);
-                    }
-                }
-            }
-            if (M('qs_schedule')->add($data1)){
+            $data['pid'] = M('qs_schedule')->add($data1);
+            if ($data['pid']){
                 $map['title'] = date('Y-m-d',$res['stoptime']).'质量安全问题';
                 $map['content'] = '质量安全问题不合格，请尽快查看';
                 $map['type'] = 'qs';
@@ -2633,6 +2613,27 @@ class IndexController extends CommonController {
                     $push['typeid'] = $map['typeid'];
                     $push['content'] = '质量安全问题不合格';
                     send_curl($this->url.'/Api/Index/push',$push);
+                }
+                if($file){
+                    $data['type'] = 'qs_schedule';
+                    $img = M('img');
+                    foreach ($file as $val){
+                        $rand = '';
+                        for ($i=0;$i<6;$i++){
+                            $rand.=rand(0,9);
+                        }
+                        $type = explode('.', $val['name']);
+                        $simg = date('YmdHis').$rand.'.'.end($type);
+                        $dir = date('Y-m-d');
+                        if (!is_dir('./Public/upfile/'.$dir)){
+                            mkdir('./Public/upfile/'.$dir,0777);
+                        }
+                        if (move_uploaded_file($val['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                            $data['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                            create_thumb($simg,$dir);
+                            $img->add($data);
+                        }
+                    }
                 }
                 json('200','成功');
             }else{
