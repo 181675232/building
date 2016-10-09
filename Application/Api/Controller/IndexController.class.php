@@ -2587,7 +2587,7 @@ class IndexController extends CommonController {
     function qs_state(){
         $where['proid'] = $data1['proid'] = $data['proid']  = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
-        $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $where['id'] = $data1['pid'] = $data['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $data1['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
         $file = $_FILES ? $_FILES : '';
         $table = M('qs');
