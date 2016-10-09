@@ -1591,7 +1591,7 @@ class IndexController extends CommonController {
         }
     }
 
-    //添加任务进度1
+    //添加任务进度
     public function add_task_schedule(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
