@@ -1696,6 +1696,7 @@ class IndexController extends CommonController {
         $img = M('img');
         foreach ($data['schedule'] as $key=>$val){
             $data['schedule'][$key]['img'] = $img->where("pid = '{$val['id']}' and type = 'task_schedule'")->getField('simg',true);
+            $data['schedule'][$key]['img'] = $data['schedule'][$key]['img'] ? $data['schedule'][$key]['img'] : array();
         }
         if ($data){
             json('200','成功',$data);
