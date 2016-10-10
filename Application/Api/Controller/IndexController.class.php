@@ -646,15 +646,12 @@ class IndexController extends CommonController {
 
         if (I('post.burst')){
             $where['burst'] = I('post.burst');
-            if(mb_strlen($where['burst'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
         if (I('post.prorecord')){
             $where['prorecord'] = I('post.prorecord');
-            if(mb_strlen($where['prorecord'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
         if (I('post.record')){
             $where['record'] = I('post.record');
-            if(mb_strlen($where['record'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
         $where['proid'] = $proid;
         $table = M('buildlog');
