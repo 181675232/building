@@ -549,15 +549,12 @@ class IndexController extends CommonController {
 
         if (I('post.burst')){
             $where['burst'] = I('post.burst');
-            if(mb_strlen($where['burst'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
         if (I('post.prorecord')){
             $where['prorecord'] = I('post.prorecord');
-            if(mb_strlen($where['prorecord'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
         if (I('post.record')){
             $where['record'] = I('post.record');
-            if(mb_strlen($where['record'],'utf8') > 200) json('400','输入内容不能大于200个字符');
         }
         $where['proid'] = $proid;
         $table = M('buildlog');
@@ -1323,6 +1320,8 @@ class IndexController extends CommonController {
             if (!$val->title) json('404','缺少参数 title');
             if (!checkTimeDate($val->time)) json('404',$val->title.' 时间格式不正确');
         }
+        $table = M('day_task');
+        $workers = M('task_work');
         foreach ($arr as $val){
             $where = array();
             $where['proid'] = $proid;
@@ -1339,9 +1338,17 @@ class IndexController extends CommonController {
             $where['stoptime'] = $time;
             $where['addtime'] = date('Y-m-d H:i',time());
 
-            $table = M('day_task');
+
             $res = $table->add($where);
             if($res) {
+                $where1['pid'] = $res;
+                if ($val->workers){
+                    foreach ($val->worders as $v){
+                        $where1['uid'] = $v->id;
+                        $where1['num'] = $v->num;
+                        $workers->add($where1);
+                    }
+                }
                 $ids[] = $res;
                 $map['title'] = $starttime.' 日任务';
                 $map['content'] = $where['title'];
