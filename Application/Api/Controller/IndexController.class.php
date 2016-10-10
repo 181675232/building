@@ -1977,25 +1977,25 @@ class IndexController extends CommonController {
         $type = I('post.type') ? I('post.type') : 0;
         $date = get_month_week_day();
         if ($type == 1){
-            $startimt = $date['beginyestoday'];
+            $starttime = $date['beginyestoday'];
             $stoptime = $date['endyestoday'];
-            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         }elseif ($type == 2){
-            $startimt = $date['beginweek'];
+            $starttime = $date['beginweek'];
             $stoptime = $date['endweek'];
-            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         }elseif ($type == 3){
-            $startimt = $date['beginmonth'];
+            $starttime = $date['beginmonth'];
             $stoptime = $date['endmonth'];
-            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         }elseif($type == 4){
-            $startimt = I('post.starttime') ? I('post.starttime') : json('404','缺少参数 starttime');
+            $starttime = I('post.starttime') ? I('post.starttime') : json('404','缺少参数 starttime');
             $stoptime = I('post.stoptime') ? I('post.stoptime') : json('404','缺少参数 stoptime');
-            $where['t_day_task.starttime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['t_day_task.starttime'] = array(array('egt',$starttime),array('elt',$stoptime));
         }
         $table = M('day_task');
         $data = M('building')->field('id,title,area')->find($where['building']);
-        $data['starttime'] = $startimt ? date('Y-m-d H:i',$startimt) : '';
+        $data['starttime'] = $starttime ? date('Y-m-d H:i',$starttime) : '';
         $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$stoptime) : '';
         if ($data){
             $count = $table->where($where)->count();
@@ -2036,9 +2036,9 @@ class IndexController extends CommonController {
         $data['task'][] = $res;
         $res = array();
         unset($where['state']);
-        $startimt = $date['beginmonth'];
+        $starttime = $date['beginmonth'];
         $stoptime = $date['endmonth'];
-        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         $count = $table->where($where)->count();
         $where['state'] = 3;
         $cc = $table->where($where)->count();
@@ -2047,9 +2047,9 @@ class IndexController extends CommonController {
         $data['task'][] = $res;
         $res = array();
         unset($where['state']);
-        $startimt = $date['beginweek'];
+        $starttime = $date['beginweek'];
         $stoptime = $date['endweek'];
-        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         $count = $table->where($where)->count();
         $where['state'] = 3;
         $cc = $table->where($where)->count();
@@ -2058,9 +2058,9 @@ class IndexController extends CommonController {
         $data['task'][] = $res;
         $res = array();
         unset($where['state']);
-        $startimt = $date['beginyestoday'];
+        $starttime = $date['beginyestoday'];
         $stoptime = $date['endyestoday'];
-        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+        $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         $count = $table->where($where)->count();
         $where['state'] = 3;
         $cc = $table->where($where)->count();
@@ -2076,26 +2076,26 @@ class IndexController extends CommonController {
         $type = I('post.type') ? I('post.type') : 0;
         $date = get_month_week_day();
         if ($type == 1){
-            $startimt = $date['beginyestoday'];
+            $starttime = $date['beginyestoday'];
             $stoptime = $date['endyestoday'];
-            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         }elseif ($type == 2){
-            $startimt = $date['beginweek'];
+            $starttime = $date['beginweek'];
             $stoptime = $date['endweek'];
-            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         }elseif ($type == 3){
-            $startimt = $date['beginmonth'];
+            $starttime = $date['beginmonth'];
             $stoptime = $date['endmonth'];
-            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$startimt)),array('elt',date('Y-m-d H:i',$stoptime)));
+            $where['t_day_task.starttime'] = array(array('egt',date('Y-m-d H:i',$starttime)),array('elt',date('Y-m-d H:i',$stoptime)));
         }else{
             if (I('post.statetime') && I('post.stoptime')){
-                $startimt = I('post.statetime');
+                $starttime = I('post.statetime');
                 $stoptime = I('post.stoptime');
-                $where['t_day_task.starttime'] = array(array('egt',$startimt),array('elt',date($stoptime)));
+                $where['t_day_task.starttime'] = array(array('egt',$starttime),array('elt',date($stoptime)));
             }
         }
         $table = M('day_task');
-        $data['starttime'] = $startimt ? $startimt : '';
+        $data['starttime'] = $starttime ? $starttime : '';
         $data['stoptime'] = $stoptime ? $stoptime : '';
 
         $count = $table->where($where)->count();
@@ -2281,8 +2281,8 @@ class IndexController extends CommonController {
             $stoptime = I('post.stoptime');
             if (checkTimeDate($stoptime)) {
                 $stoptime = strtotime($stoptime);
-                if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
-                $where['stoptime'] = array('elt',$stoptime);
+                //if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                $where['addtime'] = array('elt',$stoptime);
             } else {
                 json('404', '时间格式不正确');
             }
@@ -2335,8 +2335,8 @@ class IndexController extends CommonController {
             $stoptime = I('post.stoptime');
             if (checkTimeDate($stoptime)) {
                 $stoptime = strtotime($stoptime);
-                if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
-                $where['stoptime'] = array('elt',$stoptime);
+                //if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                $where['addtime'] = array('elt',$stoptime);
             } else {
                 json('404', '时间格式不正确');
             }
@@ -2361,26 +2361,29 @@ class IndexController extends CommonController {
 
     //质量安全问题统计
     function qs_tongji(){
-        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        if (I('post.bid')) $where['bid'] = I('post.bid');
+
         $type = I('post.type') ? I('post.type') : 0;
         $date = get_month_week_day();
         if ($type == 1){
-            $startimt = $date['beginday'];
+            $starttime = $date['beginday'];
             $stoptime = $date['endday'];
-            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['addtime'] = array('elt',$stoptime);
+            $where['stoptime'] = array('egt',$starttime);
         }elseif ($type == 2){
-            $startimt = $date['beginweek'];
+            $starttime = $date['beginweek'];
             $stoptime = $date['endweek'];
-            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['addtime'] = array('elt',$stoptime);
+            $where['stoptime'] = array('egt',$starttime);
         }elseif ($type == 3){
-            $startimt = $date['beginmonth'];
+            $starttime = $date['beginmonth'];
             $stoptime = $date['endmonth'];
-            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['addtime'] = array('elt',$stoptime);
+            $where['stoptime'] = array('egt',$starttime);
         }elseif ($type == 4){
-            $startimt = $date['beginyear'];
+            $starttime = $date['beginyear'];
             $stoptime = $date['endyear'];
-            $where['stoptime'] = array(array('egt',$startimt),array('elt',$stoptime));
+            $where['addtime'] = array('elt',$stoptime);
+            $where['stoptime'] = array('egt',$starttime);
         }else{
             if (I('post.starttime')){
                 $starttime = I('post.starttime');
@@ -2395,18 +2398,23 @@ class IndexController extends CommonController {
                 $stoptime = I('post.stoptime');
                 if (checkTimeDate($stoptime)) {
                     $stoptime = strtotime($stoptime);
-                    if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
-                    $where['stoptime'] = array('elt',$stoptime);
+                    //if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                    $where['addtime'] = array('elt',$stoptime);
                 } else {
                     json('404', '时间格式不正确');
                 }
             }
         }
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.bid')) $where['bid'] = I('post.bid');
         $where['state'] = array('neq',5);
         $table = M('all_qs');
-        $data['starttime'] = $startimt ? date('Y-m-d H:i',$startimt) : '';
+        $data['starttime'] = $starttime ? date('Y-m-d H:i',$starttime) : '';
         $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$stoptime) : '';
-        $res = $table->field('id,state,level')->where($where)->select();
+        $res = $table->field('id,state,level,stoptime')->where($where)->select();
+        foreach ($res as $key => $val){
+            $res[$key]['stoptime'] = date('Y-m-d H:i:s',$val['stoptime']);
+        }
         if (!$res){
             json('400','没有数据');
         }
