@@ -1312,6 +1312,7 @@ class IndexController extends CommonController {
     public function add_day_task(){
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $arr = json_decode($_POST['json']);
+
         foreach ($arr as $val){
             if (!$val->uid) json('404',$val->title.' 缺少参数 uid');
             if (!$val->user_id) json('404',$val->title.' 缺少参数 user_id');
@@ -1343,7 +1344,7 @@ class IndexController extends CommonController {
             if($res) {
                 $where1['pid'] = $res;
                 if ($val->workers){
-                    foreach ($val->worders as $v){
+                    foreach ($val->workers as $v){
                         $where1['uid'] = $v->id;
                         $where1['num'] = $v->num;
                         $workers->add($where1);
