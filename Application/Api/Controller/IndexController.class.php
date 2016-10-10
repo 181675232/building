@@ -1347,6 +1347,7 @@ class IndexController extends CommonController {
                     foreach ($val->workers as $v){
                         $where1['uid'] = $v->id;
                         $where1['num'] = $v->num;
+                        $where1['proid'] = $proid;
                         $workers->add($where1);
                     }
                 }
@@ -1696,6 +1697,11 @@ class IndexController extends CommonController {
             ->join('left join t_admin a on a.id = t_day_task.user_id')
             ->join('left join t_level l on l.id = a.level')
             ->where($where)->find();
+        $workers = M('task_work');
+        $data['workers'] = $workers->field('t_work.title,t_task_work.num')
+            ->join('left join t_work on t_work.id = t_task_work.uid')
+            ->where("t_task_work.pid = '{$data['id']}' and t_task_work.proid = '{$where['t_day_task.proid']}'")->select();
+        $data['workers'] =  $data['workers'] ?  $data['workers'] : array();
         $schedule = M('task_schedule');
         $data['schedule'] = $schedule->field('t_task_schedule.id,t_task_schedule.bai,FROM_UNIXTIME(t_task_schedule.addtime,"%Y-%m-%d %H:%i") datetime,t_task_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_admin on t_admin.id = t_task_schedule.uid')
