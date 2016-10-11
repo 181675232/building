@@ -2991,7 +2991,7 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('warning_user');
-        $data = $table->field('t_warning.id,t_warning.title,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime,IFNULL(t_warning_user.state,"0")')
+        $data = $table->field('t_warning.id,t_warning.title,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime,IFNULL(t_warning_user.state,"0") as state')
             ->join('left join t_admin on t_admin.id = t_warning_user.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_warning on t_warning.id = t_warning_user.pid')
