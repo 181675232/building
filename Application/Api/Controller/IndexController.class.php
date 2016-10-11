@@ -3003,7 +3003,7 @@ class IndexController extends CommonController {
         }
     }
 
-    //紧急预警列表
+    //我发布的紧急预警列表
     public function my_add_warning(){
         $where['t_warning.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['t_warning.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
