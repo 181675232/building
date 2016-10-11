@@ -512,9 +512,9 @@ class IndexController extends CommonController {
             foreach ($res as $val){
                 $time = strtotime(date('Y-m-d 23:59:59',strtotime($val['stoptime'])));
                 if ($date['endday'] > $time){
-                    $data['y'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'% 延期任务';
+                    $data['y'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'%';
                 }else{
-                    $data['x'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'% 今日任务';
+                    $data['x'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'%';
                 }
             }
             json('200','成功',$data);
