@@ -2983,11 +2983,9 @@ class IndexController extends CommonController {
 
     //紧急预警列表
     public function warning_list(){
-        $map['t_warning_user.uid'] = $map['t_warning.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
-        $map['_logic'] = 'or';
-        $where['_complex'] = $map;
-        $where['t_warning_user.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
 
+        $where['t_warning_user.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_warning_user.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('warning_user');
@@ -2995,6 +2993,27 @@ class IndexController extends CommonController {
             ->join('left join t_admin on t_admin.id = t_warning_user.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_warning on t_warning.id = t_warning_user.pid')
+            ->where($where)->order('t_warning.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //紧急预警列表
+    public function my_add_warning(){
+        $where['t_warning.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_warning.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('warning');
+        $data = $table->field('t_warning.id,t_warning.title,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime,IFNULL(t_warning_user.state,"0") as state')
+            ->join('left join t_admin on t_admin.id = t_warning.uid')
+            ->join('left join t_level on t_level.id = t_admin.level')
+            ->join('left join t_warning_user on t_warning.id = t_warning_user.pid and t_warning.uid = t_warning_user.uid')
             ->where($where)->order('t_warning.addtime desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
