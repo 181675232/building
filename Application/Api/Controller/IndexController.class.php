@@ -2959,7 +2959,7 @@ class IndexController extends CommonController {
                 $res = explode(',',$ids);
             }else{
                 $res = $admin->where("proid = '{$where['proid']}' and id != '{$where['uid']}'")->getField('id',true);
-                $push['ids'] = $ids;
+                $push['ids'] = $res;
             }
             $map['pid'] = $data['pid'];
             $map['proid'] = $data['proid'];
@@ -2983,12 +2983,15 @@ class IndexController extends CommonController {
 
     //紧急预警列表
     public function warning_list(){
+        $map['t_warning_user.uid'] = $map['t_warning.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $map['_logic'] = 'or';
+        $where['_complex'] = $map;
         $where['t_warning_user.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['t_warning_user.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('warning_user');
-        $data = $table->field('t_warning.id,t_warning.title,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime,t_warning_user.state')
+        $data = $table->field('t_warning.id,t_warning.title,t_warning.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning.stoptime,IFNULL(t_warning_user.state,0)')
             ->join('left join t_admin on t_admin.id = t_warning_user.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_warning on t_warning.id = t_warning_user.pid')
@@ -3049,7 +3052,8 @@ class IndexController extends CommonController {
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_warning_group on t_warning_group.id = t_warning.pid')
             ->where($where)->find();
-
+        $data['state'] = M('warning_user')->where("uid = '{$uid}' and pid = '{$where['t_warning.id']}' and proid = '{$where['t_warning.proid']}'")->getField('state');
+        $data['state'] = $data['state'] ? $data['state'] : 0;
         $img = M('img')->where("pid = '{$data['id']}' and type = 'warning' and proid = '{$where['t_warning.proid']}'")->getField('simg',true);
         $data['img'] = $img ? $img : array();
         $user = M('warning_user')->field('t_warning_user.uid,t_admin.username,t_admin.simg,t_level.title name,t_warning_user.state,t_warning_user.addtime')
