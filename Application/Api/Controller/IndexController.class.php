@@ -1442,6 +1442,7 @@ class IndexController extends CommonController {
     public function state_message(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        if (I('post.type')) $where['type'] = I('post.type');
         $message = M('message');
         $message->where($where)->setField('state',2);
         json('200','成功');
