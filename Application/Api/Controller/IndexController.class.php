@@ -517,6 +517,8 @@ class IndexController extends CommonController {
                     $data['x'][] = $val['title'].' '.$val['building'].$val['floor'].$val['area'].' 完成度'.($val['bai']*100).'%';
                 }
             }
+            $data['y'] = $data['y'] ? $data['y'] : array();
+            $data['x'] = $data['x'] ? $data['x'] : array();
             json('200','成功',$data);
         }else{
             json('400','没有数据');
