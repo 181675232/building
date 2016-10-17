@@ -1603,6 +1603,19 @@ class IndexController extends CommonController {
         }
     }
 
+    //任务确认
+    public function confirm_day_task(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $map['confirm'] = 2;
+        $table = M('day_task');
+        if ($table->where($where)->save($map)){
+            json('200','成功');
+        }else{
+            json('400','重复操作');
+        }
+    }
+
     //添加任务进度
     public function add_task_schedule(){
         $where['proid'] = $data['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
@@ -1691,7 +1704,7 @@ class IndexController extends CommonController {
         $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_day_task.id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('day_task');
-        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.desc,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,a.username fusername,a.simg fsimg,l.title fname,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+        $data = $table->field('t_day_task.id,t_day_task.confirm,t_day_task.title,t_day_task.desc,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,a.username fusername,a.simg fsimg,l.title fname,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
             ->join('left join t_building on t_building.id = t_day_task.building')
             ->join('left join t_floor on t_floor.id = t_day_task.floor')
             ->join('left join t_area on t_area.id = t_day_task.area')
