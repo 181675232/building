@@ -200,9 +200,10 @@ class IndexController extends CommonController {
     public function dynamic_list(){
         $page = I('post.page') ? I('post.page') : 1;
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $pages = ($page - 1)*20;
         $table = M('dynamic');
-        $data = $table->field('t_dynamic.id,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
+        $data = $table->field('t_dynamic.id,t_dynamic.upper,t_dynamic.uid,t_dynamic.content,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_admin.simg,t_level.title name')
             ->join('left join t_building on t_building.id = t_dynamic.building')
             ->join('left join t_floor on t_floor.id = t_dynamic.floor')
             ->join('left join t_area on t_area.id = t_dynamic.area')
@@ -211,10 +212,12 @@ class IndexController extends CommonController {
             ->where("t_dynamic.proid = $proid")->order('t_dynamic.addtime desc')->limit($pages,20)->select();
         if ($data){
             $img = M('img')->field('id,simg,pid')->where('type = "dynamic"')->select();
+            $upper = M('upper');
             foreach ($data as $key=>$val){
+                $data[$key]['is_upper'] = $upper->where("uid = '{$uid}' and pid = '{$val['id']}' and proid = '{$proid}'")->find() ? 1 : 0;
                 foreach ($img as $k=>$v){
                     if ($val['id'] == $v['pid']){
-                       $data [$key]['img'][] = $v['simg'];
+                        $data [$key]['img'][] = $v['simg'];
                     }
                 }
             }
@@ -1505,7 +1508,7 @@ class IndexController extends CommonController {
         $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_day_task.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $table = M('day_task');
-        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+        $data = $table->field('t_day_task.id,t_day_task.confirm,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
             ->join('left join t_building on t_building.id = t_day_task.building')
             ->join('left join t_floor on t_floor.id = t_day_task.floor')
             ->join('left join t_area on t_area.id = t_day_task.area')
@@ -1546,7 +1549,7 @@ class IndexController extends CommonController {
         $where['t_day_task.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_day_task.user_id'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $table = M('day_task');
-        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+        $data = $table->field('t_day_task.id,t_day_task.confirm,t_day_task.title,t_day_task.state,t_day_task.bai,t_day_task.uid,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
             ->join('left join t_building on t_building.id = t_day_task.building')
             ->join('left join t_floor on t_floor.id = t_day_task.floor')
             ->join('left join t_area on t_area.id = t_day_task.area')
@@ -1570,7 +1573,7 @@ class IndexController extends CommonController {
         $pages = ($page - 1)*20;
         $where['t_day_task.state'] = array('neq',3);
         $table = M('day_task');
-        $data = $table->field('t_day_task.id,t_day_task.title,t_day_task.state,t_day_task.bai,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id uid,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
+        $data = $table->field('t_day_task.id,t_day_task.confirm,t_day_task.title,t_day_task.state,t_day_task.bai,t_admin.username,t_admin.simg,t_level.title name,t_day_task.user_id uid,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_day_task.starttime,t_day_task.stoptime,t_day_task.truestarttime,t_day_task.truestoptime,now() as time')
             ->join('left join t_building on t_building.id = t_day_task.building')
             ->join('left join t_floor on t_floor.id = t_day_task.floor')
             ->join('left join t_area on t_area.id = t_day_task.area')
@@ -3106,6 +3109,27 @@ class IndexController extends CommonController {
         json('200','成功',$data);
     }
 
+    //点赞
+    public function upper(){
+        if (I('post.')){
+            $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+            $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+            $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
+            $table = M('upper');
+            if ($table->where($where)->find()){
+                json('400','已赞过');
+            }else {
+                $where['addtime'] = time();
+                if ($table->add($where)){
+                    M('dynamic')->where("id = '{$where['pid']}'")->setInc('upper',1);
+                    json('200','成功');
+                }else {
+                    json('400','操作失败');
+                }
+            }
+        }
+        json('404');
+    }
 
 
 
