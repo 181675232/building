@@ -1740,11 +1740,11 @@ class IndexController extends CommonController {
     public function fenbao_day_task(){
         $type = I('post.type') ? I('post.type') : 1;
         $date = get_month_week_day();
-        $map['stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
+
         if ($type == 1){
             $map['state'] = array('neq',3);
-            $map['_logic'] = 'or';
         }else{
+            $map['stoptime'] = array(array('egt',date('Y-m-d H:i',$date['beginday'])),array('elt',date('Y-m-d H:i',$date['endday'])));
             $map['state'] = 3;
         }
         $where['_complex'] = $map;
