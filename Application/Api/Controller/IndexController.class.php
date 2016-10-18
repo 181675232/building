@@ -2794,67 +2794,106 @@ class IndexController extends CommonController {
         }
     }
 
+    //获取罚款分类
+    public function get_find_group(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $data = M('find_group')->field('id,title')->select();
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','没有数据');
+        }
+    }
+
     //罚款
     public function add_find(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['user_id'] = I('post.user_id') ? I('post.user_id') : json('404','缺少参数 user_id');
+        $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
         $admin = M('admin');
         $user = $admin->field('id,username')->where("proid = '{$where['proid']}' and id = '{$where['user_id']}'")->find();
         if (!$admin) json('404','分包不存在');
         $where['price'] = I('post.price') ? I('post.price') : json('404','缺少参数 price');
-        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
+        if (I('post.title')) $where['title'] = I('post.title');
         if ($where['price'] < 0) json('400','罚款金额必须大于零');
         $where['addtime'] = time();
         $table = M('find');
-        $res = $table->add($where);
-        if ($res){
-            if (!$admin->where("proid = '{$where['proid']}' and id = '{$where['user_id']}'")->setDec('money',$where['price'])){
-                $table->delete($res);
+        if ($where['pid'] == 1){
+            $where['state'] = 2;
+            $res = $table->add($where);
+            if ($res){
+                if (!$admin->where("proid = '{$where['proid']}' and id = '{$where['user_id']}'")->setDec('money',$where['price'])){
+                    $table->delete($res);
+                    json('400','操作失败');
+                }
+                $message = M('message');
+                //推送罚款人
+                $map1['title'] = date('Y-m-d',time()).'罚款通知';
+                $map1['content'] = '您被罚款'.$where['price'].'元';
+                $map1['type'] = 'find';
+                $map1['typeid'] = $res;
+                $map1['user_id'] = $where['uid'];
+                $map1['uid'] = $where['user_id'];
+                $map1['proid'] = $where['proid'];
+                $map1['addtime'] = time();
+
+                if ($message->add($map1)){
+                    $push1['ids'] = $map1['uid'];
+                    $push1['type'] = $map1['type'];
+                    $push1['typeid'] = $map1['typeid'];
+                    $push1['content'] = '罚款通知';
+                    send_curl($this->url.'/Api/Index/push',$push1);
+                }
+
+                //推送所有人
+                $id = $admin->where("proid = '{$where['proid']}' and id != '{$where['user_id']}'")->getField('id',true);
+                $ids = implode(',',$id);
+
+                $map['title'] = date('Y-m-d',time()).'罚款公告';
+                $map['content'] = $user['username'].'被罚款'.$where['price'].'元';
+                $map['type'] = 'system';
+                $map['typeid'] = 0;
+                $map['user_id'] = 1;
+                $map['proid'] = $where['proid'];
+                $map['addtime'] = time();
+                foreach ($id as $val){
+                    $map['uid'] = $val;
+                    $message->add($map);
+                }
+                $push['ids'] = $ids;
+                $push['type'] = 'system';
+                $push['typeid'] = 0;
+                $push['content'] = '罚款公告';
+                send_curl($this->url.'/Api/Index/push',$push);
+                json('200','成功');
+            }else{
                 json('400','操作失败');
             }
-            $message = M('message');
-            //推送罚款人
-            $map1['title'] = date('Y-m-d',time()).'罚款通知';
-            $map1['content'] = '您被罚款'.$where['price'].'元';
-            $map1['type'] = 'find';
-            $map1['typeid'] = $res;
-            $map1['user_id'] = $where['uid'];
-            $map1['uid'] = $where['user_id'];
-            $map1['proid'] = $where['proid'];
-            $map1['addtime'] = time();
-
-            if ($message->add($map1)){
-                $push1['ids'] = $map1['uid'];
-                $push1['type'] = $map1['type'];
-                $push1['typeid'] = $map1['typeid'];
-                $push1['content'] = '罚款通知';
-                send_curl($this->url.'/Api/Index/push',$push1);
-            }
-
-            //推送所有人
-            $id = $admin->where("proid = '{$where['proid']}' and id != '{$where['user_id']}'")->getField('id',true);
-            $ids = implode(',',$id);
-
-            $map['title'] = date('Y-m-d',time()).'罚款公告';
-            $map['content'] = $user['username'].'被罚款'.$where['price'].'元';
-            $map['type'] = 'system';
-            $map['typeid'] = 0;
-            $map['user_id'] = 1;
-            $map['proid'] = $where['proid'];
-            $map['addtime'] = time();
-            foreach ($id as $val){
-                $map['uid'] = $val;
-                $message->add($map);
-            }
-            $push['ids'] = $ids;
-            $push['type'] = 'system';
-            $push['typeid'] = 0;
-            $push['content'] = '罚款公告';
-            send_curl($this->url.'/Api/Index/push',$push);
-            json('200','成功');
         }else{
-            json('400','操作失败');
+            $res = $table->add($where);
+            if ($res){
+                $message = M('message');
+                //推送罚款人
+                $map1['title'] = date('Y-m-d',time()).'罚款确认通知';
+                $map1['content'] = '您被罚款'.$where['price'].'元，请您进行确认';
+                $map1['type'] = 'find';
+                $map1['typeid'] = $res;
+                $map1['user_id'] = $where['uid'];
+                $map1['uid'] = $where['user_id'];
+                $map1['proid'] = $where['proid'];
+                $map1['addtime'] = time();
+                if ($message->add($map1)){
+                    $push1['ids'] = $map1['uid'];
+                    $push1['type'] = $map1['type'];
+                    $push1['typeid'] = $map1['typeid'];
+                    $push1['content'] = '罚款确认通知';
+                    send_curl($this->url.'/Api/Index/push',$push1);
+                }
+                json('200','成功');
+            }else{
+                json('400','操作失败');
+            }
         }
     }
 
@@ -2865,7 +2904,8 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('find');
-        $data = $table->field("t_find.id,t_find.title,t_find.price,t_find.uid,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+        $data = $table->field("t_find.id,t_find.title,t_find_group.title as group_title,t_find.state,t_find.price,t_find.uid,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+            ->join('left join t_find_group on t_find_group.id = t_find.pid')
             ->join('left join t_admin on t_admin.id = t_find.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_admin a on a.id = t_find.user_id')
@@ -2887,7 +2927,8 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('find');
-        $data = $table->field("t_find.id,t_find.title,t_find.price,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+        $data = $table->field("t_find.id,t_find.title,t_find_group.title as group_title,t_find.state,t_find.price,t_admin.username,t_admin.simg,t_level.title name,t_find.user_id,a.username fusername,a.simg fsimg,l.title fname,t_find.addtime")
+            ->join('left join t_find_group on t_find_group.id = t_find.pid')
             ->join('left join t_admin on t_admin.id = t_find.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->join('left join t_admin a on a.id = t_find.user_id')
@@ -2901,6 +2942,29 @@ class IndexController extends CommonController {
             json('400','没有数据');
         }
     }
+
+    //分包确认罚款
+    public function state_find(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        if (M('find')->where($where)->setField('state',2)){
+            json('200','成功');
+        }else{
+            json('400','重复操作');
+        }
+    }
+
+    //撤销罚款
+    public function del_find(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        if (M('find')->where($where)->setField('state',3)){
+            json('200','成功');
+        }else{
+            json('400','重复操作');
+        }
+    }
+
 
     //获取紧急预警分类
     public function get_warning_group(){
