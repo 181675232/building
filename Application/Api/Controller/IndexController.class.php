@@ -2948,6 +2948,7 @@ class IndexController extends CommonController {
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         if (M('find')->where($where)->setField('state',2)){
+            M('admin')->where("proid = '{$where['proid']}' and id = '{$where['user_id']}'")->setDec('money',$where['price']);
             json('200','成功');
         }else{
             json('400','重复操作');
