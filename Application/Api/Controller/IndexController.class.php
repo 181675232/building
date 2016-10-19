@@ -3208,6 +3208,35 @@ class IndexController extends CommonController {
         json('404');
     }
 
+    //我的金额
+    public function user_money(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('admin');
+        $data = $table->field('money')->where($where)->find();
+        json('200','成功',$data);
+    }
+
+    //我的罚款记录
+    public function user_find_list(){
+        $where['t_find.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['t_find.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_find.state'] = 2;
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('find');
+        $data = $table->field('t_find_group.title,t_find.price,t_find.addtime')
+            ->join('left join t_find_group on t_find_group.id = t_find.pid')
+            ->where($where)->order('t_find.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
 
 
 
