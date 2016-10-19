@@ -3220,7 +3220,7 @@ class IndexController extends CommonController {
     //我的罚款记录
     public function user_find_list(){
         $where['t_find.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['t_find.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $where['t_find.user_id'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['t_find.state'] = 2;
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
