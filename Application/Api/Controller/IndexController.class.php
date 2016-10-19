@@ -1594,6 +1594,7 @@ class IndexController extends CommonController {
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $map['state'] = 2;
+        $map['confirm'] = 2;
         $map['truestarttime'] = date('Y-m-d H:i:s',time());
         $table = M('day_task');
         if ($table->where($where)->save($map)){
