@@ -41,14 +41,14 @@ class LoginController extends Controller {
                 echo $object['id'];
                 exit;
                 //写入日志
-                $param = array(
-                    'user'=>$object['name'].'('.$object['username'].')',
-                    'type'=>'登录系统',
-                    'module'=>'人事管理 >> 登录帐号',
-                    'ip'=>get_client_ip()
-                );
+//                $param = array(
+//                    'user'=>$object['name'].'('.$object['username'].')',
+//                    'type'=>'登录系统',
+//                    'module'=>'人事管理 >> 登录帐号',
+//                    'ip'=>get_client_ip()
+//                );
                 //tag('log', $param);
-                return $object['id'];
+ //               return $object['id'];
 
             } else {
                 return 0;
