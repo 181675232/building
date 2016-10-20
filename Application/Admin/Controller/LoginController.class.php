@@ -20,6 +20,7 @@ class LoginController extends Controller {
             $map['password'] = md5(I('post.password'));
             $object = $table->field('id,level,name,username,state,login_count')
                 ->where($map)->find();
+
             if ($object) {
                 if (!$object['state'] == 2) return -1;
                 //if (!$object['name']) return -2;
@@ -37,7 +38,8 @@ class LoginController extends Controller {
                     'login_count'=>$object['login_count'] + 1
                 );
                 $table->save($update);
-
+                echo $object['id'];
+                exit;
                 //写入日志
                 $param = array(
                     'user'=>$object['name'].'('.$object['username'].')',
@@ -45,12 +47,13 @@ class LoginController extends Controller {
                     'module'=>'人事管理 >> 登录帐号',
                     'ip'=>get_client_ip()
                 );
-                tag('log', $param);
+                //tag('log', $param);
                 return $object['id'];
+
             } else {
                 return 0;
             }
-            //echo $uid;
+
         } else {
             $this->error('非法操作！');
         }
