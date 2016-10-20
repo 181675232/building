@@ -738,3 +738,48 @@ function unicode_decode( $name )
     }
     return $name ;
 }
+
+function group_recursion($tables,$bid,$pid = 'pid')
+{
+    $table = M($tables);
+    $where[$pid] = $bid;
+    $res = $table->where($where)->order('ord asc')->select();
+    $array = $res;
+    foreach ($res as $key=>$val){
+        $str = '';
+        if ($val['level'] == 2){
+            $str .= ' ';
+        }else{
+            for ($i=1;$i<$val['level']-1;$i++){
+                $str .= ' 　　';
+            }
+        }
+        if ($val['level'] == 1){
+            $array[$key]['titles'] = '　　'.$str.'<span class="folder-open"></span>'.$val['title'];
+        }else{
+            $array[$key]['titles'] = '　　'.$str.'<span class="folder-line"></span><span class="folder-open"></span>'.$val['title'];
+        }
+        if ($val['id'] != null){
+            $array[$key]['catid'] = group_recursion($tables,$val['id'],$pid);
+        }
+    }
+    return $array;
+}
+//多维数组转二维数组
+function group_recursion_show($array)
+{
+
+    static $result_array;
+    foreach($array as $value)
+    {
+        if ( isset($value["title"]) ){
+            $res = $value;
+            unset($res['catid']);
+            $result_array[] = $res;
+        }
+        if ( is_array($value["catid"]) )
+            group_recursion_show($value["catid"]);
+    }
+    return $result_array;
+
+}
