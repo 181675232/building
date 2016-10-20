@@ -1,0 +1,278 @@
+@charset "utf-8";
+body {
+    height: 100% !important;
+    font-family: "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei UI", "Microsoft YaHei", SimHei, "\5B8B\4F53", simsun, sans-serif;
+}
+.clear{
+    clear: both;
+}
+/*冲突ui css*/
+.layout-split-north,.layout-split-west,.layout-split-center,.layout-split-south{
+    border: 0;
+}
+td .folder-line {
+    background: url("../img/icon.png") no-repeat scroll -80px -196px;
+    display: inline-block;
+    height: 22px;
+    margin-right: 5px;
+    text-indent: -999em;
+    vertical-align: middle;
+    width: 20px;
+}
+td .folder-open {
+    background: url("../img/icon.png") no-repeat scroll -40px -196px;
+    display: inline-block;
+    height: 22px;
+    margin-right: 5px;
+    text-indent: -999em;
+    vertical-align: middle;
+    width: 20px;
+}
+.panel-icon{
+    left: 15px;
+}
+.panel-header{
+    background: #f2f2f2;
+    height: 35px;
+    padding: 0 5px;
+    border-top: 1px solid #fff;
+}
+.datebox .combo-arrow{
+    background-image: url("../img/icon.png");
+    background-position: -194px -105px;
+}
+.panel-with-icon{
+    padding-left:30px;
+}
+.tabs li{
+    margin: 2px 4px -2px 0;
+}
+.tabs li a.tabs-inner{
+    padding: 0 14px;
+}
+.tree li {
+    background: #f9f9f9;
+}
+.datagrid-header-row, .datagrid-row{
+    height: 35px;
+}
+.l-btn{
+    color: #666;
+    padding: 2px;
+    background: rgba(0, 0, 0, 0) linear-gradient(to bottom, #ffffff 0px, #f3f3f3 100%) repeat-x scroll 0 0;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+.datagrid-cell .l-btn{
+    color: #666;
+    padding: 10px 0;
+    background: rgba(0, 0, 0, 0) linear-gradient(to bottom, #ffffff 0px, #f3f3f3 100%) repeat-x scroll 0 0;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+}
+.l-btn-icon-left{
+    margin: 0;
+}
+#tool .l-btn-icon-left .l-btn-text{
+    margin: 0 6px 0 22px;
+}
+
+/*冲突ui css*/
+.tool-tools{
+    padding:10px 5px;
+}
+.tool-tool{
+    margin-bottom: 5px;
+}
+.tool-search{
+    padding: 0 0 0 7px;
+    color:#333;
+}
+
+.layout-north{
+    height:45px;
+    background:#09c;
+    overflow:hidden;
+}
+.layout-south{
+    padding:10px;
+    text-align:center;
+}
+.layout-west{
+    height: 40px;
+    line-height: 40px;
+    width:180px;
+}
+.layout-center{
+    overflow:hidden;
+}
+.logo {
+    height: 45px;
+    width: 180px;
+    float:left;
+}
+.logo img{
+    width: 180px;
+    height: 45px;
+}
+.nav {
+    height: 50px;
+    line-height: 50px;
+    padding: 0 20px 0 0;
+    float:right;
+    color:#fff;
+}
+.textbox {
+    height:28px!important;
+    padding:0 2px;
+    border-radius:3px;
+}
+a:focus {
+    outline: none;
+}
+a {
+    color:#fff;
+    text-decoration:none;
+}
+a:hover {
+    text-decoration:underline;
+}
+#nav {
+    margin:10px 15px;
+}
+.tree-node-selected {
+    background:#999;
+    border-radius:4px;
+}
+.tree-node-hover {
+    border-radius:4px;
+}
+.menu-active {
+    background: #999;
+    border: none;
+}
+a.tabs-inner {
+    color:#666 !important;
+}
+.datagrid-row-selected {
+    background:#999 !important;
+}
+.easyui-dialog {
+    padding: 10px 0 10px;
+}
+.panel-title {
+    font-size: 14px;
+    font-weight: normal;
+    height: 35px;
+    line-height: 36px;
+    margin-left: 3px;
+}
+.datagrid-toolbar{
+    background: #fcfcfc;
+}
+.textbox-text {
+    background-color: #fff;
+}
+.form-label {
+    padding: 5px 0;
+    font-size: 14px;
+    color: #666;
+}
+.dialog-button .l-btn-large .l-btn-text {
+    font-size: 14px;
+    padding: 0 10px 0 0;
+    height: 35px;
+    line-height: 35px;
+    color: #666;
+    margin-left: 32px !important;
+}
+.dialog-button .l-btn-small .l-btn-text {
+    font-size: 14px;
+    height: 30px;
+    line-height: 30px;
+}
+.tooltip-content {
+    font-size: 14px !important;
+    color: #333;
+}
+.messager-body {
+    font-size: 14px;
+    color: #666;
+}
+.form-table, .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+}
+.form-table tr:hover, .details-table tr:hover {
+    background-color: #f3f3f3;
+}
+.form-table > tbody > tr > td {
+    padding: 5px 0;
+}
+.details-table td {
+    border: 1px solid #ccc;
+}
+.form-table td.label, .details-table td.label  {
+    min-width: 100px;
+    text-align: right;
+    font-size:14px;
+    color: #666;
+}
+.form-table td.input, .details-table td.content  {
+    width: 290px;
+    text-align: left;
+    font-size:14px;
+    color: #666;
+}
+.form-table .link {
+    font-size: 14px;
+    color: #06f;
+    position: relative;
+    top: 2px;
+    left: 5px;
+    cursor: pointer;
+}
+.form-table .textarea {
+    width: 91%;
+    height: 150px;
+    border-radius: 5px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    resize: none;
+    padding: 10px;
+}
+.details-table {
+    width: 98%;
+}
+.details-table td.content {
+    padding: 0 0 0 5px;
+}
+.details-table td {
+    padding: 8px 0;
+}
+.details-table tr:nth-child(2n) {
+    background-color: #fafafa;
+}
+.details-table tr:hover {
+    background-color: #eee;
+}
+.combobox-item,.combo input {
+    cursor: pointer;
+}
+.more {
+    padding: 5px 0 0 58px;
+    display: none;
+}
+.tabs-loading {
+    /*display: none;*/
+    position: absolute;
+    z-index: 1000;
+    top: 30px;
+    left: 1px;
+    width: 100%;
+    height: 100%;
+    padding: 11px 0 0 30px;
+    background: #fff url("../img/loading.gif") no-repeat 10px 10px;
+    border-bottom: 1px solid #000;
+}
