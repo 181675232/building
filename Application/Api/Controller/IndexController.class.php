@@ -1715,8 +1715,8 @@ class IndexController extends CommonController {
             ->join('left join t_level l on l.id = a.level')
             ->where($where)->find();
         $workers = M('task_work');
-        $data['workers'] = $workers->field('t_work.title,t_task_work.num')
-            ->join('left join t_work on t_work.id = t_task_work.uid')
+        $data['workers'] = $workers->field('t_worker.title,t_task_work.num')
+            ->join('left join t_worker on t_worker.id = t_task_work.uid')
             ->where("t_task_work.pid = '{$data['id']}' and t_task_work.proid = '{$where['t_day_task.proid']}'")->select();
         $data['workers'] =  $data['workers'] ?  $data['workers'] : array();
         $schedule = M('task_schedule');
@@ -2949,8 +2949,8 @@ class IndexController extends CommonController {
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         if (M('find')->where($where)->setField('state',2)){
-            $uid = M('find')->where($where)->getField('user_id');
-            M('admin')->where("proid = '{$where['proid']}' and id = '{$uid}'")->setDec('money',$where['price']);
+            $res = M('find')->field('user_id,price')->where($where)->find();
+            M('admin')->where("proid = '{$where['proid']}' and id = '{$res['user_id']}'")->setDec('money',$res['price']);
             json('200','成功');
         }else{
             json('400','重复操作');
@@ -3184,7 +3184,7 @@ class IndexController extends CommonController {
     //工种列表
     public function work_list(){
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $table = M('work');
+        $table = M('worker');
         $data = $table->field('id,title')->select();
         json('200','成功',$data);
     }
