@@ -33,9 +33,21 @@ $(function () {
                 },
                 {
                     field : 'title',
-                    title : '名称',
+                    title : '标题',
                     align : 'center',
-                    width : 100
+                    width : 150
+                },
+                {
+                    field : 'group_name',
+                    title : '类别',
+                    align : 'center',
+                    width : 80
+                },
+                {
+                    field : 'username',
+                    title : '发布人',
+                    align : 'center',
+                    width : 80
                 },
                 {
                     field : 'addtime',
@@ -78,7 +90,7 @@ $(function () {
         });
 
         $('#'+NAME+'-add').dialog({
-            width : 420,
+            width : 780,
             height : 'auto',
             title : '新增信息',
             iconCls : 'icon-add-new',
@@ -90,12 +102,16 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-accept',
                 handler : function () {
+                    window.editor.sync();
                     if ($('#'+NAME+'-add').form('validate')) {
                         $.ajax({
                             url : ThinkPHP['MODULE'] + '/'+NAME+'/add',
                             type : 'POST',
                             data : {
                                 title : $('input[name="'+NAME+'_title_add"]').val(),
+                                pid : $('input[name="'+NAME+'_pid_add"]').val(),
+                                desc : $('textarea[name="'+NAME+'_desc_add"]').val(),
+                                content : $('textarea[name="'+NAME+'_content_add"]').val()
                             },
                             beforeSend : function () {
                                 $.messager.progress({
@@ -128,11 +144,12 @@ $(function () {
             }],
             onClose : function () {
                 $('#'+NAME+'-add').form('reset');
+                window.editor.html('');
             }
         });
 
         $('#'+NAME+'-edit').dialog({
-            width : 420,
+            width : 780,
             height : 'auto',
             title : '编辑信息',
             iconCls : 'icon-edit-new',
@@ -144,6 +161,7 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-accept',
                 handler : function () {
+                    window.editor.sync();
                     if ($('#'+NAME+'-edit').form('validate')) {
                         $.ajax({
                             url : ThinkPHP['MODULE'] + '/'+NAME+'/edit',
@@ -151,6 +169,9 @@ $(function () {
                             data : {
                                 id : $('input[name="'+NAME+'_id_edit"]').val(),
                                 title : $('input[name="'+NAME+'_title_edit"]').val(),
+                                pid : $('input[name="'+NAME+'_pid_edit"]').val(),
+                                desc : $('textarea[name="'+NAME+'_desc_edit"]').val(),
+                                content : $('textarea[name="'+NAME+'_content_edit"]').val(),
                             },
                             beforeSend : function () {
                                 $.messager.progress({
@@ -183,6 +204,7 @@ $(function () {
             }],
             onClose : function () {
                 $('#'+NAME+'-edit').form('reset');
+                window.editor.html('');
             }
         });
         /* ---------------------------弹出框样式-------------------------------------------*/
@@ -191,9 +213,50 @@ $(function () {
             height : 32,
             required : true,
             validType : 'length[2,20]',
-            missingMessage : '请输入名称',
+            missingMessage : '请输入标题',
             invalidMessage : '名称2-20位'
         });
+        $('#'+NAME+'-pid-add,#'+NAME+'-pid-edit').combobox({
+            width : 140,
+            height : 'auto',
+            url : ThinkPHP['MODULE'] + '/wordgroup/getall',
+            editable : false,
+            required : true,
+            validType : 'length[1,20]',
+            valueField : 'id',
+            textField : 'title',
+            missingMessage : '请选择类别',
+            hasDownArrow : true
+        });
+        //加载新增编辑器
+        window.editor = KindEditor.create('#'+NAME+'-content-add,', {
+            width : '94%',
+            height : '200px',
+            resizeType : 0,
+            items : [
+                'source', 'wordpaste','|',
+                'formatblock', 'fontname', 'fontsize','|',
+                'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'link', 'removeformat', '|',
+                'justifyleft', 'justifycenter', 'justifyright', '|', 'insertorderedlist', 'insertunorderedlist','|',
+                'emoticons', 'image','baidumap','|',
+                'fullscreen'
+            ]
+        });
+
+        window.editor = KindEditor.create('#'+NAME+'-content-edit', {
+            width : '94%',
+            height : '200px',
+            resizeType : 0,
+            items : [
+                'source', 'wordpaste','|',
+                'formatblock', 'fontname', 'fontsize','|',
+                'forecolor', 'hilitecolor', 'bold','italic', 'underline', 'link', 'removeformat', '|',
+                'justifyleft', 'justifycenter', 'justifyright', '|', 'insertorderedlist', 'insertunorderedlist','|',
+                'emoticons', 'image','baidumap','|',
+                'fullscreen'
+            ]
+        });
+
         /* ---------------------------弹出框样式-------------------------------------------*/
         //时间搜索
         $('#'+NAME+'-search-date').combobox({
@@ -269,7 +332,10 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                     if (data) {
                         var PUCLIC_JSON= eval('({'+
                             NAME+'_id_edit:data.id,'+
-                            NAME+'_title_edit:data.title'+
+                            NAME+'_title_edit:data.title,'+
+                            NAME+'_pid_edit:data.pid,'+
+                            NAME+'_desc_edit:data.desc,'+
+                            NAME+'_content_edit:data.content,'+
                             '})');
                         $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
                         if (data.state == '正常') {

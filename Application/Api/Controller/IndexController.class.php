@@ -3240,6 +3240,35 @@ class IndexController extends CommonController {
         }
     }
 
+    //方案列表
+    public function word_list(){
+        $where['t_word.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('word');
+        $data = $table->field('t_word.id,t_word.title,t_word.desc,t_word_group.title as group_name,t_word.addtime')
+            ->join('left join t_word_group on t_word_group.id = t_word.pid')
+            ->where($where)->order('t_word.addtime desc')->limit($pages,20)->select();
+        if ($data){
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //方案详情
+    public function word_info(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $table = M('word');
+        $data = $table->field('id,title,content')->where($where)->find();
+        $this->assign($data);
+        $this->display('Index_newsweb');
+
+    }
+
 
 
 

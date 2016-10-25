@@ -91,7 +91,9 @@
 .icon-yincang{
 	background:url('icons/icon.png') no-repeat -417px -83px;
 }
-
+.icon-import{
+	 background:url('icons/icon.png') no-repeat -470px -112px;
+ }
 /*.icon-add-new{*/
 	/*background:url('icons/add-new.png') no-repeat center center;*/
 /*}*/

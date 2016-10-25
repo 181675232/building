@@ -233,10 +233,19 @@ a.tabs-inner {
     left: 5px;
     cursor: pointer;
 }
+.form-table .textdesc {
+    width: 50%;
+    height: 80px;
+    border-radius: 3px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    resize: none;
+    padding: 10px;
+}
 .form-table .textarea {
     width: 91%;
     height: 150px;
-    border-radius: 5px;
+    border-radius: 3px;
     background-color: #fff;
     border: 1px solid #ccc;
     resize: none;
@@ -275,4 +284,12 @@ a.tabs-inner {
     padding: 11px 0 0 30px;
     background: #fff url("../img/loading.gif") no-repeat 10px 10px;
     border-bottom: 1px solid #000;
+}
+.upload-box .upload-btn {
+    background: #fff none repeat scroll 0 0;
+    border: 1px solid #e1e1e1;
+    color: #333;
+    display: inline-block;
+    height: 30px;
+    vertical-align: middle;
 }

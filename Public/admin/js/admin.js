@@ -243,7 +243,7 @@ $(function () {
         missingMessage : '请输入手机号',
         invalidMessage : '手机格式不正确'
     });
-    $('#'+NAME+'-level-add,#'+NAME+'-levelname-edit').combobox({
+    $('#'+NAME+'-level-add,#'+NAME+'-level-edit').combobox({
         width : 140,
         height : 'auto',
         url : ThinkPHP['MODULE'] + '/level/getall',
@@ -335,7 +335,7 @@ return {
                         NAME+'_phone_edit:data.phone,'+
                         NAME+'_username_edit:data.username,'+
                         NAME+'_level_edit:data.level,'+
-                       NAME+'_levelname_edit:data.levelname,'+
+                       //NAME+'_levelname_edit:data.levelname,'+
                         '})');
                     $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
                     // if (data.state == '正常') {
@@ -371,7 +371,7 @@ return {
                                 $('#'+NAME+'').datagrid('reload');
                                 $.messager.show({
                                     title : '操作提醒',
-                                    msg : data + '个职位被成功删除！'
+                                    msg : data + '条记录被成功删除！'
                                 });
                             }
                         }

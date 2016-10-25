@@ -16,7 +16,7 @@ $(function () {
         striped : true,
         rownumbers : true,
         border : false,
-        pagination : false,
+        pagination : true,
         pageSize : 20,
         pageList : [10, 20, 30, 40, 50],
         pageNumber : 1,
@@ -26,42 +26,35 @@ $(function () {
         columns : [[
             {
                 field : 'id',
-                title : '编号',
-                align : 'center',
+                title : '自动编号',
                 width : 100,
                 checkbox : true
             },
             {
-                field : 'titles',
-                title : '名称',
-                width : 100,
-                halign : 'center'
+                field : 'title',
+                title : '标题',
+                width : 200,
+                align : 'center',
             },
             {
-                field : 'ord',
-                title : '排序',
+                field : 'day',
+                title : '工时（天）',
+                width : 60,
                 align : 'center',
-                width : 100,
             },
             {
-                field : 'state',
-                title : '状态',
-                width : 100,
+                field : 'starttime',
+                title : '开始时间',
                 align : 'center',
-                fixed : true,
+                width : 100,
                 sortable : true,
-                formatter : function (value, row) {
-                    var state = '';
-                    switch (value) {
-                        case '1' :
-                            state = '<a href="javascript:void(0)" '+NAME+'-id="' + row.id + '" '+NAME+'-state="1" title="正常" class="'+NAME+'-state '+NAME+'-state-1" style="height: 18px;margin-left:4px;"></a>';
-                            break;
-                        case '2' :
-                            state = '<a href="javascript:void(0)" '+NAME+'-id="' + row.id + '" '+NAME+'-state="2" title="隐藏" class="'+NAME+'-state '+NAME+'-state-2" style="height: 18px;margin-left:4px;"></a>';
-                            break;
-                    }
-                    return state;
-                }
+            },
+            {
+                field : 'stoptime',
+                title : '结束时间',
+                align : 'center',
+                width : 100,
+                sortable : true,
             },
             {
                 field: 'details',
@@ -77,79 +70,6 @@ $(function () {
             }
         ]],
         onLoadSuccess : function() {
-            $('.'+NAME+'-state-1').linkbutton({
-                iconCls : 'icon-xianshi',
-                plain : true
-            });
-            $('.'+NAME+'-state-2').linkbutton({
-                iconCls : 'icon-yincang',
-                plain : true
-            });
-            $('.'+NAME+'-state').click(function () {
-                var id = $(this).attr(''+NAME+'-id'),
-                    state = $(this).attr(''+NAME+'-state');
-
-                switch (state) {
-                    case '2' :
-                        $.messager.confirm('操作确认','确认显示？',function(flag) {
-                            if (flag){
-                                $.ajax({
-                                    url : ThinkPHP['MODULE'] + '/'+NAME+'/state',
-                                    type : 'POST',
-                                    data : {
-                                        id : id,
-                                        state : '1'
-                                    },
-                                    beforeSend : function () {
-                                        $.messager.progress({
-                                            text : 'loading...'
-                                        });
-                                    },
-                                    success : function(data) {
-                                        $.messager.progress('close');
-                                        if (data > 0) {
-                                            $.messager.show({
-                                                title : '操作提醒',
-                                                msg : '操作成功！'
-                                            });
-                                            $('#'+NAME+'').datagrid('reload');
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        break;
-                    case '1' :
-                        $.messager.confirm('操作确认','确认隐藏？',function(flag) {
-                            if (flag){
-                                $.ajax({
-                                    url : ThinkPHP['MODULE'] + '/'+NAME+'/state',
-                                    type : 'POST',
-                                    data : {
-                                        id : id,
-                                        state : '2'
-                                    },
-                                    beforeSend : function () {
-                                        $.messager.progress({
-                                            text : 'loading...'
-                                        });
-                                    },
-                                    success : function(data) {
-                                        $.messager.progress('close');
-                                        if (data > 0) {
-                                            $.messager.show({
-                                                title : '操作提醒',
-                                                msg : '操作成功！'
-                                            });
-                                            $('#'+NAME+'').datagrid('reload');
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                        break;
-                }
-            });
             $('.'+NAME+'-details').linkbutton({
                 iconCls : 'icon-text',
                 plain : true
@@ -184,9 +104,11 @@ $(function () {
                         url : ThinkPHP['MODULE'] + '/'+NAME+'/add',
                         type : 'POST',
                         data : {
-                            title : $('input[name="'+NAME+'_title_add"]').val(),
-                            ord : $('input[name="'+NAME+'_ord_add"]').val(),
-                            pid : $('input[name="'+NAME+'_pid_add"]').val(),
+                            name : $('input[name="'+NAME+'_name_add"]').val(),
+                            password : $('input[name="'+NAME+'_password_add"]').val(),
+                            username : $('input[name="'+NAME+'_username_add"]').val(),
+                            phone : $('input[name="'+NAME+'_phone_add"]').val(),
+                            level : $('input[name="'+NAME+'_level_add"]').val(),
                         },
                         beforeSend : function () {
                             $.messager.progress({
@@ -204,6 +126,64 @@ $(function () {
                                 $('#'+NAME+'').datagrid('load');
                             } else {
                                 $.messager.alert('添加失败！', data, 'warning');
+                            }
+                        }
+                    });
+                }
+            }
+        },{
+            text : '取消',
+            size : 'large',
+            iconCls : 'icon-cross',
+            handler : function () {
+                $('#'+NAME+'-add').dialog('close');
+            }
+        }],
+        onClose : function () {
+            $('#'+NAME+'-add').form('reset');
+        }
+    });
+
+    $('#'+NAME+'-import').dialog({
+        width : 420,
+        height : 'auto',
+        title : '导入信息',
+        iconCls : 'icon-import',
+        modal : true,
+        closed : true,
+        maximizable : true,
+        buttons : [{
+            text : '导入',
+            size : 'large',
+            iconCls : 'icon-accept',
+            handler : function () {
+                if ($('#'+NAME+'-add').form('validate')) {
+                    $.ajax({
+                        url : ThinkPHP['MODULE'] + '/'+NAME+'/import',
+                        type : 'POST',
+                        data : {
+                            name : $('input[name="'+NAME+'_name_add"]').val(),
+                            password : $('input[name="'+NAME+'_password_add"]').val(),
+                            username : $('input[name="'+NAME+'_username_add"]').val(),
+                            phone : $('input[name="'+NAME+'_phone_add"]').val(),
+                            level : $('input[name="'+NAME+'_level_add"]').val(),
+                        },
+                        beforeSend : function () {
+                            $.messager.progress({
+                                text : '正在尝试保存...'
+                            });
+                        },
+                        success : function(data) {
+                            $.messager.progress('close');
+                            if (data > 0) {
+                                $.messager.show({
+                                    title : '操作提醒',
+                                    msg : '导入成功！'
+                                });
+                                $('#'+NAME+'-add').dialog('close');
+                                $('#'+NAME+'').datagrid('load');
+                            } else {
+                                $.messager.alert('导入失败！', data, 'warning');
                             }
                         }
                     });
@@ -241,8 +221,9 @@ $(function () {
                         type : 'POST',
                         data : {
                             id : $('input[name="'+NAME+'_id_edit"]').val(),
-                            title : $('input[name="'+NAME+'_title_edit"]').val(),
-                            ord : $('input[name="'+NAME+'_ord_edit"]').val(),
+                            username : $('input[name="'+NAME+'_username_edit"]').val(),
+                            phone : $('input[name="'+NAME+'_phone_edit"]').val(),
+                            level : $('input[name="'+NAME+'_level_edit"]').val(),
                         },
                         beforeSend : function () {
                             $.messager.progress({
@@ -278,54 +259,19 @@ $(function () {
         }
     });
     /* ---------------------------弹出框样式-------------------------------------------*/
-    $('#'+NAME+'-title-add,#'+NAME+'-title-edit').textbox({
+    $('#'+NAME+'-name-import,#'+NAME+'-name-import').filebox({
         width : 220,
         height : 32,
         required : true,
-        validType : 'length[2,20]',
-        missingMessage : '请输入名称',
-        invalidMessage : '名称2-20位'
-    });
-    $('#'+NAME+'-ord-add,#'+NAME+'-ord-edit').numberbox({
-        width : 60,
-        height : 32,
-        required : true,
-        //precision : 2,
-        //validType : 'length[2,20]',
-        missingMessage : '不能为空',
-        //invalidMessage : '名称2-20位'
-    });
-    //下拉类别
-    $('#'+NAME+'-pid-add').combogrid({
-        url : ThinkPHP['MODULE'] + '/'+NAME+'/getall',
-        width : 120,
-        panelWidth: 220,
-        showHeader: false,
-        panelHeight: 'auto',
-        panelMaxHeight : 227,
-        fitColumns : true,
-        striped : true,
-        border : false,
-        idField:'id',
-        textField:'title',
         editable : false,
-        remoteSort : false,
-        columns : [[
-            {
-                field : 'titles',
-                title : '　　<span class="folder-open"></span>无上级类别',
-                width : 80
-            }
-        ]],
-        onShowPanel : function () {
-            $(this).combogrid('panel').panel('resize', {
-                width : '220px'
-            });
-        }
     });
+    $('#'+NAME+'-sheet-import,#'+NAME+'-sheet-import').textbox({
+        width : 220,
+        height : 32,
+        //required : true,
+    });
+
     /* ---------------------------弹出框样式-------------------------------------------*/
-
-
     //时间搜索
     $('#'+NAME+'-search-date').combobox({
         width : 80,
@@ -350,13 +296,13 @@ $(function () {
                 $('#'+NAME+'-search-date').combobox('showPanel');
             }
         }
-    })
+    });
 
 })(PUBLIC_STR_NAME);
 });
 
 //工具栏操作模块
-PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME){
+PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
 return {
     search : function () {
         if ($('#'+NAME+'-tool').form('validate')) {
@@ -378,7 +324,7 @@ return {
     },
     add : function () {
         $('#'+NAME+'-add').dialog('open');
-        $('#'+NAME+'-type-add').combogrid('grid').datagrid('reload');
+        //$('#name-add').siblings('span').find('input').select();
     },
     edit : function (id) {
         //$('#user-staff-edit').combogrid('grid').datagrid('reload');
@@ -401,15 +347,18 @@ return {
                 if (data) {
                    var PUCLIC_JSON= eval('({'+
                         NAME+'_id_edit:data.id,'+
-                        NAME+'_title_edit:data.title,'+
-                        NAME+'_ord_edit:data.ord,'+
+                        NAME+'_name_edit:data.name,'+
+                        NAME+'_phone_edit:data.phone,'+
+                        NAME+'_username_edit:data.username,'+
+                        NAME+'_level_edit:data.level,'+
+                       NAME+'_levelname_edit:data.levelname,'+
                         '})');
                     $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
-                    if (data.state == '正常') {
-                        $('#user-state-edit').switchbutton('check');
-                    } else {
-                        $('#user-state-edit').switchbutton('uncheck');
-                    }
+                    // if (data.state == '正常') {
+                    //     $('#user-state-edit').switchbutton('check');
+                    // } else {
+                    //     $('#user-state-edit').switchbutton('uncheck');
+                    // }
                 }
             }
         });
@@ -463,7 +412,48 @@ return {
             sortOrder : 'desc'
         });
         this.search();
-    }
+    },
+    import : function () {
+        $('#'+NAME+'-import').dialog('open');
+        //$('#name-add').siblings('span').find('input').select();
+    },
 };
 })(PUBLIC_STR_NAME);
 
+//扩展工号验证功能
+$.extend($.fn.validatebox.defaults.rules, {
+    number : {
+        validator: function(value){
+            return /^[0-9]{4}$/.test(value);
+        }
+    }
+});
+
+//扩展身份证验证功能
+$.extend($.fn.validatebox.defaults.rules, {
+    id_card : {
+        validator: function(value){
+            return /^[0-9]{17}[xX0-9]$/.test(value);
+        }
+    }
+});
+
+//扩展民族验证功能
+$.extend($.fn.validatebox.defaults.rules, {
+    nation : {
+        validator: function(value){
+            return /^.{1,4}族$/.test(value);
+        }
+    }
+});
+
+
+//扩展手机验证功能
+$.extend($.fn.validatebox.defaults.rules, {
+    tel: {
+        validator: function(value){
+            return /^1[0-9]{10}$/.test(value);
+        },
+        message: '手机格式不正确'
+    }
+});

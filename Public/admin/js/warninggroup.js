@@ -305,7 +305,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                                     $('#'+NAME+'').datagrid('reload');
                                     $.messager.show({
                                         title : '操作提醒',
-                                        msg : data + '个职位被成功删除！'
+                                        msg : data + '条记录被成功删除！'
                                     });
                                 }
                             }
