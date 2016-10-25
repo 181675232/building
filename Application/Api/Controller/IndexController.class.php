@@ -2137,7 +2137,7 @@ class IndexController extends CommonController {
     //获取天气
     function tianqi(){
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $city = M('product')->where("id = $proid")->getField('city');
+        $city = M('pro')->where("id = $proid")->getField('city');
         $res = tianqi($city);
         if ($res['reason'] == 'successed!'){
             unset($res['result']['data']['realtime']['wind']['offset']);
