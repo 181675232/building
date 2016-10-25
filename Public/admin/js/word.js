@@ -102,7 +102,7 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-accept',
                 handler : function () {
-                    window.editor.sync();
+                    window.add.sync();
                     if ($('#'+NAME+'-add').form('validate')) {
                         $.ajax({
                             url : ThinkPHP['MODULE'] + '/'+NAME+'/add',
@@ -144,7 +144,7 @@ $(function () {
             }],
             onClose : function () {
                 $('#'+NAME+'-add').form('reset');
-                window.editor.html('');
+                window.add.html('');
             }
         });
 
@@ -229,7 +229,7 @@ $(function () {
             hasDownArrow : true
         });
         //加载新增编辑器
-        window.editor = KindEditor.create('#'+NAME+'-content-add,', {
+        window.add = KindEditor.create('#'+NAME+'-content-add,', {
             width : '94%',
             height : '200px',
             resizeType : 0,
@@ -242,7 +242,6 @@ $(function () {
                 'fullscreen'
             ]
         });
-
         window.editor = KindEditor.create('#'+NAME+'-content-edit', {
             width : '94%',
             height : '200px',
@@ -338,6 +337,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                             NAME+'_content_edit:data.content,'+
                             '})');
                         $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
+                        window.editor.html(data.content);
                         if (data.state == '正常') {
                             $('#user-state-edit').switchbutton('check');
                         } else {
