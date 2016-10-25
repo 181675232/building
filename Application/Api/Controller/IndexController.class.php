@@ -3243,6 +3243,7 @@ class IndexController extends CommonController {
     //方案列表
     public function word_list(){
         $where['t_word.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.keyword')) $where['t_word.title'] = array('like','%'.$_POST['keyword'].'%');
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('word');
@@ -3260,13 +3261,12 @@ class IndexController extends CommonController {
 
     //方案详情
     public function word_info(){
-        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
-        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        //$where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('get.id') ? I('get.id') : json('404','缺少参数 id');
         $table = M('word');
         $data = $table->field('id,title,content')->where($where)->find();
         $this->assign($data);
         $this->display('Index_newsweb');
-
     }
 
 
