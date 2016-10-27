@@ -25,9 +25,15 @@ class IndexController extends CommonController {
 
 	//测试
 	public function test(){
-        $str = "撒地方纪律就dsf";
-        echo $s = unicode_encode($str);
-        echo unicode_decode($s);
+        $table = M('admin');
+        $data = $table->field('t_level.title')
+            ->join("left join t_level on t_admin.level = t_level.id")
+            ->where('t_admin.id = 100000')
+            ->find();
+        json('200','',$data);
+//        $str = "撒地方纪律就dsf";
+//        echo $s = unicode_encode($str);
+//        echo unicode_decode($s);
 	}
 
     //短信登录
@@ -3265,6 +3271,7 @@ class IndexController extends CommonController {
         $where['id'] = I('get.id') ? I('get.id') : json('404','缺少参数 id');
         $table = M('word');
         $data = $table->field('id,title,content')->where($where)->find();
+        $data['content'] = $data['content'];
         $this->assign($data);
         $this->display('Index_newsweb');
     }

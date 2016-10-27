@@ -2,7 +2,7 @@
 namespace Admin\Controller;
 use Think\Controller;
 
-class WordController extends CommonController {
+class WarningController extends CommonController {
 
     //加载首页
     public function index() {
@@ -16,7 +16,7 @@ class WordController extends CommonController {
     //列表
     public function show() {
         if (IS_AJAX) {
-            $table = M('Word');
+            $table = M('Warning');
             //分页
             $page = I('post.page') ? I('post.page') : 1;
             $pagesize = I('post.rows') ? I('post.rows') : 20;
@@ -52,11 +52,12 @@ class WordController extends CommonController {
             $data = $table->field('*')
                 ->where($where)
                 ->order($orders)->limit($pages,$pagesize)->select();
-            $word_group = M('Word_group');
+            $warning_group = M('warning_group');
             $admin = M('admin');
             foreach ($data as $key=>$val){
-                $data[$key]['group_name'] = $word_group->where("id = '{$val['pid']}'")->getField('title');
+                $data[$key]['group_name'] = $warning_group->where("id = '{$val['pid']}'")->getField('title');
                 $data[$key]['username'] = $admin->where("id = '{$val['uid']}'")->getField('username');
+                $data[$key]['uname'] = $admin->where("id = '{$val['user_id']}'")->getField('username');
             }
             $this->ajaxReturn(array('total'=>$count,'rows'=>$data ? $data : ''));
         } else {
@@ -67,7 +68,7 @@ class WordController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
-            $table = M('Word');
+            $table = M('Warning');
             $where = I('post.');
             $where['addtime'] = time();
             $where['proid'] = C('proid');
@@ -91,7 +92,7 @@ class WordController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            $table = M('Word');
+            $table = M('Warning');
             $where = I('post.');
 //            if ($table->where("title = '{$where['title']}'")->find()){
 //                echo '职位名称已存在';
@@ -116,7 +117,7 @@ class WordController extends CommonController {
     //获取所有职位
     public function getListAll() {
         if (IS_AJAX) {
-            $table = D('Word');
+            $table = D('Warning');
             $this->ajaxReturn($table->getListAll());
         } else {
             $this->error('非法操作！');
@@ -126,7 +127,7 @@ class WordController extends CommonController {
     //获取
     public function getone() {
         if (IS_AJAX) {
-            $table = M('Word');
+            $table = M('Warning');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -140,7 +141,7 @@ class WordController extends CommonController {
     //详情
     public function details() {
         if (IS_AJAX) {
-            $table = M('Word');
+            $table = M('Warning');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -155,7 +156,7 @@ class WordController extends CommonController {
     //删除
     public function delete() {
         if (IS_AJAX) {
-            $table = M('Word');
+            $table = M('Warning');
             echo $table->delete(I('post.ids'));
         } else {
             $this->error('非法操作！');

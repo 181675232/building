@@ -25,15 +25,8 @@ $(function () {
             toolbar : '#'+NAME+'-tool',
             columns : [[
                 {
-                    field : 'id',
-                    title : '编号',
-                    align : 'center',
-                    width : 100,
-                    checkbox : true
-                },
-                {
                     field : 'title',
-                    title : '标题',
+                    title : '罚款原因',
                     align : 'center',
                     width : 150
                 },
@@ -50,6 +43,18 @@ $(function () {
                     width : 80
                 },
                 {
+                    field : 'uname',
+                    title : '分包',
+                    align : 'center',
+                    width : 80
+                },
+                {
+                    field : 'price',
+                    title : '金额',
+                    align : 'center',
+                    width : 80
+                },
+                {
                     field : 'addtime',
                     title : '创建时间',
                     align : 'center',
@@ -60,17 +65,40 @@ $(function () {
                     }
                 },
                 {
-                    field: 'details',
-                    title: '操作',
-                    width: 60,
-                    align : 'center',
+                    field : 'state',
+                    title : '状态',
+                    width : 80,
                     fixed : true,
-                    formatter : function (value,row) {
-                        //'<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
-                        return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
-
+                    align : 'center',
+                    sortable : true,
+                    formatter : function (value, row) {
+                        var state = '';
+                        switch (value) {
+                            case '1' :
+                                state = '未确认';
+                                break;
+                            case '2' :
+                                state = '已确认';
+                                break;
+                            case '3' :
+                                state = '已撤销';
+                                break;
+                        }
+                        return state;
                     }
-                }
+                },
+                // {
+                //     field: 'details',
+                //     title: '操作',
+                //     width: 60,
+                //     align : 'center',
+                //     fixed : true,
+                //     formatter : function (value,row) {
+                //         //'<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
+                //         return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
+                //
+                //     }
+                // }
             ]],
             onLoadSuccess : function() {
                 $('.'+NAME+'-details').linkbutton({
