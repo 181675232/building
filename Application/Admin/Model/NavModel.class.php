@@ -12,7 +12,7 @@ class NavModel extends Model {
 //    }
 
     public function getNav($bid) {
-        $object = $this->field('id,title as text,url,pid')->where("bid = $bid")->select();
+        $object = $this->field('id,simg,title as text,url,pid')->where("state = 1")->select();
         $tree = array();
 
         //先筛选出根节点
@@ -25,11 +25,18 @@ class NavModel extends Model {
         //将子节点合并到对应的根节点
         foreach ($tree as $treeKey=>$treeValue) {
             foreach ($object as $objectKey=>$objectValue) {
-                if ($treeValue['id'] == $objectValue['pid']) {
+                if ($treeValue['id'] == $objectValue['pid']){
+                    foreach ($object as $k=>$v){
+                        if ($objectValue['id'] == $v['pid']){
+                            $objectValue['children'][] = $v;
+                        }
+                    }
                     $tree[$treeKey]['children'][] = $objectValue;
                 }
             }
         }
+
+
         return $tree;
     }
 

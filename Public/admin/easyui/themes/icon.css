@@ -92,8 +92,26 @@
 	background:url('icons/icon.png') no-repeat -417px -83px;
 }
 .icon-import{
-	 background:url('icons/icon.png') no-repeat -470px -112px;
+	background:url('icons/icon.png') no-repeat -470px -112px;
  }
+.icon-export{
+	background:url('icons/icon.png') no-repeat -388px -112px;
+}
+.icon-1{
+	background:url('icons/icon.png') no-repeat 2px -305px;
+}
+.icon-2{
+	background:url('icons/icon.png') no-repeat -388px -112px;
+}
+.icon-3{
+	background:url('icons/icon.png') no-repeat -388px -112px;
+}
+.icon-4{
+	background:url('icons/icon.png') no-repeat -388px -112px;
+}
+.icon-5{
+	background:url('icons/icon.png') no-repeat -388px -112px;
+}
 /*.icon-add-new{*/
 	/*background:url('icons/add-new.png') no-repeat center center;*/
 /*}*/

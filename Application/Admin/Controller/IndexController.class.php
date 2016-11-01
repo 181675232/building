@@ -16,7 +16,7 @@ class IndexController extends Controller {
     //获取菜单导航
     public function getNav() {
         $Nav = D('Nav');
-        $this->ajaxReturn($Nav->getNav(1));
+        $this->ajaxReturn($Nav->getNav(0));
     }
 
     //	上传图片

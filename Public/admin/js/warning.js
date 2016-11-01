@@ -26,7 +26,7 @@ $(function () {
             columns : [[
                 {
                     field : 'title',
-                    title : '罚款原因',
+                    title : '预警标题',
                     align : 'center',
                     width : 150
                 },
@@ -43,18 +43,6 @@ $(function () {
                     width : 80
                 },
                 {
-                    field : 'uname',
-                    title : '分包',
-                    align : 'center',
-                    width : 80
-                },
-                {
-                    field : 'price',
-                    title : '金额',
-                    align : 'center',
-                    width : 80
-                },
-                {
                     field : 'addtime',
                     title : '创建时间',
                     align : 'center',
@@ -65,28 +53,30 @@ $(function () {
                     }
                 },
                 {
-                    field : 'state',
-                    title : '状态',
-                    width : 80,
-                    fixed : true,
+                    field : 'stoptime',
+                    title : '预警时间',
                     align : 'center',
+                    width : 100,
                     sortable : true,
-                    formatter : function (value, row) {
-                        var state = '';
-                        switch (value) {
-                            case '1' :
-                                state = '未确认';
-                                break;
-                            case '2' :
-                                state = '已确认';
-                                break;
-                            case '3' :
-                                state = '已撤销';
-                                break;
-                        }
-                        return state;
+                    formatter : function (value,row) {
+                        return formatDate(new Date(value * 1000));
                     }
                 },
+                // {
+                //     field : 'mp3',
+                //     title : '音频',
+                //     width : 80,
+                //     fixed : true,
+                //     align : 'center',
+                //     sortable : true,
+                //     formatter : function (value, row) {
+                //         if (value){
+                //             return  '<audio src="'+value+'" controls="controls">Your browser does not support the audio element. </audio>';
+                //         }else {
+                //             return '无';
+                //         }
+                //     }
+                // },
                 // {
                 //     field: 'details',
                 //     title: '操作',

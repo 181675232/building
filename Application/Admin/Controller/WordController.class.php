@@ -38,6 +38,11 @@ class WordController extends CommonController {
             } else if ($stoptime) {
                 $where["$datetype"] = array('elt', date($stoptime));
             }
+            //管理 or 职员
+            if (session('admin')['level']){
+                $level_uid = session('admin')['id'];
+                $where['_string'] = "uid = $level_uid or user_id = $level_uid";
+            }
             //排序
             $order = I('post.order');
             $sort = I('post.sort');
@@ -135,6 +140,49 @@ class WordController extends CommonController {
         } else {
             $this->error('非法操作！');
         }
+    }
+
+    //导出
+    public function export() {
+        $table = M('Word');
+
+        /*--------post参数--------*/
+        $keywords = I('post.word_search_keywords');
+        if (I('post.word_search_date_from')) $starttime = strtotime(I('post.word_search_date_from'));
+        if (I('post.word_search_date_to')) $stoptime = strtotime(I('post.word_search_date_to').' 23:59:59');
+        $datetype = I('post.word_search_date') ? I('post.word_search_date') : 'addtime';
+        /*--------post参数--------*/
+
+        //条件
+        $where = array();
+        if ($keywords) {
+            $where['title'] = array('like', '%'.$keywords.'%');
+        }
+        if ($starttime && $stoptime) {
+            $where["$datetype"] = array(array('egt', date($starttime)), array('elt', date($stoptime)));
+        } else if ($starttime) {
+            $where["$datetype"] = array('egt', date($starttime));
+        } else if ($stoptime) {
+            $where["$datetype"] = array('elt', date($stoptime));
+        }
+        //管理 or 职员
+        if (session('admin')['level']){
+            $level_uid = session('admin')['id'];
+            $where['_string'] = "uid = $level_uid or user_id = $level_uid";
+        }
+        //排序
+
+        $orders['id'] = 'desc';
+        $where['proid'] = C('proid');
+        $data = $table->field('*')->where($where)->order($orders)->select();
+        $word_group = M('Word_group');
+        $admin = M('admin');
+        foreach ($data as $key=>$val){
+            $data[$key]['group_name'] = $word_group->where("id = '{$val['pid']}'")->getField('title');
+            $data[$key]['username'] = $admin->where("id = '{$val['uid']}'")->getField('username');
+        }
+        $execl = new \Org\Util\Excel();
+        $execl->excel_find($data,date('YmdHis',time()));
     }
 
     //详情

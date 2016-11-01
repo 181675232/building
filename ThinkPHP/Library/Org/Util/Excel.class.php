@@ -113,7 +113,152 @@ class download{
 }
 
 
-class Excel{    
+class Excel{
+    public function excel_find($data,$name){
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->createSheet();//创建新的内置表
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objSheet = $objPHPExcel->getActiveSheet();
+
+        //填充数据
+        $objSheet->setCellValue("A1","罚款原因")
+            ->setCellValue("B1","罚款类别")
+            ->setCellValue("C1","发布人")
+            ->setCellValue("D1","分包")
+            ->setCellValue("E1","金额")
+            ->setCellValue("F1","状态")
+            ->setCellValue("G1","罚款时间");
+
+        //设置默认行高
+        $objSheet->getDefaultRowDimension()->setRowHeight(20);
+        //所有垂直居中
+        $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);//设置excel文件默认水平垂直方向居中
+        //设置单元格宽度
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(30);
+        //设置第二行行高
+        //$objSheet->getRowDimension(1)->setRowHeight(20);
+        //填充班级背景颜色
+        $objSheet->getStyle("A1:G1")->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('6fc144');
+        //设置单元格边框
+        $objPHPExcel->getActiveSheet()->getStyle('A1:G1')->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+        //设置某列单元格格式为文本格式
+        //$objSheet->getStyle("C2:C100")->getNumberFormat()->setFormatCode(\PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+
+        $j=2;
+        foreach ($data as $key=>$val){
+
+            //设置行高
+            //$objPHPExcel->getActiveSheet()->getRowDimension($j)->setRowHeight(10);
+
+            if($val['state']==1){
+                $state = "未确认";
+            }elseif($val['sex']==2){
+                $state = "已确认";
+            }else{
+                $state = '已撤销';
+            }
+
+            $objSheet
+                ->setCellValue("A".$j,$val['title'])
+                ->setCellValue("B".$j,$val['group_name'])
+                ->setCellValue("C".$j,$val['username'])
+                ->setCellValue("D".$j,$val['uname'])
+                ->setCellValue("E".$j,$val['price'].'元')
+                ->setCellValue("F".$j,$state)
+                ->setCellValue("G".$j,date("Y-m-d H:i:s",$val['addtime']));
+            $j++;
+        }
+
+
+
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel,'Excel5');//生成excel文件
+        //$objWriter->save("./Public/excel/excel.xls");//保存文件
+        //browser_excel('Excel5','excel.xls');//输出到浏览器
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');//告诉浏览器数据excel07文件
+        header("Content-Disposition: attachment;filename=$name.xls");//告诉浏览器将输出文件的名称
+        header('Cache-Control: max-age=0');//禁止缓存
+        $objWriter->save("php://output");
+
+    }
+
+    public function excel_warning($data,$name){
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->createSheet();//创建新的内置表
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objSheet = $objPHPExcel->getActiveSheet();
+
+        //填充数据
+        $objSheet->setCellValue("A1","预警标题")
+            ->setCellValue("B1","类别")
+            ->setCellValue("C1","发布人")
+            ->setCellValue("D1","创建时间")
+            ->setCellValue("E1","预警时间");
+
+        //设置默认行高
+        $objSheet->getDefaultRowDimension()->setRowHeight(20);
+        //所有垂直居中
+        $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);//设置excel文件默认水平垂直方向居中
+        //设置单元格宽度
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+//        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+//        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(30);
+        //设置第二行行高
+        //$objSheet->getRowDimension(1)->setRowHeight(20);
+        //填充班级背景颜色
+        $objSheet->getStyle("A1:E1")->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('6fc144');
+        //设置单元格边框
+        $objPHPExcel->getActiveSheet()->getStyle('A1:E1')->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+        //设置某列单元格格式为文本格式
+        //$objSheet->getStyle("C2:C100")->getNumberFormat()->setFormatCode(\PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+
+        $j=2;
+        foreach ($data as $key=>$val){
+
+            //设置行高
+            //$objPHPExcel->getActiveSheet()->getRowDimension($j)->setRowHeight(10);
+
+            if($val['state']==1){
+                $state = "未确认";
+            }elseif($val['sex']==2){
+                $state = "已确认";
+            }else{
+                $state = '已撤销';
+            }
+
+            $objSheet
+                ->setCellValue("A".$j,$val['title'])
+                ->setCellValue("B".$j,$val['group_name'])
+                ->setCellValue("C".$j,$val['username'])
+                ->setCellValue("D".$j,date("Y-m-d H:i:s",$val['addtime']))
+                ->setCellValue("E".$j,date("Y-m-d H:i:s",$val['stoptime']));
+//                ->setCellValue("F".$j,$state)
+//                ->setCellValue("G".$j,date("Y-m-d H:i:s",$val['addtime']));
+            $j++;
+        }
+
+
+
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel,'Excel5');//生成excel文件
+        //$objWriter->save("./Public/excel/excel.xls");//保存文件
+        //browser_excel('Excel5','excel.xls');//输出到浏览器
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');//告诉浏览器数据excel07文件
+        header("Content-Disposition: attachment;filename=$name.xls");//告诉浏览器将输出文件的名称
+        header('Cache-Control: max-age=0');//禁止缓存
+        $objWriter->save("php://output");
+
+    }
+
+
 	public function excel($data,$time){
 		$objPHPExcel = new \PHPExcel();
 		$objPHPExcel->createSheet();//创建新的内置表

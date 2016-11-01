@@ -24,11 +24,13 @@ class LoginController extends Controller {
             if ($object) {
                 if (!$object['state'] == 2) return -1;
                 //if (!$object['name']) return -2;
+                $role = M('Level')->field('title,level')->where("id = '{$object['level']}'")->find();
                 $arr = array(
                     'id'=>$object['id'],
                     'name'=>$object['name'],
                     'username'=>$object['username'],
-                    'level'=>M('Level')->where("id = '{$object['level']}'")->getField('title')
+                    'level'=>$role['level'],
+                    'title'=>$role['title'],
                 );
                 session('admin',$arr);
                 $update = array(
