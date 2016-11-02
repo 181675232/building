@@ -21,8 +21,12 @@ class CommonController extends Controller {
 
         //检测是否有权限没有权限就做相应的处理
         if(!$auth->check(CONTROLLER_NAME.'-'.ACTION_NAME,$session['id'])){
-            json('400','您没有操作权限！',CONTROLLER_NAME.'-'.ACTION_NAME);
-            exit();
+            if (IS_AJAX){
+                json('400','您没有操作权限！',CONTROLLER_NAME.'-'.ACTION_NAME);
+                exit();
+            }else{
+                alertBack('您没有操作权限！');
+            }
         }
 //        if(!$rbac::AccessDecision()){
 //            if (ACTION_NAME == 'delete'){

@@ -1,0 +1,80 @@
+<table class="form-table" style="max-width: 820px;">
+	<tbody>
+	<input type="hidden" id="level-edit-id" name="level_edit_id" value="{$id}">
+	<tr>
+		<td class="label" width="15%">
+			<label for="level-edit-title" class="form-label">职位名称：</label>
+		</td>
+		<td class="input">
+			<input type="text" id="level-edit-title" name="level_edit_title" class="easyui-textbox" value="{$title}">
+		</td>
+	</tr>
+	<tr>
+		<td class="input" colspan="2">
+			<table id="rold_table" border="0" cellspacing="0" cellpadding="0" class="border-table" width="80%">
+				<thead>
+				<tr>
+					<th width="25%">　 　 　导航名称</th>
+					<th>权限分配</th>
+				</tr>
+				</thead>
+				<tbody>
+
+				<volist name="data" id="val1">
+					<tr >
+						<td style="white-space:nowrap;word-break:break-all;overflow:hidden;padding-left: 50px;">
+							<span class="folder-open"></span>
+							<span>{$val1.text}</span>
+						</td>
+						<td align="left">
+							<!--
+                            <input type="checkbox" id="cblActionType" Class="cbllist" name="node_id[]" value="{$val1.id}" Style="vertical-align: middle;" /> 显示　
+                            -->
+							<volist name="val1.role" id="val11">
+								<input type="checkbox" id="cblActionType" <php> if(in_array($val11['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" name="level_edit_node[]" value="{$val11.id}" Style="vertical-align: middle;" /> {$val11.title} 　
+							</volist>
+						</td>
+					</tr>
+					<volist name="val1.children" id="val2">
+						<tr>
+							<td style="white-space:nowrap;word-break:break-all;overflow:hidden;padding-left: 50px;">
+								<span style="display:inline-block;width:0px;"></span>
+								<span class="folder-line"></span><span class="folder-open"></span>
+								<span>{$val2.text}</span>
+							</td>
+							<td align="left">
+								<!--
+                                <input type="checkbox" id="cblActionType" Class="cbllist" name="node_id[]" value="{$val2.id}" Style="vertical-align: middle;" /> 显示　
+                                -->
+								<foreach name="val2.role" item="val21">
+									<input type="checkbox" id="cblActionType" <php> if(in_array($val21['id'],$rules)){</php>checked="checked"<php>}</php> name="level_edit_node[]" Class="cbllist" value="{$val21.id}" Style="vertical-align: middle;" /> {$val21.title} 　
+								</foreach>
+							</td>
+						</tr>
+						<foreach name="val2.children" item="val3">
+							<tr valign="middle">
+								<td style="white-space:nowrap;word-break:break-all;overflow:hidden;padding-left: 50px;">
+									<span style="display:inline-block;width:25px;"></span>
+									<span class="folder-line"></span><span class="folder-open"></span>
+									<span>{$val3.text}</span>
+								</td>
+								<td align="left">
+									<!--
+                                    <input type="checkbox" Class="cbllist" name="node_id[]" value="{$val3.id}" Style="vertical-align: middle;" /> 显示　
+                                    -->
+
+									<foreach name="val3.role" item="val31">
+										<input type="checkbox" name="level_edit_node[]" <php> if(in_array($val31['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" value="{$val31.id}" Style="vertical-align: top;margin:3px 0px 6px;" /> {$val31.title} 　
+									</foreach>
+								</td>
+							</tr>
+						</foreach>
+					</volist>
+				</volist>
+				</tbody>
+			</table>
+		</td>
+	</tr>
+
+	</tbody>
+</table>

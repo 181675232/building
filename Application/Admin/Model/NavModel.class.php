@@ -11,8 +11,8 @@ class NavModel extends Model {
 //        return $object ? $object : '';
 //    }
 
-    public function getNav($bid) {
-        $object = $this->field('id,simg,title as text,url,pid')->where("state = 1")->select();
+    public function getNav($bid = 0) {
+        $object = $this->field('id,simg,title as text,url,pid')->where("state = 1")->order('ord asc,id asc')->select();
         $tree = array();
 
         //先筛选出根节点
@@ -28,6 +28,39 @@ class NavModel extends Model {
                 if ($treeValue['id'] == $objectValue['pid']){
                     foreach ($object as $k=>$v){
                         if ($objectValue['id'] == $v['pid']){
+                            $objectValue['children'][] = $v;
+                        }
+                    }
+                    $tree[$treeKey]['children'][] = $objectValue;
+                }
+            }
+        }
+
+
+        return $tree;
+    }
+
+    public function getRole($bid = 0) {
+        $object = $this->field('id,simg,title as text,url,pid')->where("state = 1")->order('ord asc,id asc')->select();
+        $tree = array();
+
+        $rule = M('rule');
+        //先筛选出根节点
+        foreach ($object as $key=>$value) {
+            if ($value['pid'] == $bid) {
+                $value['role'] = $rule->field('id,title')->where("pid = '{$value['id']}'")->order('id asc')->select();
+                $tree[] = $value;
+            }
+        }
+
+        //将子节点合并到对应的根节点
+        foreach ($tree as $treeKey=>$treeValue) {
+            foreach ($object as $objectKey=>$objectValue) {
+                if ($treeValue['id'] == $objectValue['pid']){
+                    $objectValue['role'] = $rule->field('id,title')->where("pid = '{$objectValue['id']}'")->order('id asc')->select();
+                    foreach ($object as $k=>$v){
+                        if ($objectValue['id'] == $v['pid']){
+                            $v['role'] = $rule->field('id,title')->where("pid = '{$v['id']}'")->order('id asc')->select();
                             $objectValue['children'][] = $v;
                         }
                     }

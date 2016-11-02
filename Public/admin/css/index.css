@@ -37,6 +37,13 @@ td .folder-open {
     padding: 0 5px;
     border-top: 1px solid #fff;
 }
+.l-btn-plain-selected{
+    background: #33b5e5 none repeat scroll 0 0 !important;
+}
+.switchbutton-on{
+    background: #33b5e5 none repeat scroll 0 0 !important;
+}
+
 .datebox .combo-arrow{
     background-image: url("../img/icon.png");
     background-position: -194px -105px;
@@ -292,4 +299,14 @@ a.tabs-inner {
     display: inline-block;
     height: 30px;
     vertical-align: middle;
+}
+#rold_table th{
+    height: 35px;
+}
+#rold_table td{
+    height: 30px;
+    vertical-align: middle;
+}
+#rold_table td input{
+    line-height: 30px;
 }

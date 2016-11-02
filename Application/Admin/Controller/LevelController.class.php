@@ -61,21 +61,28 @@ class LevelController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
-            $table = M('Level');
-            $where = I('post.');
-            if ($table->where("title = '{$where['title']}'")->find()){
-                echo '职位名称已存在';
-                exit;
+            if ($_POST){
+
+                $table = M('Level');
+                $where = I('post.');
+                if ($table->where("title = '{$where['title']}'")->find()){
+                    echo '职位名称已存在';
+                    exit;
+                }
+                $where['addtime'] = time();
+                $id = $table->add($where);
+                if ($id) {
+                    echo $id ? $id : 0;
+                    exit;
+                } else {
+                    echo '操作失败！';
+                    exit;
+                }
             }
-            $where['addtime'] = time();
-            $id = $table->add($where);
-            if ($id) {
-                echo $id ? $id : 0;
-                exit;
-            } else {
-                echo '操作失败！';
-                exit;
-            }
+            $nav = D('Nav');
+            $data = $nav->getRole();
+            $this->assign('data',$data);
+            $this->display();
         } else {
             $this->error('非法操作！');
         }
@@ -84,20 +91,29 @@ class LevelController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            $table = M('Level');
-            $where = I('post.');
+            if ($_POST) {
+                $table = M('Level');
+                $where = I('post.');
 //            if ($table->where("title = '{$where['title']}'")->find()){
 //                echo '职位名称已存在';
 //                exit;
 //            }
-            $id = $table->save($where);
-            if ($id) {
-                echo $id ? $id : 0;
-                exit;
-            } else {
-                echo '操作失败！';
-                exit;
+                $id = $table->save($where);
+                if ($id) {
+                    echo $id ? $id : 0;
+                    exit;
+                } else {
+                    echo '操作失败！';
+                    exit;
+                }
             }
+            $nav = D('Nav');
+            $res = M('Level')->find(I('get.id'));
+            $res['rules'] = explode(',',$res['rules']);
+            $data = $nav->getRole();
+            $this->assign('data',$data);
+            $this->assign($res);
+            $this->display();
         } else {
             $this->error('非法操作！');
         }

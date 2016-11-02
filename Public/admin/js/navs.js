@@ -16,7 +16,7 @@ $(function () {
         striped : true,
         rownumbers : true,
         border : false,
-        pagination : true,
+        pagination : false,
         pageSize : 20,
         pageList : [10, 20, 30, 40, 50],
         pageNumber : 1,
@@ -32,19 +32,35 @@ $(function () {
                 checkbox : true
             },
             {
-                field : 'title',
+                field : 'titles',
                 title : '名称',
-                align : 'center',
-                width : 100
+                width : 100,
+                halign : 'center'
             },
             {
-                field : 'addtime',
-                title : '创建时间',
+                field : 'ord',
+                title : '排序',
                 align : 'center',
                 width : 100,
+            },
+            {
+                field : 'state',
+                title : '状态',
+                width : 100,
+                align : 'center',
+                fixed : true,
                 sortable : true,
-                formatter : function (value,row) {
-                    return formatDate(new Date(value * 1000));
+                formatter : function (value, row) {
+                    var state = '';
+                    switch (value) {
+                        case '1' :
+                            state = '<a href="javascript:void(0)" '+NAME+'-id="' + row.id + '" '+NAME+'-state="1" title="正常" class="'+NAME+'-state '+NAME+'-state-1" style="height: 18px;margin-left:4px;"></a>';
+                            break;
+                        case '2' :
+                            state = '<a href="javascript:void(0)" '+NAME+'-id="' + row.id + '" '+NAME+'-state="2" title="隐藏" class="'+NAME+'-state '+NAME+'-state-2" style="height: 18px;margin-left:4px;"></a>';
+                            break;
+                    }
+                    return state;
                 }
             },
             {
@@ -61,6 +77,79 @@ $(function () {
             }
         ]],
         onLoadSuccess : function() {
+            $('.'+NAME+'-state-1').linkbutton({
+                iconCls : 'icon-xianshi',
+                plain : true
+            });
+            $('.'+NAME+'-state-2').linkbutton({
+                iconCls : 'icon-yincang',
+                plain : true
+            });
+            $('.'+NAME+'-state').click(function () {
+                var id = $(this).attr(''+NAME+'-id'),
+                    state = $(this).attr(''+NAME+'-state');
+
+                switch (state) {
+                    case '2' :
+                        $.messager.confirm('操作确认','确认显示？',function(flag) {
+                            if (flag){
+                                $.ajax({
+                                    url : ThinkPHP['MODULE'] + '/'+NAME+'/state',
+                                    type : 'POST',
+                                    data : {
+                                        id : id,
+                                        state : '1'
+                                    },
+                                    beforeSend : function () {
+                                        $.messager.progress({
+                                            text : 'loading...'
+                                        });
+                                    },
+                                    success : function(data) {
+                                        $.messager.progress('close');
+                                        if (data > 0) {
+                                            $.messager.show({
+                                                title : '操作提醒',
+                                                msg : '操作成功！'
+                                            });
+                                            $('#'+NAME+'').datagrid('reload');
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        break;
+                    case '1' :
+                        $.messager.confirm('操作确认','确认隐藏？',function(flag) {
+                            if (flag){
+                                $.ajax({
+                                    url : ThinkPHP['MODULE'] + '/'+NAME+'/state',
+                                    type : 'POST',
+                                    data : {
+                                        id : id,
+                                        state : '2'
+                                    },
+                                    beforeSend : function () {
+                                        $.messager.progress({
+                                            text : 'loading...'
+                                        });
+                                    },
+                                    success : function(data) {
+                                        $.messager.progress('close');
+                                        if (data > 0) {
+                                            $.messager.show({
+                                                title : '操作提醒',
+                                                msg : '操作成功！'
+                                            });
+                                            $('#'+NAME+'').datagrid('reload');
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        break;
+                }
+            });
             $('.'+NAME+'-details').linkbutton({
                 iconCls : 'icon-text',
                 plain : true
@@ -78,8 +167,8 @@ $(function () {
     });
 
     $('#'+NAME+'-add').dialog({
-        width : 820,
-        height : '600',
+        width : 420,
+        height : 'auto',
         title : '新增信息',
         iconCls : 'icon-add-new',
         modal : true,
@@ -95,8 +184,13 @@ $(function () {
                         url : ThinkPHP['MODULE'] + '/'+NAME+'/add',
                         type : 'POST',
                         data : {
-                            title : $('input[name="level_add_title"]').val(),
-                            rules : (function(){var arry_data=[]; $('input[name="level_add_node[]"]:checked').each(function () {
+                            title : $('input[name="'+NAME+'_title_add"]').val(),
+                            name : $('input[name="'+NAME+'_name_add"]').val(),
+                            simg : $('input[name="'+NAME+'_simg_add"]').val(),
+                            url : $('input[name="'+NAME+'_url_add"]').val(),
+                            ord : $('input[name="'+NAME+'_ord_add"]').val(),
+                            pid : $('input[name="'+NAME+'_pid_add"]').val(),
+                            auth :(function(){var arry_data=[]; $('input[name="'+NAME+'_auth_add"]:checked').each(function () {
                                 arry_data.push($(this).val());
                             });return arry_data.join(',');}),
                         },
@@ -135,8 +229,8 @@ $(function () {
     });
 
     $('#'+NAME+'-edit').dialog({
-        width : 820,
-        height : '600',
+        width : 420,
+        height : 'auto',
         title : '编辑信息',
         iconCls : 'icon-edit-new',
         modal : true,
@@ -152,11 +246,12 @@ $(function () {
                         url : ThinkPHP['MODULE'] + '/'+NAME+'/edit',
                         type : 'POST',
                         data : {
-                            id : $('input[name="'+NAME+'_edit_id"]').val(),
-                            title : $('input[name="level_edit_title"]').val(),
-                            rules : (function(){var arry_data=[]; $('input[name="level_edit_node[]"]:checked').each(function () {
-                                arry_data.push($(this).val());
-                            });return arry_data.join(',');}),
+                            id : $('input[name="'+NAME+'_id_edit"]').val(),
+                            title : $('input[name="'+NAME+'_title_edit"]').val(),
+                            ord : $('input[name="'+NAME+'_ord_edit"]').val(),
+                            name : $('input[name="'+NAME+'_name_edit"]').val(),
+                            simg : $('input[name="'+NAME+'_simg_edit"]').val(),
+                            url : $('input[name="'+NAME+'_url_edit"]').val(),
                         },
                         beforeSend : function () {
                             $.messager.progress({
@@ -200,7 +295,61 @@ $(function () {
         missingMessage : '请输入名称',
         invalidMessage : '名称2-20位'
     });
+    $('#'+NAME+'-name-add,#'+NAME+'-name-edit').textbox({
+        width : 220,
+        height : 32,
+        required : true,
+        validType : 'length[2,20]',
+        missingMessage : '请输入名称',
+        invalidMessage : '名称2-20位'
+    });
+    $('#'+NAME+'-url-add,#'+NAME+'-url-edit,#'+NAME+'-simg-add,#'+NAME+'-simg-edit').textbox({
+        width : 220,
+        height : 32,
+    });
+
+    $('#'+NAME+'-ord-add,#'+NAME+'-ord-edit').numberbox({
+        width : 60,
+        height : 32,
+        required : true,
+        //precision : 2,
+        //validType : 'length[2,20]',
+        missingMessage : '不能为空',
+        //invalidMessage : '名称2-20位'
+    });
+    //下拉类别
+    $('#'+NAME+'-pid-add').combogrid({
+        url : ThinkPHP['MODULE'] + '/'+NAME+'/getall',
+        width : 120,
+        panelWidth: 220,
+        showHeader: false,
+        panelHeight: 'auto',
+        panelMaxHeight : 227,
+        fitColumns : true,
+        striped : true,
+        border : false,
+        idField:'id',
+        textField:'title',
+        editable : false,
+        remoteSort : false,
+        columns : [[
+            {
+                field : 'titles',
+                title : '　　<span class="folder-open"></span>无上级类别',
+                width : 80
+            }
+        ]],
+        onShowPanel : function () {
+            $(this).combogrid('panel').panel('resize', {
+                width : '220px'
+            });
+        }
+    });
+
+
     /* ---------------------------弹出框样式-------------------------------------------*/
+
+
     //时间搜索
     $('#'+NAME+'-search-date').combobox({
         width : 80,
@@ -218,6 +367,12 @@ $(function () {
         novalidate : true
     });
 
+    // $('#'+NAME+'-state-add,#'+NAME+'-state-edit').switchbutton({
+    //     checked: true,
+    //     onChange: function(checked){
+    //         console.log(checked);
+    //     }
+    // })
     //选择时间触发验证
     $('#'+NAME+'-search-date-from, #'+NAME+'-search-date-to').datebox({
         onSelect : function () {
@@ -225,13 +380,13 @@ $(function () {
                 $('#'+NAME+'-search-date').combobox('showPanel');
             }
         }
-    });
+    })
 
 })(PUBLIC_STR_NAME);
 });
 
 //工具栏操作模块
-PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
+PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME){
 return {
     search : function () {
         if ($('#'+NAME+'-tool').form('validate')) {
@@ -252,48 +407,45 @@ return {
             dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/getDetails/?id=' + id);
     },
     add : function () {
-        $('#'+NAME+'-add').
-        dialog('open').
-        dialog('setTitle', '新增').
-        dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/add');
-        //$('#'+NAME+'-add').dialog('open');
+        $('#'+NAME+'-add').dialog('open');
+        $('#'+NAME+'-type-add').combogrid('grid').datagrid('reload');
     },
     edit : function (id) {
-        $('#'+NAME+'-edit').
-        dialog('open').
-        dialog('setTitle', '修改').
-        dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/edit/id/'+id);
         //$('#user-staff-edit').combogrid('grid').datagrid('reload');
         //获取选中对象
         //var rows = $('#'+NAME+'').datagrid('getSelections');
-        // $('#'+NAME+'-edit').dialog('open');
-        // $.ajax({
-        //     url : ThinkPHP['MODULE'] + '/'+NAME+'/getone',
-        //     type : 'POST',
-        //     data : {
-        //         id : id
-        //     },
-        //     // beforeSend : function () {
-        //     //     $.messager.progress({
-        //     //         text : '正在获取信息...'
-        //     //     });
-        //     // },
-        //     success : function(data) {
-        //         $.messager.progress('close');
-        //         if (data) {
-        //            var PUCLIC_JSON= eval('({'+
-        //                 NAME+'_id_edit:data.id,'+
-        //                 NAME+'_title_edit:data.title'+
-        //                 '})');
-        //             $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
-        //             if (data.state == '正常') {
-        //                 $('#user-state-edit').switchbutton('check');
-        //             } else {
-        //                 $('#user-state-edit').switchbutton('uncheck');
-        //             }
-        //         }
-        //     }
-        // });
+        $('#'+NAME+'-edit').dialog('open');
+        $.ajax({
+            url : ThinkPHP['MODULE'] + '/'+NAME+'/getone',
+            type : 'POST',
+            data : {
+                id : id
+            },
+            // beforeSend : function () {
+            //     $.messager.progress({
+            //         text : '正在获取信息...'
+            //     });
+            // },
+            success : function(data) {
+                $.messager.progress('close');
+                if (data) {
+                   var PUCLIC_JSON= eval('({'+
+                        NAME+'_id_edit:data.id,'+
+                        NAME+'_title_edit:data.title,'+
+                        NAME+'_ord_edit:data.ord,'+
+                       NAME+'_name_edit:data.name,'+
+                       NAME+'_url_edit:data.url,'+
+                       NAME+'_simg_edit:data.simg,'+
+                        '})');
+                    $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
+                    if (data.state == '正常') {
+                        $('#user-state-edit').switchbutton('check');
+                    } else {
+                        $('#user-state-edit').switchbutton('uncheck');
+                    }
+                }
+            }
+        });
     },
     remove : function () {
         var rows = $('#'+NAME+'').datagrid('getSelections');
@@ -319,7 +471,7 @@ return {
                                 $('#'+NAME+'').datagrid('reload');
                                 $.messager.show({
                                     title : '操作提醒',
-                                    msg : data + '个职位被成功删除！'
+                                    msg : data + '条记录被成功删除！'
                                 });
                             }
                         }
@@ -347,3 +499,4 @@ return {
     }
 };
 })(PUBLIC_STR_NAME);
+
