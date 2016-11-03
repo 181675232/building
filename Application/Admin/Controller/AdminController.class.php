@@ -116,11 +116,50 @@ class AdminController extends CommonController {
         }
     }
 
-    //获取所有职位
-    public function getListAll() {
+    //获取所有
+    public function getall() {
         if (IS_AJAX) {
-            $table = D('Admin');
-            $this->ajaxReturn($table->getListAll());
+            $table = M('Admin');
+            //分页
+            $page = I('post.page') ? I('post.page') : 1;
+            $pagesize = I('post.rows') ? I('post.rows') : 20;
+            $pages = ($page - 1) * $pagesize;
+
+            //条件
+            $where = array();
+            if (I('post.keywords')) {
+                $keywords = I('post.keywords');
+                $map['name'] = array('like', '%'.$keywords.'%');
+                $map['phone'] = array('like', '%'.$keywords.'%');
+                $map['username'] = array('like', '%'.$keywords.'%');
+                $map['_logic'] = 'OR';
+            }
+
+            if ($map){
+                $where['_complex'] = $map;
+            }
+            if (I('get.type')){
+                $where['level'] = I('get.type');
+            }
+            //排序
+            $order = I('post.order');
+            $sort = I('post.sort');
+            if ($order && $sort){
+                $orders[$sort] = $order;
+            }else{
+                //默认排序
+                $orders['id'] = 'desc';
+            }
+            $where['proid'] = C('proid');
+            $count = $table->where($where)->count();
+            $data = $table->field('*')
+                ->where($where)
+                ->order($orders)->limit($pages,$pagesize)->select();
+            $level = M('level');
+            foreach ($data as $key=>$val){
+                $data[$key]['level_name'] = $level->where("id = '{$val['level']}'")->getField('title');
+            }
+            $this->ajaxReturn(array('total'=>$count,'rows'=>$data ? $data : ''));
         } else {
             $this->error('非法操作！');
         }

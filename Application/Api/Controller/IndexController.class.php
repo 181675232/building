@@ -3008,14 +3008,8 @@ class IndexController extends CommonController {
             unset($file['mp3']);
         }
         $where['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
-        $where['title'] = I('post.title') ? I('post.title') : json('404','缺少参数 title');
-        $where['stoptime'] = I('post.stoptime') ? I('post.stoptime') : json('404','缺少参数 stoptime');
-        if (checkTimeDate($where['stoptime'])){
-            $where['stoptime'] = strtotime($where['stoptime']);
-            if ($where['stoptime'] < time()) json('400','结束时间不能小于当前时间');
-        }else{
-            json('404','时间格式不正确');
-        }
+        if (I('post.title')) $where['title'] = I('post.title');
+        $where['stoptime'] = I('post.stoptime') ? strtotime(I('post.stoptime')) : time();
         $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
         $table = M('warning');
         $where['addtime'] = $data['addtime'] = time();
