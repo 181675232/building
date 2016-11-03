@@ -162,11 +162,8 @@ $(function () {
                         url : ThinkPHP['MODULE'] + '/'+NAME+'/import',
                         type : 'POST',
                         data : {
-                            name : $('input[name="'+NAME+'_name_add"]').val(),
-                            password : $('input[name="'+NAME+'_password_add"]').val(),
-                            username : $('input[name="'+NAME+'_username_add"]').val(),
-                            phone : $('input[name="'+NAME+'_phone_add"]').val(),
-                            level : $('input[name="'+NAME+'_level_add"]').val(),
+                            file : $('input[name="'+NAME+'_file_import"]').val(),
+                            sheet : $('input[name="'+NAME+'_sheet_import"]').val(),
                         },
                         beforeSend : function () {
                             $.messager.progress({
@@ -194,11 +191,11 @@ $(function () {
             size : 'large',
             iconCls : 'icon-cross',
             handler : function () {
-                $('#'+NAME+'-add').dialog('close');
+                $('#'+NAME+'-import').dialog('close');
             }
         }],
         onClose : function () {
-            $('#'+NAME+'-add').form('reset');
+            $('#'+NAME+'-import').form('reset');
         }
     });
 
@@ -221,9 +218,8 @@ $(function () {
                         type : 'POST',
                         data : {
                             id : $('input[name="'+NAME+'_id_edit"]').val(),
-                            username : $('input[name="'+NAME+'_username_edit"]').val(),
-                            phone : $('input[name="'+NAME+'_phone_edit"]').val(),
-                            level : $('input[name="'+NAME+'_level_edit"]').val(),
+                            title : $('input[name="'+NAME+'_title_edit"]').val(),
+                            day : $('input[name="'+NAME+'_day_edit"]').val(),
                         },
                         beforeSend : function () {
                             $.messager.progress({
@@ -263,13 +259,28 @@ $(function () {
         width : 220,
         height : 32,
         required : true,
-        editable : false,
     });
     $('#'+NAME+'-sheet-import,#'+NAME+'-sheet-import').textbox({
+        width : 120,
+        height : 32,
+        //required : true,
+    });
+    $('#'+NAME+'-title-edit').textbox({
         width : 220,
         height : 32,
         //required : true,
     });
+    $('#'+NAME+'-day-edit').numberbox({
+        width : 220,
+        height : 32,
+        //required : true,
+    });
+    // $('#'+NAME+'-file-import').textbox({
+    //     width : 180,
+    //     height : 32,
+    //     required : true,
+    //     editable : false,
+    // });
 
     /* ---------------------------弹出框样式-------------------------------------------*/
     //时间搜索
@@ -347,11 +358,8 @@ return {
                 if (data) {
                    var PUCLIC_JSON= eval('({'+
                         NAME+'_id_edit:data.id,'+
-                        NAME+'_name_edit:data.name,'+
-                        NAME+'_phone_edit:data.phone,'+
-                        NAME+'_username_edit:data.username,'+
-                        NAME+'_level_edit:data.level,'+
-                       NAME+'_levelname_edit:data.levelname,'+
+                        NAME+'_title_edit:data.title,'+
+                       NAME+'_day_edit:data.day,'+
                         '})');
                     $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
                     // if (data.state == '正常') {

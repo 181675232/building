@@ -26,10 +26,10 @@ class TaskController extends CommonController {
             $where = array();
             if (I('post.keywords')) {
                 $keywords = I('post.keywords');
-                $map['name'] = array('like', '%'.$keywords.'%');
-                $map['phone'] = array('like', '%'.$keywords.'%');
-                $map['_logic'] = 'OR';
-                $map['username'] = array('like', '%'.$keywords.'%');
+                $map['title'] = array('like', '%'.$keywords.'%');
+//                $map['phone'] = array('like', '%'.$keywords.'%');
+//                $map['_logic'] = 'OR';
+//                $map['username'] = array('like', '%'.$keywords.'%');
             }
             if ($map){
                 $where['_complex'] = $map;
@@ -71,6 +71,34 @@ class TaskController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
+            $table = M('Task');
+            $where = I('post.');
+            if ($table->where("name = '{$where['name']}'")->find()){
+                echo '账号已存在';
+                exit;
+            }
+            $where['proid'] = C('proid');
+            $where['simg'] = '/Public/upfile/xitong.jpg';
+            $where['password'] = md5($where['password']);
+            $where['addtime'] = time();
+            $id = $table->add($where);
+            if ($id) {
+                echo $id ? $id : 0;
+                exit;
+            } else {
+                echo '操作失败！';
+                exit;
+            }
+        } else {
+            $this->error('非法操作！');
+        }
+    }
+
+    //导入
+    public function import() {
+        if (IS_AJAX) {
+            print_r(I('post.'));
+            exit;
             $table = M('Task');
             $where = I('post.');
             if ($table->where("name = '{$where['name']}'")->find()){
