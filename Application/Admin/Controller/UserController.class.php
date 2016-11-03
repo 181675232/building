@@ -15,6 +15,8 @@ class UserController extends Controller {
 
     //获取帐号列表
     public function getList() {
+//        $where['proid'] = C('proid');
+//        $data = $table->field('id,title')->where($where)->select();
         if (IS_AJAX) {
             $User = D('User');
             $this->ajaxReturn($User->getList(I('post.page'), I('post.rows'), I('post.order'),

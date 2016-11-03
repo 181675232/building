@@ -118,6 +118,8 @@ class TaskController extends CommonController {
 
     //获取所有职位
     public function getListAll() {
+//        $where['proid'] = C('proid');
+//        $data = $table->field('id,title')->where($where)->select();
         if (IS_AJAX) {
             $table = D('Task');
             $this->ajaxReturn($table->getListAll());

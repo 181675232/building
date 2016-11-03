@@ -139,7 +139,8 @@ class BuildingController extends CommonController {
     public function getall() {
         if (IS_AJAX) {
             $table = M('Building');
-            $data = $table->field('id,title')->select();
+            $where['proid'] = C('proid');
+            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($data);
         } else {
             $this->error('非法操作！');

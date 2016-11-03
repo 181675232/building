@@ -322,7 +322,7 @@ $(function () {
                             title : '选择',
                             width : 60,
                             formatter : function (value, row) {
-                                return '<a href="javascript:void(0)" class="select-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.select(\'' + row.id + '\', \'' + row.username + '\');">选择</a>';
+                                return '<a href="javascript:void(0)" class="select-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.select(\'' + row.id + '\', \'' + row.username + '\', \'' + row.level_name + '\');">选择</a>';
                             }
                         },
                     ]],
@@ -454,6 +454,40 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
         },
         add : function () {
             $('#'+NAME+'-add').dialog('open');
+            //订单产品列表
+            $('#'+NAME+'-username-list-add').datagrid({
+                //url : ThinkPHP['MODULE'] + '/Floor/getuser',
+                width : '95%',
+                columns:[[
+                    {
+                        field : 'id',
+                        title : '编号',
+                        width : 100,
+                        hidden : true
+                    },
+                    {
+                        field : 'username',
+                        title : '名称',
+                        width : 100
+                    },
+                    {
+                        field : 'name',
+                        title : '职务',
+                        width : 130
+                    },
+                    {
+                        field : 'opt',
+                        title : '操作',
+                        width : 40,
+                        formatter : function (value, row, index) {
+                            return '<a href="javascript:void(0)" class="delete-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.delete(\'' + index + '\', \'' + row.id + '\');"><img src="' + ThinkPHP['ROOT'] + '/Public/admin/easyui/themes/icons/delete-new.png"></a>';
+                        }
+                    }
+                ]],
+                onClickCell : function (index) {
+                    $('#'+NAME+'-username-list-add').datagrid('selectRow', index);
+                }
+            });
         },
         edit : function (id) {
             //$('#user-staff-edit').combogrid('grid').datagrid('reload');
@@ -547,6 +581,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
 //工具栏操作模块
 PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] = (function  (NAME) {
     return{
+    ids : [],
     search : function () {
         $('#'+NAME+'-search-client').datagrid('load', {
             keywords: $.trim($('input[name="'+NAME+'_client_search_keywords"]').val())
@@ -558,16 +593,27 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] = (function  (NAME) {
         dialog('setTitle', '入库产品详情').
         dialog('refresh', ThinkPHP['MODULE'] + '/Inlib/getDetails/?id=' + id);
     },
-    select : function (id, username) {
-        if ($('#'+NAME+'-add').dialog('dialog').css('display') == 'block') {
-            $('#'+NAME+'-uid-add').val(id);
-            $('#'+NAME+'-username-add').textbox('setValue', username);
-        } else if ($('#'+NAME+'-edit').dialog('dialog').css('display') == 'block') {
-            $('#'+NAME+'-uid-edit').val(id);
-            $('#'+NAME+'-username-edit').textbox('setValue', username);
+    select : function (id, username, name) {
+        //$('#order-documentary-add').textbox('setValue', title);
+        //$('#order-documentary-id-add').val(id);
+        if ($.inArray(id, this.ids) >= 0) {
+            $.messager.alert('警告操作', '此用户已选择！', 'warning');
+        } else {
+            this.ids.push(id);
+            $('#'+NAME+'-username-list-add').datagrid('appendRow',{
+                id : id,
+                username : username,
+                name : name,
+            });
+            $('#'+NAME+'-client').dialog('close');
+            this.reset();
         }
-        $('#'+NAME+'-client').dialog('close');
-        this.reset();
+    },
+    delete : function (index, id) {
+        var obj = $('#'+NAME+'-user-list-add');
+        obj.datagrid('deleteRow', index);
+        obj.datagrid('loadData', obj.datagrid('getRows'));
+        this.ids.splice($.inArray(id, this.ids), 1);
     },
     redo : function () {
         $('#'+NAME+'').datagrid('unselectAll');

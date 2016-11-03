@@ -123,6 +123,8 @@ class FindController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('Find');
+            $where['proid'] = C('proid');
+            //$data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
             $this->error('非法操作！');

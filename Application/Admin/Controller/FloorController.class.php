@@ -142,7 +142,25 @@ class FloorController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('Floor');
+            C('proid');
             $this->ajaxReturn($table->getListAll());
+        } else {
+            $this->error('非法操作！');
+        }
+    }
+
+    //获取所有职位
+    public function getuser() {
+        if (IS_AJAX) {
+            $table = M('floor');
+            $proid = C('proid');
+            $res = $table->field('id,pid')->find();
+            $admin_qs = M('admin_qs');
+            $data = $admin_qs->field('t_admin.id,t_admin.username,t_level.title')
+                ->join('left join t_admin on t_admin.id = t_admin_qs.uid')
+                ->join('left t_level on t_level.id = t_admin.level')
+                ->where("t_admin_qs.building = '{$res['pid']}' and t_admin_qs.floor = '{$res['id']}' and t_admin.proid = '{$proid}'")->select();
+            $this->ajaxReturn($data);
         } else {
             $this->error('非法操作！');
         }
