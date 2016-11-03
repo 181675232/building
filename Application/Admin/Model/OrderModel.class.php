@@ -63,16 +63,16 @@ class OrderModel extends RelationModel {
             $map['pay_state'] = '未付款';
         }
 
-        $object = $this->field('crm_order.id,
-                                crm_order.sn,
-                                crm_order.title,
-                                crm_order.amount,
-                                crm_order.enter,
-                                crm_order.pay_state,
-                                crm_order.create_time,
-                                crm_documentary.d_name,
-                                crm_documentary.company')
-                       ->join('crm_documentary ON crm_order.documentary_id=crm_documentary.id', 'LEFT')
+        $object = $this->field('t_order.id,
+                                t_order.sn,
+                                t_order.title,
+                                t_order.amount,
+                                t_order.enter,
+                                t_order.pay_state,
+                                t_order.create_time,
+                                t_documentary.d_name,
+                                t_documentary.company')
+                       ->join('t_documentary ON t_order.documentary_id=t_documentary.id', 'LEFT')
                        ->where($map)
                        ->order(array($sort=>$order))
                        ->limit(($rows * ($page - 1)), $rows)
@@ -151,10 +151,10 @@ class OrderModel extends RelationModel {
 	
     //获取一条信息
     public function getOne($id) {
-        $map['crm_order.id'] = $id;
+        $map['t_order.id'] = $id;
         $object =  $this->relation('Extend')
-                    ->field('crm_order.id,crm_order.title,crm_order.documentary_id,crm_order.amount,crm_documentary.title AS d_title')
-                    ->join('crm_documentary ON crm_order.documentary_id=crm_documentary.id', 'LEFT')
+                    ->field('t_order.id,t_order.title,t_order.documentary_id,t_order.amount,t_documentary.title AS d_title')
+                    ->join('t_documentary ON t_order.documentary_id=t_documentary.id', 'LEFT')
                     ->where($map)
                     ->find();
         $object['Extend']['details'] = htmlspecialchars_decode($object['Extend']['details']);
@@ -182,10 +182,10 @@ class OrderModel extends RelationModel {
 
     //获取单个客户详情
     public function getDetails($id) {
-        $map['crm_order.id'] = $id;
+        $map['t_order.id'] = $id;
         $object =  $this->relation('Extend')
-            ->field('crm_order.id,crm_order.sn,crm_order.title,crm_order.documentary_id,crm_order.amount,crm_documentary.title AS d_title')
-            ->join('crm_documentary ON crm_order.documentary_id=crm_documentary.id', 'LEFT')
+            ->field('t_order.id,t_order.sn,t_order.title,t_order.documentary_id,t_order.amount,t_documentary.title AS d_title')
+            ->join('t_documentary ON t_order.documentary_id=t_documentary.id', 'LEFT')
             ->where($map)
             ->find();
         $object['Extend']['details'] = htmlspecialchars_decode($object['Extend']['details']);

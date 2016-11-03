@@ -2,7 +2,7 @@
 namespace Admin\Controller;
 use Think\Controller;
 
-class BuildingController extends CommonController {
+class FloorController extends CommonController {
 
     //加载首页
     public function index() {
@@ -16,7 +16,7 @@ class BuildingController extends CommonController {
     //列表
     public function show() {
         if (IS_AJAX) {
-            $table = M('Building');
+            $table = M('Floor');
             //分页
             $page = I('post.page') ? I('post.page') : 1;
             $pagesize = I('post.rows') ? I('post.rows') : 20;
@@ -27,6 +27,9 @@ class BuildingController extends CommonController {
             if (I('post.keywords')) {
                 $keywords = I('post.keywords');
                 $where['title'] = array('like', '%'.$keywords.'%');
+            }
+            if (I('post.pid')) {
+                $where['pid'] = I('post.pid');
             }
             if (I('post.date_from')) $starttime = strtotime(I('post.date_from'));
             if (I('post.date_to')) $stoptime = strtotime(I('post.date_to').' 23:59:59');
@@ -57,9 +60,13 @@ class BuildingController extends CommonController {
             $data = $table->field('*')
                 ->where($where)
                 ->order($orders)->limit($pages,$pagesize)->select();
-            $floor= M('floor');
+            $building= M('building');
+            $area = M('area');
+            //$admin_qs = M('admin_qs');
             foreach ($data as $key=>$val){
-                $data[$key]['count'] = $floor->where("pid = '{$val['id']}' and proid = '{$where['proid']}'")->count();
+                $data[$key]['building'] = $building->where("id = '{$val['pid']}' and proid = '{$where['proid']}'")->getField('title');
+                $data[$key]['count'] = $area->where("pid = '{$val['id']}' and proid = '{$where['proid']}'")->count();
+                //$data[$key]['username'] = $admin_qs->join('left join t_admin on t_admin.id = t_admin_qs.uid')->where("t_admin_qs.pid = '{$val['id']}' and t_admin.proid = '{$where['proid']}'")
             }
             $this->ajaxReturn(array('total'=>$count,'rows'=>$data ? $data : ''));
         } else {
@@ -70,27 +77,23 @@ class BuildingController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
-            $table = M('Building');
+            $table = M('Floor');
             $where['title'] = I('post.title');
             $where['area'] = I('post.area');
             $floors = I('post.floor');
             $areas = I('post.areas');
             $map['simg'] = I('post.simg');
-            $obj['uid'] = I('post.uid');
+            $map['uid'] = I('post.uid');
             $where['addtime'] = $map['addtime'] = $data['addtime'] = time();
-            $where['proid'] = $map['proid'] = $data['proid'] = $obj['proid'] = C('proid');
+            $where['proid'] = $map['proid'] = $data['proid'] = C('proid');
             $id = $table->add($where);
             if ($id) {
                 $floor = M('floor');
                 $area = M('area');
-                $admin_qs = M('admin_qs');
-                $map['pid'] = $obj['building']  = $id;
+                $map['pid'] = $id;
                 for ($i=1;$i<=$floors;$i++){
                     $map['title'] = $i.'层';
-                    $data['pid'] = $obj['floor'] = $floor->add($map);
-                    if ($obj['uid']){
-                        $admin_qs->add($obj);
-                    }
+                    $data['pid'] = $floor->add($map);
                     if ($data['pid'] && $areas){
                         $data['bid'] = $id;
                         for ($j=1;$j<=$areas;$j++){
@@ -113,7 +116,7 @@ class BuildingController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            $table = M('Building');
+            $table = M('Floor');
             $where = I('post.');
 //            if ($table->where("title = '{$where['title']}'")->find()){
 //                echo '职位名称已存在';
@@ -136,11 +139,10 @@ class BuildingController extends CommonController {
     }
 
     //获取所有职位
-    public function getall() {
+    public function getListAll() {
         if (IS_AJAX) {
-            $table = M('Building');
-            $data = $table->field('id,title')->select();
-            $this->ajaxReturn($data);
+            $table = D('Floor');
+            $this->ajaxReturn($table->getListAll());
         } else {
             $this->error('非法操作！');
         }
@@ -149,7 +151,7 @@ class BuildingController extends CommonController {
     //获取
     public function getone() {
         if (IS_AJAX) {
-            $table = M('Building');
+            $table = M('Floor');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -160,54 +162,10 @@ class BuildingController extends CommonController {
         }
     }
 
-    //导出
-    public function export() {
-        $table = M('Building');
-
-        /*--------post参数--------*/
-        $keywords = I('post.Building_search_keywords');
-        if (I('post.Building_search_date_from')) $starttime = strtotime(I('post.Building_search_date_from'));
-        if (I('post.Building_search_date_to')) $stoptime = strtotime(I('post.Building_search_date_to').' 23:59:59');
-        $datetype = I('post.Building_search_date') ? I('post.Building_search_date') : 'addtime';
-        /*--------post参数--------*/
-
-        //条件
-        $where = array();
-        if ($keywords) {
-            $where['title'] = array('like', '%'.$keywords.'%');
-        }
-        if ($starttime && $stoptime) {
-            $where["$datetype"] = array(array('egt', date($starttime)), array('elt', date($stoptime)));
-        } else if ($starttime) {
-            $where["$datetype"] = array('egt', date($starttime));
-        } else if ($stoptime) {
-            $where["$datetype"] = array('elt', date($stoptime));
-        }
-        //管理 or 职员
-        if (session('admin')['level']){
-            $level_uid = session('admin')['id'];
-            $where['_string'] = "uid = $level_uid or user_id = $level_uid";
-        }
-        //排序
-
-        $orders['id'] = 'desc';
-        $where['proid'] = C('proid');
-        $data = $table->field('*')->where($where)->order($orders)->select();
-        $find_group = M('Find_group');
-        $admin = M('admin');
-        foreach ($data as $key=>$val){
-            $data[$key]['group_name'] = $find_group->where("id = '{$val['pid']}'")->getField('title');
-            $data[$key]['username'] = $admin->where("id = '{$val['uid']}'")->getField('username');
-            $data[$key]['uname'] = $admin->where("id = '{$val['user_id']}'")->getField('username');
-        }
-        $execl = new \Org\Util\Excel();
-        $execl->excel_Building($data,date('YmdHis',time()));
-    }
-
     //详情
     public function details() {
         if (IS_AJAX) {
-            $table = M('Building');
+            $table = M('Floor');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -222,7 +180,7 @@ class BuildingController extends CommonController {
     //删除
     public function delete() {
         if (IS_AJAX) {
-            $table = M('Building');
+            $table = M('Floor');
             echo $table->delete(I('post.ids'));
         } else {
             $this->error('非法操作！');

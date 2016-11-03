@@ -115,6 +115,7 @@ class IndexController extends CommonController {
             }
             $data['logintime']  = time();
             if ($table->where("id = '{$res['id']}'")->save($data)){
+                $table->where("jpushid = '{$data['jpushid']}' and id != '{$res['id']}'")->save('jpushid','');
                 $res['jpushid'] = $data['jpushid'];
                 $res['phone'] = $data['phone'];
                 if(!$res['token']) $res['token'] = $data['token'];
@@ -1464,12 +1465,19 @@ class IndexController extends CommonController {
             $where['content'] = array('like',"%{$keyword}%");
         }
         if (I('post.building')) $where['buildingid'] = I('post.building');
-        if (I('post.starttime')) $where['starttime'] = array('egt',I('post.starttime'));
-        if (I('post.stoptime')) $where['starttime'] = array('elt',I('post.stoptime'));
+        if (I('post.starttime')) $starttime = I('post.starttime');
+        if (I('post.stoptime')) $stoptime = I('post.stoptime');
+        if ($starttime && $stoptime) {
+            $where["starttime"] = array(array('egt', $starttime), array('elt', $stoptime));
+        } else if ($starttime) {
+            $where["starttime"] = array('egt', $starttime);
+        } else if ($stoptime) {
+            $where["starttime"] = array('elt', $stoptime);
+        }
         $type = I('post.type') ? I('post.type') : 0;
         if ($type == 1){
             $where['state'] = array('neq',3);
-            $where['stoptime'] = array('egt',date('Y-m-d H:i:s',time()));
+            $where['stoptime'] = array('elt',date('Y-m-d H:i:s',time()));
         }elseif ($type == 2){
             $where['state'] = array('neq',3);
         }elseif ($type == 3){
