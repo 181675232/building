@@ -258,6 +258,84 @@ class Excel{
 
     }
 
+    public function excel_daytask($data,$name){
+        $objPHPExcel = new \PHPExcel();
+        $objPHPExcel->createSheet();//创建新的内置表
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objSheet = $objPHPExcel->getActiveSheet();
+
+        //填充数据
+        $objSheet->setCellValue("A1","任务标题")
+            ->setCellValue("B1","发布人")
+            ->setCellValue("C1","发布人电话")
+            ->setCellValue("D1","执行人")
+            ->setCellValue("E1","执行人电话")
+            ->setCellValue("F1","任务位置")
+            ->setCellValue("G1","任务完成度")
+            ->setCellValue("H1","计划开始时间")
+            ->setCellValue("I1","计划完成时间")
+            ->setCellValue("J1","实际开始时间")
+            ->setCellValue("K1","实际完成时间");
+
+        //设置默认行高
+        $objSheet->getDefaultRowDimension()->setRowHeight(20);
+        //所有垂直居中
+        $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);//设置excel文件默认水平垂直方向居中
+        //设置单元格宽度
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(25);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(25);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(25);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(25);
+        //设置第二行行高
+        //$objSheet->getRowDimension(1)->setRowHeight(20);
+        //填充班级背景颜色
+        $objSheet->getStyle("A1:K1")->getFill()->setFillType(\PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('6fc144');
+        //设置单元格边框
+        $objPHPExcel->getActiveSheet()->getStyle('A1:K1')->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+        //设置某列单元格格式为文本格式
+        //$objSheet->getStyle("C2:C100")->getNumberFormat()->setFormatCode(\PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+
+        $j=2;
+        foreach ($data as $key=>$val){
+
+            //设置行高
+            //$objPHPExcel->getActiveSheet()->getRowDimension($j)->setRowHeight(10);
+
+
+            $objSheet
+                ->setCellValue("A".$j,$val['title'])
+                ->setCellValue("B".$j,$val['username'].' ('.$val['name'].')')
+                ->setCellValue("C".$j,$val['phone'])
+                ->setCellValue("D".$j,$val['fusername'].' ('.$val['fname'].')')
+                ->setCellValue("E".$j,$val['fphone'])
+                ->setCellValue("F".$j,$val['building'].' '.$val['floor'].' '.$val['area'])
+                ->setCellValue("G".$j,round($val['bai']*100).'%')
+                ->setCellValue("H".$j,$val['starttime'])
+                ->setCellValue("I".$j,$val['stoptime'])
+                ->setCellValue("J".$j,$val['truestarttime'] == '0000-00-00 00:00:00' ? '未开始' : $val['truestarttime'])
+                ->setCellValue("K".$j,$val['truestoptime'] == '0000-00-00 00:00:00' ? '未开始' : $val['truestoptime']);
+            $j++;
+        }
+
+
+
+        $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel,'Excel5');//生成excel文件
+        //$objWriter->save("./Public/excel/excel.xls");//保存文件
+        //browser_excel('Excel5','excel.xls');//输出到浏览器
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');//告诉浏览器数据excel07文件
+        header("Content-Disposition: attachment;filename=$name.xls");//告诉浏览器将输出文件的名称
+        header('Cache-Control: max-age=0');//禁止缓存
+        $objWriter->save("php://output");
+
+    }
+
 
 	public function excel($data,$time){
 		$objPHPExcel = new \PHPExcel();
@@ -456,9 +534,11 @@ class Excel{
         // 		}
         //全部加载end
         $table=M($table);
+
         $id = $table->order('id desc')->getField('id');
         //逐行加载
         foreach ($objPHPExcel->getWorksheetIterator() as $val){//循环取sheet
+
             $i=0;
             foreach ($val->getRowIterator() as $row){//逐行处理
                 if($row->getRowIndex()<2){
@@ -467,24 +547,30 @@ class Excel{
                 $rs = array();
                 $id = $id ? $id : 0;
                 //检测
+
                 foreach ($row->getCellIterator() as $key => $cell){//逐列读取
                     $data = $cell->getValue();//获取单元格数据
                     if($key==0){
                         if(!is_numeric($data)){
-                            alertBack('错误：标识号必须为数字，错误行数第 '.$row->getRowIndex().' 行');
+                            echo '错误：标识号必须为数字，错误行数第 '.$row->getRowIndex().' 行';
+                            exit;
                         }
                     }
                     if($key==3){
                         if(!$data){
-                            alertBack('错误：任务名称不能为空，错误行数第 '.$row->getRowIndex().' 行');
+                            echo '错误：任务名称不能为空，错误行数第 '.$row->getRowIndex().' 行';
+                            exit;
                         }
                     }
                     if($key==8){
                         if(!is_numeric($data)){
-                            alertBack('错误：大纲级别必须为数字，错误行数第 '.$row->getRowIndex().' 行');
+                            echo '错误：大纲级别必须为数字，错误行数第 '.$row->getRowIndex().' 行';
+                            exit;
                         }
                     }
+
                 }
+
                 //上传
                 foreach ($row->getCellIterator() as $key => $cell){//逐列读取
                     $data = $cell->getValue();//获取单元格数据
@@ -498,7 +584,6 @@ class Excel{
                     if($key==7){$data && is_numeric($data) ? $rs['bid']=$data+$id:$rs['bid'] = 0;}
                     if($key==8){$rs['level']=$data;}
                     if($key==9){$rs['description']=$data?$data:'';}
-
                     if ($rs['level'] == 1){
                         $rs['pid'] = 0;
                         $pid = array();
@@ -510,11 +595,14 @@ class Excel{
                 }
                 $level = $rs['level'];
                 $pid[$level] = $rs['id'];
+                $rs['proid'] = C('proid');
                 $table->add($rs);
                 $i++;
             }
-            echo '成功插入' .$i. '条数据。';
+            //echo '成功插入' .$i. '条数据。';
+            return $i;
         }
+
         exit;
         //逐行加载end
     }

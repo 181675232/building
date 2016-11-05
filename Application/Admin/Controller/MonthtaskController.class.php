@@ -2,11 +2,11 @@
 namespace Admin\Controller;
 use Think\Controller;
 
-class TaskController extends CommonController {
+class MonthtaskController extends CommonController {
 
     //加载首页
     public function index() {
-//        if (session('Task')) {
+//        if (session('Month_task')) {
             $this->display();
 //        } else {
 //            $this->redirect('Login/index');
@@ -16,7 +16,7 @@ class TaskController extends CommonController {
     //列表
     public function show() {
         if (IS_AJAX) {
-            $table = M('Task');
+            $table = M('Month_task');
             //分页
             $page = I('post.page') ? I('post.page') : 1;
             $pagesize = I('post.rows') ? I('post.rows') : 20;
@@ -71,7 +71,7 @@ class TaskController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
-            $table = M('Task');
+            $table = M('Month_task');
             $where = I('post.');
             if ($table->where("name = '{$where['name']}'")->find()){
                 echo '账号已存在';
@@ -101,7 +101,7 @@ class TaskController extends CommonController {
             if($where['file']){
                 $excel = new \Org\Util\Excel();
                 $where['sheet'] = $where['sheet'] ? $where['sheet'] : 'Sheet1';
-                $id = $excel->excelimport('.'.$where['file'],$where['sheet'],'task');
+                $id = $excel->excelimport('.'.$where['file'],$where['sheet'],'Month_task');
                 if ($id) {
                     echo $id ? $id : 0;
                     exit;
@@ -121,7 +121,7 @@ class TaskController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            $table = M('Task');
+            $table = M('Month_task');
             $where = I('post.');
 //            if ($table->where("title = '{$where['title']}'")->find()){
 //                echo '职位名称已存在';
@@ -145,7 +145,7 @@ class TaskController extends CommonController {
 //        $where['proid'] = C('proid');
 //        $data = $table->field('id,title')->where($where)->select();
         if (IS_AJAX) {
-            $table = D('Task');
+            $table = D('Month_task');
             $this->ajaxReturn($table->getListAll());
         } else {
             $this->error('非法操作！');
@@ -155,7 +155,7 @@ class TaskController extends CommonController {
     //获取一条数据
     public function getone() {
         if (IS_AJAX) {
-            $table = M('Task');
+            $table = M('Month_task');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -169,7 +169,7 @@ class TaskController extends CommonController {
     //详情
     public function details() {
         if (IS_AJAX) {
-            $table = M('Task');
+            $table = M('Month_task');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -184,7 +184,7 @@ class TaskController extends CommonController {
     //删除
     public function delete() {
         if (IS_AJAX) {
-            $table = M('Task');
+            $table = M('Month_task');
             echo $table->delete(I('post.ids'));
         } else {
             $this->error('非法操作！');

@@ -338,6 +338,12 @@ function alertLocation($_info, $_url) {
 	}
 }
 
+//弹窗
+function alert($_info) {
+    echo "<script type='text/javascript'>alert('$_info');</script>";
+    exit();
+}
+
 //弹窗返回
 function alertBack($_info) {
 	echo "<script type='text/javascript'>alert('$_info');history.back();</script>";

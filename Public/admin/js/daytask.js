@@ -20,44 +20,108 @@ $(function () {
             pageSize : 20,
             pageList : [10, 20, 30, 40, 50],
             pageNumber : 1,
-            sortName : 'id',
-            sortOrder : 'asc',
+            sortName : 'stoptime',
+            sortOrder : 'DESC',
             toolbar : '#'+NAME+'-tool',
             columns : [[
                 {
-                    field : 'id',
-                    title : '编号',
-                    width : 60,
-                    checkbox : true
+                    field : 'title',
+                    title : '任务标题',
+                    align : 'center',
+                    width : 80
                 },
                 {
-                    field : 'title',
-                    title : '层名称',
+                    field : 'bai',
+                    title : '完成度',
                     align : 'center',
-                    width : 150
+                    width : 15,
+                    formatter : function (value,row) {
+                        return parseInt(value*100)+'%';
+                    }
+                },
+                {
+                    field : 'username',
+                    title : '发布人',
+                    align : 'center',
+                    width : 35
+                },
+                {
+                    field : 'fusername',
+                    title : '执行人',
+                    align : 'center',
+                    width : 35
                 },
                 {
                     field : 'building',
-                    title : '所属楼',
+                    title : '楼',
                     align : 'center',
-                    width : 150
+                    width : 15,
+
                 },
                 {
-                    field : 'count',
-                    title : '分区数',
+                    field : 'floor',
+                    title : '层',
                     align : 'center',
-                    width : 150
+                    width : 15
                 },
                 {
-                    field : 'addtime',
-                    title : '创建时间',
+                    field : 'area',
+                    title : '区',
                     align : 'center',
-                    width : 100,
+                    width : 15
+                },
+                {
+                    field : 'starttime',
+                    title : '计划开始时间',
+                    align : 'center',
+                    width : 50,
+                    sortable : true,
+                },
+                {
+                    field : 'stoptime',
+                    title : '计划完成时间',
+                    align : 'center',
+                    width : 50,
+                    sortable : true,
+                },
+                {
+                    field : 'truestarttime',
+                    title : '实际开始时间',
+                    align : 'center',
+                    width : 50,
                     sortable : true,
                     formatter : function (value,row) {
-                        return formatDate(new Date(value * 1000));
+                        if(value == '0000-00-00 00:00:00'){
+                            return '未开始';
+                        } else {
+                            return value;
+                        }
                     }
                 },
+                {
+                    field : 'truestoptime',
+                    title : '实际完成时间',
+                    align : 'center',
+                    width : 50,
+                    sortable : true,
+                    formatter : function (value,row) {
+                        if (value == '0000-00-00 00:00:00') {
+                            return '未结束';
+                        } else {
+                            return value;
+                        }
+                    }
+                },
+                // {
+                //     field : 'stoptime',
+                //     title : '预警时间',
+                //     align : 'center',
+                //     width : 100,
+                //     sortable : true,
+                //     formatter : function (value,row) {
+                //         return formatDate(new Date(value * 1000));
+                //     }
+                // },
                 // {
                 //     field : 'mp3',
                 //     title : '音频',
@@ -73,18 +137,18 @@ $(function () {
                 //         }
                 //     }
                 // },
-                {
-                    field: 'details',
-                    title: '操作',
-                    width: 60,
-                    align : 'center',
-                    fixed : true,
-                    formatter : function (value,row) {
-                        //'<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
-                        return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
-
-                    }
-                }
+                // {
+                //     field: 'details',
+                //     title: '操作',
+                //     width: 60,
+                //     align : 'center',
+                //     fixed : true,
+                //     formatter : function (value,row) {
+                //         //'<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
+                //         return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
+                //
+                //     }
+                // }
             ]],
             onLoadSuccess : function() {
                 $('.'+NAME+'-details').linkbutton({
@@ -104,7 +168,7 @@ $(function () {
         });
 
         $('#'+NAME+'-add').dialog({
-            width : 600,
+            width : 780,
             height : 'auto',
             title : '新增信息',
             iconCls : 'icon-add-new',
@@ -116,18 +180,16 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-accept',
                 handler : function () {
-                    //window.add.sync();
+                    window.add.sync();
                     if ($('#'+NAME+'-add').form('validate')) {
                         $.ajax({
                             url : ThinkPHP['MODULE'] + '/'+NAME+'/add',
                             type : 'POST',
                             data : {
                                 title : $('input[name="'+NAME+'_title_add"]').val(),
-                                uid : $('input[name="'+NAME+'_uid_add"]').val(),
-                                area : $('input[name="'+NAME+'_area_add"]').val(),
-                                areas : $('input[name="'+NAME+'_areas_add"]').val(),
-                                floor : $('input[name="'+NAME+'_floor_add"]').val(),
-                                simg : $('input[name="'+NAME+'_simg_add"]').val(),
+                                pid : $('input[name="'+NAME+'_pid_add"]').val(),
+                                desc : $('textarea[name="'+NAME+'_desc_add"]').val(),
+                                content : $('textarea[name="'+NAME+'_content_add"]').val()
                             },
                             beforeSend : function () {
                                 $.messager.progress({
@@ -155,20 +217,17 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-cross',
                 handler : function () {
-                    $('#'+NAME+'-uid-add').val('');
-                    $('#'+NAME+'-simg-add').prev().attr('src','');
-                    $('#'+NAME+'-simg-add').val('');
                     $('#'+NAME+'-add').dialog('close');
                 }
             }],
             onClose : function () {
                 $('#'+NAME+'-add').form('reset');
-                //window.add.html('');
+                window.add.html('');
             }
         });
 
         $('#'+NAME+'-edit').dialog({
-            width : 400,
+            width : 780,
             height : 'auto',
             title : '编辑信息',
             iconCls : 'icon-edit-new',
@@ -180,7 +239,7 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-accept',
                 handler : function () {
-                    //window.editor.sync();
+                    window.editor.sync();
                     if ($('#'+NAME+'-edit').form('validate')) {
                         $.ajax({
                             url : ThinkPHP['MODULE'] + '/'+NAME+'/edit',
@@ -188,7 +247,9 @@ $(function () {
                             data : {
                                 id : $('input[name="'+NAME+'_id_edit"]').val(),
                                 title : $('input[name="'+NAME+'_title_edit"]').val(),
-                                area : $('input[name="'+NAME+'_area_edit"]').val(),
+                                pid : $('input[name="'+NAME+'_pid_edit"]').val(),
+                                desc : $('textarea[name="'+NAME+'_desc_edit"]').val(),
+                                content : $('textarea[name="'+NAME+'_content_edit"]').val(),
                             },
                             beforeSend : function () {
                                 $.messager.progress({
@@ -216,15 +277,12 @@ $(function () {
                 size : 'large',
                 iconCls : 'icon-cross',
                 handler : function () {
-                    $('#'+NAME+'-uid-edit').val('');
-                    $('#'+NAME+'-simg-edit').prev().attr('src','');
-                    $('#'+NAME+'-simg-edit').val('');
                     $('#'+NAME+'-edit').dialog('close');
                 }
             }],
             onClose : function () {
                 $('#'+NAME+'-edit').form('reset');
-                //window.editor.html('');
+                window.editor.html('');
             }
         });
         /* ---------------------------弹出框样式-------------------------------------------*/
@@ -236,120 +294,18 @@ $(function () {
             missingMessage : '请输入标题',
             invalidMessage : '名称2-20位'
         });
-        // $('#'+NAME+'-areas-add,#'+NAME+'-areas-edit').numberbox({
-        //     width : 80,
-        //     height : 32,
-        // });
-        $('#'+NAME+'-area-add,#'+NAME+'-area-edit').numberbox({
-            width : 80,
-            height : 32,
-            required : true,
-            precision : 2,
-            //validType : 'length[2,20]',
-            missingMessage : '请输入建筑面积',
-            //invalidMessage : '名称2-20位'
-        });
-        $('#'+NAME+'-floor-add,#'+NAME+'-floor-edit').numberbox({
-            width : 80,
-            height : 32,
-            required : true,
-            //precision : 2,
-            //validType : 'length[2,20]',
-            missingMessage : '请输入一共有多少层',
-            //invalidMessage : '名称2-20位'
-        });
-        //新增和修改公司名称
-        $('#'+NAME+'-username-add,#'+NAME+'-username-edit').textbox({
+        $('#'+NAME+'-pid-add,#'+NAME+'-pid-edit').combobox({
             width : 140,
-            height : 32,
+            height : 'auto',
+            url : ThinkPHP['MODULE'] + '/wordgroup/getall',
             editable : false,
-            icons: [{
-                iconCls:'icon-zoom',
-                handler: function(){
-                    $('#'+NAME+'-client').dialog('open');
-                }
-            }],
-            //required : true,
-            missingMessage : '请点击放大镜选择默认负责人',
-            //invalidMessage : '请选择负责人'
+            required : true,
+            validType : 'length[1,20]',
+            valueField : 'id',
+            textField : 'title',
+            missingMessage : '请选择类别',
+            hasDownArrow : true
         });
-        //弹出选择公司名称
-        $('#'+NAME+'-client').dialog({
-            width: 550,
-            height: 380,
-            title: '选择分包',
-            iconCls: 'icon-zoom',
-            modal: true,
-            closed: true,
-            maximizable: true,
-            onOpen : function () {
-                $('#'+NAME+'-client-search-keywords').textbox();
-                $('#'+NAME+'-client-search-button').linkbutton();
-                $('#'+NAME+'-client-search-refresh').linkbutton();
-                $('#'+NAME+'-client-search-reset').linkbutton();
-                $('#'+NAME+'-search-client').datagrid({
-                    url : ThinkPHP['MODULE'] + '/Admin/getall/type/79',
-                    fit : true,
-                    fitColumns : true,
-                    striped : true,
-                    rownumbers : true,
-                    border : false,
-                    pagination : true,
-                    pageSize : 10,
-                    pageList : [10, 20, 30, 40, 50],
-                    pageNumber : 1,
-                    sortName : 'addtime',
-                    sortOrder : 'DESC',
-                    toolbar : '#'+NAME+'-client-tool',
-                    columns : [[
-                        {
-                            field : 'username',
-                            title : '名称',
-                            width : 100
-                        },
-                        {
-                            field : 'level_name',
-                            title : '职位',
-                            width : 100
-                        },
-                        {
-                            field : 'phone',
-                            title : '电话',
-                            width : 100
-                        },
-                        {
-                            field : 'select',
-                            title : '选择',
-                            width : 60,
-                            formatter : function (value, row) {
-                                return '<a href="javascript:void(0)" class="select-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.select(\'' + row.id + '\', \'' + row.username + '\', \'' + row.level_name + '\');">选择</a>';
-                            }
-                        },
-                    ]],
-                    onLoadSuccess : function() {
-                        $('.select-button').linkbutton({
-                            iconCls : 'icon-tick',
-                            plain : true
-                        });
-                    },
-                    onClickCell : function (index) {
-                        $('#'+NAME+'-search-client').datagrid('selectRow', index);
-                    }
-                });
-            }
-        });
-        // $('#'+NAME+'-uid-add,#'+NAME+'-uid-edit').combobox({
-        //     width : 140,
-        //     height : 'auto',
-        //     url : ThinkPHP['MODULE'] + '/admin/getall',
-        //     editable : false,
-        //     required : true,
-        //     validType : 'length[1,20]',
-        //     valueField : 'id',
-        //     textField : 'title',
-        //     missingMessage : '请选择负责人',
-        //     hasDownArrow : true
-        // });
         //加载新增编辑器
         window.add = KindEditor.create('#'+NAME+'-content-add,', {
             width : '94%',
@@ -377,38 +333,19 @@ $(function () {
                 'fullscreen'
             ]
         });
-        //订单产品列表
-        $('#'+NAME+'-username-button-add').linkbutton({
-            iconCls : 'icon-add-new',
-            onClick : function () {
-                //创建订单界面
-                $('#'+NAME+'-client').dialog('open');
-            }
-        });
-         $('#'+NAME+'-listitem-button-add').linkbutton({
-            iconCls : 'icon-add-new',
-            onClick : function () {
-                var item=$('#'+NAME+'-listitem-temple').clone(true);
-                item.attr('id','').find('input').val('');
-                item.find('.l-btn.l-btn-small').show();
-                 $(this).closest('tr').before(item)
-            }
-        });
-         $('#'+NAME+'-deletline').linkbutton({
-            iconCls : 'icon-delete-new',
-            onClick : function () {
-                 $(this).closest('tr').remove()
-            }
-        });
 
         /* ---------------------------弹出框样式-------------------------------------------*/
         //时间搜索
         $('#'+NAME+'-search-date').combobox({
             width : 80,
             data : [{
-                id : 'addtime',
-                text : '创建时间'
-            }],
+                id : 'stoptime',
+                text : '计划完成时间'
+            },
+                {
+                    id : 'truestoptime',
+                    text : '实际完成时间'
+                }],
             editable : false,
             valueField : 'id',
             textField : 'text',
@@ -419,6 +356,27 @@ $(function () {
             novalidate : true
         });
 
+        //时间搜索
+        $('#'+NAME+'-search-state').combobox({
+            width : 80,
+            data : [{
+                    id : '0',
+                    text : '全部任务'
+                 },
+                {
+                    id : '1',
+                    text : '未完成'
+                },{
+                    id : '3',
+                    text : '已完成'
+                }],
+            editable : false,
+            valueField : 'id',
+            textField : 'text',
+            panelHeight : 'auto',
+            tipPosition : 'left',
+        });
+
         //选择时间触发验证
         $('#'+NAME+'-search-date-from, #'+NAME+'-search-date-to').datebox({
             onSelect : function () {
@@ -426,20 +384,6 @@ $(function () {
                     $('#'+NAME+'-search-date').combobox('showPanel');
                 }
             }
-        });
-
-        //搜索
-        $('#'+NAME+'-search-pid').combobox({
-            width : 80,
-            url : ThinkPHP['MODULE'] + '/Building/getall',
-            editable : false,
-            valueField : 'id',
-            textField : 'title',
-            required : true,
-            missingMessage : '选择楼',
-            panelHeight : 'auto',
-            tipPosition : 'left',
-            novalidate : true
         });
 
     })(PUBLIC_STR_NAME);
@@ -452,7 +396,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             if ($('#'+NAME+'-tool').form('validate')) {
                 $('#'+NAME+'').datagrid('load', {
                     keywords: $.trim($('input[name="'+NAME+'_search_keywords"]').val()),
-                    pid: $('input[name="'+NAME+'_search_pid"]').val(),
+                    state: $('input[name="'+NAME+'_search_state"]').val(),
                     date: $('input[name="'+NAME+'_search_date"]').val(),
                     date_from: $('input[name="'+NAME+'_search_date_from"]').val(),
                     date_to: $('input[name="'+NAME+'_search_date_to"]').val()
@@ -469,40 +413,6 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
         },
         add : function () {
             $('#'+NAME+'-add').dialog('open');
-            //订单产品列表
-            $('#'+NAME+'-username-list-add').datagrid({
-                //url : ThinkPHP['MODULE'] + '/Floor/getuser',
-                width : '95%',
-                columns:[[
-                    {
-                        field : 'id',
-                        title : '编号',
-                        width : 100,
-                        hidden : true
-                    },
-                    {
-                        field : 'username',
-                        title : '名称',
-                        width : 100
-                    },
-                    {
-                        field : 'name',
-                        title : '职务',
-                        width : 130
-                    },
-                    {
-                        field : 'opt',
-                        title : '操作',
-                        width : 40,
-                        formatter : function (value, row, index) {
-                            return '<a href="javascript:void(0)" class="delete-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.delete(\'' + index + '\', \'' + row.id + '\');"><img src="' + ThinkPHP['ROOT'] + '/Public/admin/easyui/themes/icons/delete-new.png"></a>';
-                        }
-                    }
-                ]],
-                onClickCell : function (index) {
-                    $('#'+NAME+'-username-list-add').datagrid('selectRow', index);
-                }
-            });
         },
         edit : function (id) {
             //$('#user-staff-edit').combogrid('grid').datagrid('reload');
@@ -526,7 +436,9 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                         var PUCLIC_JSON= eval('({'+
                             NAME+'_id_edit:data.id,'+
                             NAME+'_title_edit:data.title,'+
-                            NAME+'_area_edit:data.area,'+
+                            NAME+'_pid_edit:data.pid,'+
+                            NAME+'_desc_edit:data.desc,'+
+                            NAME+'_content_edit:data.content,'+
                             '})');
                         $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
                         window.editor.html(data.content);
@@ -581,66 +493,13 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
         reset : function () {
             $('#'+NAME+'-search-keywords').textbox('clear');
             $('#'+NAME+'-search-date').combobox('clear').combobox('disableValidation');
-            $('#'+NAME+'-search-pid').combobox('clear').combobox('disableValidation');
             $('#'+NAME+'-search-date-from').datebox('clear');
             $('#'+NAME+'-search-date-to').datebox('clear');
             $('#'+NAME+'').datagrid('resetSort', {
-                sortName : 'id',
-                sortOrder : 'asc'
+                sortName : 'stoptime',
+                sortOrder : 'desc'
             });
             this.search();
         }
     };
-})(PUBLIC_STR_NAME);
-
-//工具栏操作模块
-PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] = (function  (NAME) {
-    return{
-    ids : [],
-    search : function () {
-        $('#'+NAME+'-search-client').datagrid('load', {
-            keywords: $.trim($('input[name="'+NAME+'_client_search_keywords"]').val())
-        });
-    },
-    details : function (id) {
-        $('#'+NAME+'-dialog').
-        dialog('open').
-        dialog('setTitle', '入库产品详情').
-        dialog('refresh', ThinkPHP['MODULE'] + '/Inlib/getDetails/?id=' + id);
-    },
-    select : function (id, username, name) {
-        //$('#order-documentary-add').textbox('setValue', title);
-        //$('#order-documentary-id-add').val(id);
-        if ($.inArray(id, this.ids) >= 0) {
-            $.messager.alert('警告操作', '此用户已选择！', 'warning');
-        } else {
-            this.ids.push(id);
-            $('#'+NAME+'-username-list-add').datagrid('appendRow',{
-                id : id,
-                username : username,
-                name : name,
-            });
-            $('#'+NAME+'-client').dialog('close');
-            this.reset();
-        }
-    },
-    delete : function (index, id) {
-        var obj = $('#'+NAME+'-username-list-add');
-        console.log(obj)
-        obj.datagrid('deleteRow', index);
-        obj.datagrid('loadData', obj.datagrid('getRows'));
-        this.ids.splice($.inArray(id, this.ids), 1);
-    },
-    redo : function () {
-        $('#'+NAME+'').datagrid('unselectAll');
-    },
-    reset : function () {
-        $('#'+NAME+'-client-search-keywords').textbox('clear');
-        $('#'+NAME+'-search-client').datagrid('resetSort', {
-            sortName : 'addtime',
-            sortOrder : 'desc'
-        });
-        this.search();
-    }
-    }
 })(PUBLIC_STR_NAME);
