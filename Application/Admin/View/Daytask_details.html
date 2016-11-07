@@ -1,0 +1,77 @@
+
+    <div class="content-body project-xxl" style="width: 80%;margin: 5px auto;">
+        <div class="top p10 xrow">
+            <if condition="$schedule">
+            <volist name="schedule" id="val">
+                <div class="repeat-item xrow">
+                    <div class="left yuan">
+                        <span class="time db text-center">
+                            <em class="db f16 fb">{$val.addtime|date="H:i",###}</em>
+                            <em class='f12'>{$val.addtime|date="Y-m-d",###}</em>
+                        </span>
+                    </div>
+                    <div class="left cont">
+                        <p class="f16">已完成{$val['bai']*100}%</p>
+                        <div class="imgs">
+                            <if condition="$val['img']">
+                                <volist name="val['img']" id="v">
+                                    <img src="{$v}" class="col-3"  alt="">
+                                </volist>
+                            </if>
+                        </div>
+                        <p class="f16">{$val.name}：{$val.username}</p>
+                    </div>
+                </div>
+            </volist>
+            </if>
+        </div>
+        <div class="f18 title">
+            任务详情
+        </div>
+        <div class="bottom p10">
+               <div class="list">
+                   <div class="item bb1">
+                       <p class=" f16">责任人<span class="right">{$fname}-{$fusername}({$fphone})</span></p>
+                   </div>
+                    <div class="item bb1">
+                       <p class=" f16">执行人<span class="right">{$name}-{$username}({$phone})</span></p>
+                   </div>
+               </div>
+               <div class="times p10 br5 xrow pos-r">
+                    <div class="sg pos-a"></div>
+                    <div class="left col-5 text-center">
+                        <p>计划完成时间</p>
+                        <div class="time-star pos-r  xrow">
+                            <p class="f12">2016-08-02</p>
+                        </div>
+                    </div>
+                   <div class="left col-5 text-center">
+                       <p>时间完成时间</p>
+                       <div class="time-star pos-r  xrow">
+                           <p class="f12">2016-08-02</p>
+                       </div>
+                   </div>
+               </div>
+                <div class="list">
+                   <div class="item bb1">
+                       <p class=" f16">任务位置<span class="right">{$building} {$floor} {$area}</span></p>
+                   </div>
+                    <div class="item bb1">
+                       <p class=" f16">任务内容<span class="right">{$title}</span></p>
+                   </div>
+               </div>
+            <div class="f18 title">
+                工种
+            </div>
+            <div class="list">
+                <if condition="$workers">
+                    <foreach name="workers" item="value">
+                        <div class="item bb1">
+                            <p class=" f16">{$value.title} 　{$value.num}人</p>
+                        </div>
+                    </foreach>
+                </if>
+            </div>
+        </div>
+    </div>
+    <link rel="stylesheet" href="__Admin__/css/style.css" type='text/css'>

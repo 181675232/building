@@ -138,11 +138,28 @@ class DaytaskController extends CommonController {
     public function getone() {
         if (IS_AJAX) {
             $table = M('all_day_task');
-            $where['id'] = I('post.id');
-            $object = $table->field('*')
+            $where['id'] = I('get.id');
+            $data = $table->field('*')
                 ->where($where)->find();
-            $object['content'] = htmlspecialchars_decode($object['content']);
-            $this->ajaxReturn($object);
+            $proid = C('proid');
+            //$object['content'] = htmlspecialchars_decode($object['content']);
+            $workers = M('task_work');
+            $data['workers'] = $workers->field('t_worker.title,t_task_work.num')
+                ->join('left join t_worker on t_worker.id = t_task_work.uid')
+                ->where("t_task_work.pid = '{$data['id']}' and t_task_work.proid = '{$proid}'")->select();
+            $data['workers'] =  $data['workers'] ?  $data['workers'] : array();
+            $schedule = M('task_schedule');
+            $data['schedule'] = $schedule->field('t_task_schedule.id,t_task_schedule.bai,t_task_schedule.addtime,t_task_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
+                ->join('left join t_admin on t_admin.id = t_task_schedule.uid')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where("t_task_schedule.proid = '{$proid}' and t_task_schedule.pid = '{$data['id']}'")->order('t_task_schedule.addtime desc')->select();
+            $img = M('img');
+            foreach ($data['schedule'] as $key=>$val){
+                $data['schedule'][$key]['img'] = $img->where("pid = '{$val['id']}' and type = 'task_schedule'")->getField('simg',true);
+                $data['schedule'][$key]['img'] = $data['schedule'][$key]['img'] ? $data['schedule'][$key]['img'] : array();
+            }
+            $this->assign($data);
+            $this->display('Daytask_details');
         } else {
             $this->error('非法操作！');
         }

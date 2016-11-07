@@ -137,18 +137,18 @@ $(function () {
                 //         }
                 //     }
                 // },
-                // {
-                //     field: 'details',
-                //     title: '操作',
-                //     width: 60,
-                //     align : 'center',
-                //     fixed : true,
-                //     formatter : function (value,row) {
-                //         //'<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
-                //         return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
-                //
-                //     }
-                // }
+                {
+                    field: 'details',
+                    title: '操作',
+                    width: 60,
+                    align : 'center',
+                    fixed : true,
+                    formatter : function (value,row) {
+                        return '<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
+                        //return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
+
+                    }
+                }
             ]],
             onLoadSuccess : function() {
                 $('.'+NAME+'-details').linkbutton({
@@ -409,7 +409,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             $('#details-dialog').
             dialog('open').
             dialog('setTitle', '详情信息').
-            dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/getDetails/?id=' + id);
+            dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/getone/?id=' + id);
         },
         add : function () {
             $('#'+NAME+'-add').dialog('open');

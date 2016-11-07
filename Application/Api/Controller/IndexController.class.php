@@ -115,7 +115,7 @@ class IndexController extends CommonController {
             }
             $data['logintime']  = time();
             if ($table->where("id = '{$res['id']}'")->save($data)){
-                $table->where("jpushid = '{$data['jpushid']}' and id != '{$res['id']}'")->save('jpushid','');
+                $table->where("jpushid = '{$data['jpushid']}' and id != '{$res['id']}'")->setField('jpushid','');
                 $res['jpushid'] = $data['jpushid'];
                 $res['phone'] = $data['phone'];
                 if(!$res['token']) $res['token'] = $data['token'];
