@@ -338,6 +338,18 @@ $(function () {
                 });
             }
         });
+        $('#'+NAME+'-pid-add,#'+NAME+'-pid-edit').combobox({
+            width : 140,
+            height : 'auto',
+            url : ThinkPHP['MODULE'] + '/building/getall',
+            editable : false,
+            required : true,
+            validType : 'length[1,20]',
+            valueField : 'id',
+            textField : 'title',
+            missingMessage : '请选择所属楼',
+            hasDownArrow : true
+        });
         // $('#'+NAME+'-uid-add,#'+NAME+'-uid-edit').combobox({
         //     width : 140,
         //     height : 'auto',
@@ -389,15 +401,27 @@ $(function () {
             iconCls : 'icon-add-new',
             onClick : function () {
                 var item=$('#'+NAME+'-listitem-temple').clone(true);
+                item.show();
                 item.attr('id','').find('input').val('');
                 item.find('.l-btn.l-btn-small').show();
-                 $(this).closest('tr').before(item)
+                 if(($(this).attr('numb')-0)>0){
+                    item.find('label').html('');
+                 }
+                 $(this).attr('numb',$(this).attr('numb')-0+1);
+                  $(this).closest('tr').before(item);
+                 $(this).closest('td').prev().html('');
             }
         });
          $('#'+NAME+'-deletline').linkbutton({
             iconCls : 'icon-delete-new',
             onClick : function () {
-                 $(this).closest('tr').remove()
+                 $(this).closest('tr').remove();
+                 $('#'+NAME+'-listitem-temple').next().find('label').html('分区：');
+                 $('#'+NAME+'-listitem-button-add').attr('numb',$('#'+NAME+'-listitem-button-add').attr('numb')-1);
+
+                 if($('#'+NAME+'-listitem-button-add').attr('numb')==0){
+                    $('#'+NAME+'-listitem-button-add').closest('td').prev().html('分区：');
+                 }
             }
         });
 
