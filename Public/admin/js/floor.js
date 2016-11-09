@@ -105,7 +105,7 @@ $(function () {
 
         $('#'+NAME+'-add').dialog({
             width : 600,
-            height : 'auto',
+            height : 650,
             title : '新增信息',
             iconCls : 'icon-add-new',
             modal : true,
@@ -123,11 +123,14 @@ $(function () {
                             type : 'POST',
                             data : {
                                 title : $('input[name="'+NAME+'_title_add"]').val(),
-                                uid : $('input[name="'+NAME+'_uid_add"]').val(),
-                                area : $('input[name="'+NAME+'_area_add"]').val(),
-                                areas : $('input[name="'+NAME+'_areas_add"]').val(),
-                                floor : $('input[name="'+NAME+'_floor_add"]').val(),
+                                pid : $('input[name="'+NAME+'_pid_add"]').val(),
                                 simg : $('input[name="'+NAME+'_simg_add"]').val(),
+                                uid :(function(){var arry_data=[]; $('input[name="'+NAME+'_uid_add"]').each(function () {
+                                    arry_data.push($(this).val());
+                                });return arry_data.join(',');}),
+                                areas :(function(){var arry_data=[]; $('input[name="'+NAME+'_areas_add"]').each(function () {
+                                    arry_data.push($(this).val());
+                                });return arry_data.join(',');}),
                             },
                             beforeSend : function () {
                                 $.messager.progress({
@@ -168,8 +171,8 @@ $(function () {
         });
 
         $('#'+NAME+'-edit').dialog({
-            width : 400,
-            height : 'auto',
+            width : 600,
+            height : 650,
             title : '编辑信息',
             iconCls : 'icon-edit-new',
             modal : true,
@@ -322,7 +325,7 @@ $(function () {
                             title : '选择',
                             width : 60,
                             formatter : function (value, row) {
-                                return '<a href="javascript:void(0)" class="select-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.select(\'' + row.id + '\', \'' + row.username + '\', \'' + row.level_name + '\');">选择</a>';
+                                return '<a href="javascript:void(0)" class="select-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.select(\'' + row.id + '\', \'' + row.username + '\', \'' + row.level_name + '\', \'' + row.phone + '\');">选择</a>';
                             }
                         },
                     ]],
@@ -391,6 +394,13 @@ $(function () {
         });
         //订单产品列表
         $('#'+NAME+'-username-button-add').linkbutton({
+            iconCls : 'icon-add-new',
+            onClick : function () {
+                //创建订单界面
+                $('#'+NAME+'-client').dialog('open');
+            }
+        });
+        $('#'+NAME+'-username-button-edit').linkbutton({
             iconCls : 'icon-add-new',
             onClick : function () {
                 //创建订单界面
@@ -502,22 +512,25 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                         field : 'id',
                         title : '编号',
                         width : 100,
-                        hidden : true
+                        hidden : true,
+                        formatter : function (value, row, index) {
+                            return '<input value="'+row.id+'" name="'+NAME+'_uid_add" />';
+                        }
                     },
                     {
                         field : 'username',
                         title : '名称',
-                        width : 100
+                        width : 180
                     },
                     {
                         field : 'name',
                         title : '职务',
-                        width : 130
+                        width : 180
                     },
                     {
                         field : 'opt',
                         title : '操作',
-                        width : 40,
+                        width : 60,
                         formatter : function (value, row, index) {
                             return '<a href="javascript:void(0)" class="delete-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.delete(\'' + index + '\', \'' + row.id + '\');"><img src="' + ThinkPHP['ROOT'] + '/Public/admin/easyui/themes/icons/delete-new.png"></a>';
                         }
@@ -550,15 +563,11 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                         var PUCLIC_JSON= eval('({'+
                             NAME+'_id_edit:data.id,'+
                             NAME+'_title_edit:data.title,'+
-                            NAME+'_area_edit:data.area,'+
+                            NAME+'_simg_edit:data.simg,'+
                             '})');
                         $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
-                        window.editor.html(data.content);
-                        if (data.state == '正常') {
-                            $('#user-state-edit').switchbutton('check');
-                        } else {
-                            $('#user-state-edit').switchbutton('uncheck');
-                        }
+                        $('#'+NAME+'-simg-edit').prev().attr('src',data.simg);
+                        //window.editor.html(data.content);
                     }
                 }
             });

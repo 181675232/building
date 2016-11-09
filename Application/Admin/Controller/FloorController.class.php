@@ -79,27 +79,27 @@ class FloorController extends CommonController {
         if (IS_AJAX) {
             $table = M('Floor');
             $where['title'] = I('post.title');
-            $where['area'] = I('post.area');
-            $floors = I('post.floor');
-            $areas = I('post.areas');
-            $map['simg'] = I('post.simg');
-            $map['uid'] = I('post.uid');
-            $where['addtime'] = $map['addtime'] = $data['addtime'] = time();
+            $where['pid'] = $map['bid'] = $data['building'] = I('post.pid');
+            $where['simg'] = I('post.simg');
+            $areas = explode(',',I('post.areas'));
+            $uid = explode(',',I('post.uid'));
+            $where['addtime'] = $map['addtime'] = time();
             $where['proid'] = $map['proid'] = $data['proid'] = C('proid');
             $id = $table->add($where);
             if ($id) {
-                $floor = M('floor');
                 $area = M('area');
-                $map['pid'] = $id;
-                for ($i=1;$i<=$floors;$i++){
-                    $map['title'] = $i.'层';
-                    $data['pid'] = $floor->add($map);
-                    if ($data['pid'] && $areas){
-                        $data['bid'] = $id;
-                        for ($j=1;$j<=$areas;$j++){
-                            $data['title'] = $j.'区';
-                            $area->add($data);
-                        }
+                $admin_qs = M('admin_qs');
+                $map['pid'] = $data['floor'] = $id;
+                foreach ($areas as $val){
+                    if ($val){
+                        $map['title'] = $val;
+                        $area->add($map);
+                    }
+                }
+                foreach ($uid as $value){
+                    if ($value){
+                        $data['uid'] = $value;
+                        $admin_qs->add($data);
                     }
                 }
                 echo $id ? $id : 0;
@@ -138,12 +138,13 @@ class FloorController extends CommonController {
         }
     }
 
-    //获取所有职位
-    public function getListAll() {
+    //获取所有
+    public function getall() {
         if (IS_AJAX) {
-            $table = D('Floor');
-            C('proid');
-            $this->ajaxReturn($table->getListAll());
+            $table = M('Floor');
+            $where['proid'] = C('proid');
+            $data = $table->field('id,title')->where($where)->select();
+            $this->ajaxReturn($data);
         } else {
             $this->error('非法操作！');
         }
@@ -158,7 +159,7 @@ class FloorController extends CommonController {
             $admin_qs = M('admin_qs');
             $data = $admin_qs->field('t_admin.id,t_admin.username,t_level.title')
                 ->join('left join t_admin on t_admin.id = t_admin_qs.uid')
-                ->join('left t_level on t_level.id = t_admin.level')
+                ->join('left join t_level on t_level.id = t_admin.level')
                 ->where("t_admin_qs.building = '{$res['pid']}' and t_admin_qs.floor = '{$res['id']}' and t_admin.proid = '{$proid}'")->select();
             $this->ajaxReturn($data);
         } else {
@@ -173,7 +174,13 @@ class FloorController extends CommonController {
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
-            $object['content'] = htmlspecialchars_decode($object['content']);
+            $area = M('area');
+            $admin = M('admin_qs');
+            $object['areas'] = $area->field('id,title')->where("pid = '{$where['id']}'")->order('id asc')->select();
+            $object['users'] = $admin->field('t_admin.id,t_admin.username,t_level.title')
+                ->join('left join t_admin on t_admin.id = t_admin_qs.uid')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where("floor = '{$where['id']}'")->order('t_admin_qs.id asc')->select();
             $this->ajaxReturn($object);
         } else {
             $this->error('非法操作！');
