@@ -465,7 +465,7 @@ function yzm($phone)
 }
 function sms($phone,$content)
 {
-    header("Content-Type:application/json; charset=utf-8");
+    header("Content-type:text/html; charset=UTF-8");
     $username = 'caimantangcn';		//用户账号
     $password = 'caimantang123';	//密码
     $apikey = 'e1127a31a9dd2dee4ec9cc325da5b580';//密码
