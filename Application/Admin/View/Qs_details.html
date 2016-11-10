@@ -11,7 +11,7 @@
                         </span>
                     </div>
                     <div class="left cont">
-                        <p class="f16">已完成{$val['bai']*100}%</p>
+                        <p class="f16">{$val['title']}</p>
                         <div class="imgs">
                             <if condition="$val['img']">
                                 <volist name="val['img']" id="v">
@@ -26,10 +26,13 @@
             </if>
         </div>
         <div class="f18 title">
-            任务详情
+            整改详情
         </div>
         <div class="bottom p10">
                <div class="list">
+                   <div class="item bb1">
+                       <p class=" f16">整改截止时间：{$stoptime|date="Y-m-d H:i",###}<span class="right"></span></p>
+                   </div>
                    <div class="item bb1">
                        <p class=" f16">责任人<span class="right">{$fname}-{$fusername}({$fphone})</span></p>
                    </div>
@@ -37,38 +40,38 @@
                        <p class=" f16">执行人<span class="right">{$name}-{$username}({$phone})</span></p>
                    </div>
                </div>
-               <div class="times p10 br5 xrow pos-r">
-                    <div class="sg pos-a"></div>
-                    <div class="left col-5 text-center">
-                        <p>计划开始时间</p>
-                        <div class="time-star pos-r  xrow">
-                            <p class="f12" style="font-size: 14px">{$starttime}</p>
-                        </div>
-                    </div>
-                   <div class="left col-5 text-center">
-                       <p>时间完成时间</p>
-                       <div class="time-star pos-r  xrow">
-                           <p class="f12" style="font-size: 14px">{$stoptime}</p>
-                       </div>
-                   </div>
-               </div>
                 <div class="list">
-                   <div class="item bb1">
-                       <p class=" f16">任务位置<span class="right">{$building} {$floor} {$area}</span></p>
-                   </div>
+
                     <div class="item bb1">
-                       <p class=" f16">任务内容<span class="right">{$title}</span></p>
+                        <p class=" f16">位置<span class="right">{$building} {$floor} {$area}</span></p>
+                    </div>
+                    <div class="item bb1">
+                        <p class=" f16">检查项目<span class="right">{$issue}</span></p>
+                    </div>
+                    <div class="item bb1">
+                        <p class=" f16">紧急程度<span class="right">
+                            <if condition="$type eq 1">
+                                普通
+                                <elseif condition="$type eq 2" />
+                                紧急
+                                <elseif condition="$type eq 3" />
+                                十分紧急
+                                <elseif condition="$type eq 4" />
+                                十万火急
+                            </if>
+                        </span></p>
+                    </div>
+                    <div class="item bb1">
+                       <p class=" f16">问题描述<span class="right">{$title}</span></p>
                    </div>
                </div>
             <div class="f18 title">
-                工种
+                照片
             </div>
             <div class="list">
-                <if condition="$workers">
-                    <foreach name="workers" item="value">
-                        <div class="item bb1">
-                            <p class=" f16">{$value.title} 　{$value.num}人</p>
-                        </div>
+                <if condition="$img">
+                    <foreach name="img" item="value">
+                        <img src="{$value}" class="col-3"  alt="">
                     </foreach>
                 </if>
             </div>

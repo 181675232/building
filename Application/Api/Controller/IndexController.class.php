@@ -2354,7 +2354,16 @@ class IndexController extends CommonController {
     function qs_count(){
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         if (I('post.bid')) $where['bid'] = I('post.bid');
-        if (I('post.uid')) $where['uid'] = I('post.uid');
+        if (I('post.uid')){
+            $where['uid'] = I('post.uid');
+            $level = M('admin')->where("id = '{$where['uid']}'")->getField('level');
+            if($level){
+                $res = M('level')->where("id = '{$level}'")->getField('level');
+            }
+            if($res == 0){
+                unset($where['uid']);
+            }
+        }
         if (I('post.user_id')) $where['user_id'] = I('post.user_id');
         if (I('post.building')) $where['buildingid'] = I('post.building');
         if (I('post.type')) $where['type'] = I('post.type');
