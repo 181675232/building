@@ -2458,6 +2458,7 @@ class IndexController extends CommonController {
         $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         if (I('post.bid')) $where['bid'] = I('post.bid');
         $where['state'] = array('neq',5);
+        $where['level'] = array('in','13,14,15');
         $table = M('all_qs');
         $data['starttime'] = $starttime ? date('Y-m-d H:i',$starttime) : '';
         $data['stoptime'] = $stoptime ? date('Y-m-d H:i',$stoptime) : '';
