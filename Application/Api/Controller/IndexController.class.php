@@ -25,6 +25,10 @@ class IndexController extends CommonController {
 
 	//测试
 	public function test(){
+	    echo sms('18301034592','asdfasdhflk阿萨德分类及阿斯顿飞机离开家水电费了就');
+
+        exit;
+
         $table = M('admin');
         $data = $table->field('t_level.title')
             ->join("left join t_level on t_admin.level = t_level.id")
