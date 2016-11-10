@@ -25,9 +25,6 @@ class IndexController extends CommonController {
 
 	//测试
 	public function test(){
-	    echo sms('18301034592','asdfasdhflk阿萨德分类及阿斯顿飞机离开家水电费了就');
-
-        exit;
 
         $table = M('admin');
         $data = $table->field('t_level.title')
@@ -2281,7 +2278,7 @@ class IndexController extends CommonController {
             if ($where['type'] > 1){
                 $phone = M('admin')->where("id = '{$where['user_id']}'")->getField('phone');
                 if ($phone){
-                    sms($phone,$map['title'].',请尽快查看！');
+                    sms($phone,$map['title'].',请尽快查看');
                 }
             }
             json('200','成功');
