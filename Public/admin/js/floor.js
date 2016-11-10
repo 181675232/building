@@ -166,6 +166,9 @@ $(function () {
             }],
             onClose : function () {
                 $('#'+NAME+'-add').form('reset');
+                 $('#'+NAME+'-uid-add').val('');
+                    $('#'+NAME+'-simg-add').prev().attr('src','');
+                    $('#'+NAME+'-simg-add').val('');
                 //window.add.html('');
             }
         });
@@ -227,6 +230,10 @@ $(function () {
             }],
             onClose : function () {
                 $('#'+NAME+'-edit').form('reset');
+                 $('#'+NAME+'-uid-edit').val('');
+                    $('#'+NAME+'-simg-edit').prev().attr('src','');
+                    $('#'+NAME+'-simg-edit').val('');
+                   
                 //window.editor.html('');
             }
         });
