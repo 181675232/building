@@ -360,13 +360,13 @@ class Excel{
         //所有垂直居中
         $objSheet->getDefaultStyle()->getAlignment()->setVertical(\PHPExcel_Style_Alignment::VERTICAL_CENTER)->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);//设置excel文件默认水平垂直方向居中
         //设置单元格宽度
-        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(30);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(35);
         $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(20);
         $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(20);
         $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(20);
         $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(20);
         $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(20);
-        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(30);
         $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(25);
         $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(25);
         $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(25);
@@ -417,8 +417,8 @@ class Excel{
                 ->setCellValue("G".$j,$val['title'])
                 ->setCellValue("H".$j,$val['type'])
                 ->setCellValue("I".$j,$val['state'])
-                ->setCellValue("J".$j,$val['addtime'])
-                ->setCellValue("K".$j,$val['stoptime']);
+                ->setCellValue("J".$j,date('Y-m-d H:i',$val['addtime']))
+                ->setCellValue("K".$j,date('Y-m-d H:i',$val['stoptime']));
             $j++;
         }
 

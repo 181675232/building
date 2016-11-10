@@ -11,7 +11,8 @@ class StaffModel extends RelationModel {
         //帐号长度不合法
         array('name', '2,20', '帐号长度不合法', self::EXISTS_VALIDATE, 'length'),
         //工号格式不合法
-        array('number', '/^[0-9]{4}$/', '工号格式不合法', self::EXISTS_VALIDATE)
+
+        //array('number', '/^[0-9]{4}$/', '工号格式不合法', self::EXISTS_VALIDATE)
     );
 
     //关联模型

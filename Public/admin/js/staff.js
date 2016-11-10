@@ -24,12 +24,6 @@ $(function () {
                 checkbox : true
             },
             {
-                field : 'number',
-                title : '工号',
-                width : 70,
-                sortable : true
-            },
-            {
                 field : 'name',
                 title : '姓名',
                 width : 100
@@ -44,11 +38,6 @@ $(function () {
                 field : 'id_card',
                 title : '身份证',
                 width : 170
-            },
-            {
-                field : 'post',
-                title : '职位',
-                width : 100
             },
             {
                 field : 'nation',
@@ -280,14 +269,14 @@ $(function () {
         disabled : true
     });
 
-    $('#staff-number-add, #staff-number-edit').textbox({
-        width : 240,
-        height : 32,
-        required : true,
-        validType : 'number',
-        missingMessage : '请输入员工工号',
-        invalidMessage : '员工工号四位数字'
-    });
+    // $('#staff-number-add, #staff-number-edit').textbox({
+    //     width : 240,
+    //     height : 32,
+    //     required : true,
+    //     validType : 'number',
+    //     missingMessage : '请输入员工工号',
+    //     invalidMessage : '员工工号四位数字'
+    // });
 
     $('#staff-gender-add-1').linkbutton({
         plain : true,
