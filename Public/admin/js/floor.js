@@ -162,6 +162,7 @@ $(function () {
                     $('#'+NAME+'-simg-add').prev().attr('src','');
                     $('#'+NAME+'-simg-add').val('');
                     $('#'+NAME+'-add').dialog('close');
+                    $('.will-kill').remove();
                 }
             }],
             onClose : function () {
@@ -169,6 +170,8 @@ $(function () {
                  $('#'+NAME+'-uid-add').val('');
                     $('#'+NAME+'-simg-add').prev().attr('src','');
                     $('#'+NAME+'-simg-add').val('');
+                    $('.will-kill').remove();
+                    $('#'+NAME+'-listitem-button-add').closest('td').prev().html('区名称：');
                 //window.add.html('');
             }
         });
@@ -194,7 +197,14 @@ $(function () {
                             data : {
                                 id : $('input[name="'+NAME+'_id_edit"]').val(),
                                 title : $('input[name="'+NAME+'_title_edit"]').val(),
-                                area : $('input[name="'+NAME+'_area_edit"]').val(),
+                                pid : $('input[name="'+NAME+'_pid_edit"]').val(),
+                                simg : $('input[name="'+NAME+'_simg_edit"]').val(),
+                                uid :(function(){var arry_data=[]; $('input[name="'+NAME+'_uid_eidt"]').each(function () {
+                                    arry_data.push($(this).val());
+                                });return arry_data.join(',');}),
+                                areas :(function(){var arry_data=[]; $('input[name="'+NAME+'_areas_edit"]').each(function () {
+                                    arry_data.push($(this).val());
+                                });return arry_data.join(',');}),
                             },
                             beforeSend : function () {
                                 $.messager.progress({
@@ -226,6 +236,7 @@ $(function () {
                     $('#'+NAME+'-simg-edit').prev().attr('src','');
                     $('#'+NAME+'-simg-edit').val('');
                     $('#'+NAME+'-edit').dialog('close');
+                    $('.will-kill').remove();
                 }
             }],
             onClose : function () {
@@ -233,6 +244,7 @@ $(function () {
                  $('#'+NAME+'-uid-edit').val('');
                     $('#'+NAME+'-simg-edit').prev().attr('src','');
                     $('#'+NAME+'-simg-edit').val('');
+                    $('.will-kill').remove();
                    
                 //window.editor.html('');
             }
@@ -405,6 +417,7 @@ $(function () {
             onClick : function () {
                 //创建订单界面
                 $('#'+NAME+'-client').dialog('open');
+                PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'].isOpenPanel='add';
             }
         });
         $('#'+NAME+'-username-button-edit').linkbutton({
@@ -412,6 +425,7 @@ $(function () {
             onClick : function () {
                 //创建订单界面
                 $('#'+NAME+'-client').dialog('open');
+                PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'].isOpenPanel='edit';
             }
         });
          $('#'+NAME+'-listitem-button-add').linkbutton({
@@ -419,7 +433,21 @@ $(function () {
             onClick : function () {
                 var item=$('#'+NAME+'-listitem-temple').clone(true);
                 item.show();
-                item.attr('id','').find('input').val('');
+                item.attr('id','').addClass('will-kill').find('input').val('');
+                item.find('.l-btn.l-btn-small').show();
+                 if(($(this).attr('numb')-0)>0){
+                    item.find('label').html('');
+                 }
+                 $(this).attr('numb',$(this).attr('numb')-0+1);
+                  $(this).closest('tr').before(item);
+                 $(this).closest('td').prev().html('');
+            }
+        }); $('#'+NAME+'-listitem-button-edit').linkbutton({
+            iconCls : 'icon-add-new',
+            onClick : function () {
+                var item=$('#'+NAME+'-listitem-temple').clone(true);
+                item.show();
+                item.attr('id','').addClass('will-kill').find('input').val('');
                 item.find('.l-btn.l-btn-small').show();
                  if(($(this).attr('numb')-0)>0){
                     item.find('label').html('');
@@ -432,12 +460,14 @@ $(function () {
          $('#'+NAME+'-deletline').linkbutton({
             iconCls : 'icon-delete-new',
             onClick : function () {
+                var but=$(this).closest('table').find('.'+NAME+'-listitem-button-but a' );
+                var topTem=$(this).closest('table').find('.'+NAME+'-next-islist' );
                  $(this).closest('tr').remove();
-                 $('#'+NAME+'-listitem-temple').next().find('label').html('分区：');
-                 $('#'+NAME+'-listitem-button-add').attr('numb',$('#'+NAME+'-listitem-button-add').attr('numb')-1);
+                 topTem.next().find('label').html('区名称：');
+                 but.attr('numb',but.attr('numb')-1);
 
-                 if($('#'+NAME+'-listitem-button-add').attr('numb')==0){
-                    $('#'+NAME+'-listitem-button-add').closest('td').prev().html('分区：');
+                 if(but.attr('numb')==0){
+                    but.closest('td').prev().html('区名称：');
                  }
             }
         });
@@ -509,6 +539,8 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/getDetails/?id=' + id);
         },
         add : function () {
+            /*每一次新增都要清空ids*/
+            PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] .ids=[];
             $('#'+NAME+'-add').dialog('open');
             //订单产品列表
             $('#'+NAME+'-username-list-add').datagrid({
@@ -539,7 +571,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                         title : '操作',
                         width : 60,
                         formatter : function (value, row, index) {
-                            return '<a href="javascript:void(0)" class="delete-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.delete(\'' + index + '\', \'' + row.id + '\');"><img src="' + ThinkPHP['ROOT'] + '/Public/admin/easyui/themes/icons/delete-new.png"></a>';
+                            return '<a href="javascript:void(0)" class="delete-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.delete(\'' + index + '\', \'' + row.id + '\',\'add\');"><img src="' + ThinkPHP['ROOT'] + '/Public/admin/easyui/themes/icons/delete-new.png"></a>';
                         }
                     }
                 ]],
@@ -549,6 +581,8 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             });
         },
         edit : function (id) {
+            /*每一次编辑要先清空 ids,请求到数据后再复值*/
+            PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] .ids=[];
             //$('#user-staff-edit').combogrid('grid').datagrid('reload');
             //获取选中对象
             //var rows = $('#'+NAME+'').datagrid('getSelections');
@@ -565,6 +599,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                     });
                 },
                 success : function(data) {
+                    console.log(data)
                     $.messager.progress('close');
                     if (data) {
                         var PUCLIC_JSON= eval('({'+
@@ -575,6 +610,71 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                         $('#'+NAME+'-edit').form('load', PUCLIC_JSON);
                         $('#'+NAME+'-simg-edit').prev().attr('src',data.simg);
                         //window.editor.html(data.content);
+                        //初始化ids
+                        for(var i =0;i<data.users.length;i++){
+                            PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] .ids.push(data.users[i].id);
+                        }
+                        /*初始化分区*/
+                        if(data.areas.length>0){
+                            var but=$('#'+NAME+'-listitem-button-edit').closest('tr');;
+                            but.find('a').attr('numb',data.areas.length);
+                            but.find('.label').html('');
+                             var item=$('#'+NAME+'-listitem-temple').clone(true);
+                             item.show();
+                            for(var j=0;j<data.areas.length;j++){
+                                var newitem=item.clone(true);
+                                newitem.addClass('will-kill');
+                                newitem.find('input').val(data.areas[j].title);
+                                if(j>0){
+                                    newitem.find('label').html('');
+                                }
+                               but.before(newitem);
+                               console.log(j)
+                            }
+                            item.remove();
+                         }else{
+                            var but=$('#'+NAME+'-listitem-button-edit').closest('tr');;
+                            but.find('a').attr('numb',0);
+                            but.find('.label').html('区名称：');
+                         }
+                        
+                $('#'+NAME+'-username-list-edit').datagrid({
+                //url : ThinkPHP['MODULE'] + '/Floor/getuser',
+                width : '95%',
+                data:data.users,
+                columns:[[
+                    {
+                        field : 'id',
+                        title : '编号',
+                        width : 100,
+                        hidden : true,
+                        formatter : function (value, row, index) {
+                            return '<input value="'+row.id+'" name="'+NAME+'_uid_add" />';
+                        }
+                    },
+                    {
+                        field : 'username',
+                        title : '名称',
+                        width : 180
+                    },
+                    {
+                        field : 'name',
+                        title : '职务',
+                        width : 180
+                    },
+                    {
+                        field : 'opt',
+                        title : '操作',
+                        width : 60,
+                        formatter : function (value, row, index) {
+                            return '<a href="javascript:void(0)" class="delete-button" style="height: 18px;margin-left:2px;" onclick="PUBLIC_TOOL.'+NAME+'_client_tool.delete(\'' + index + '\', \'' + row.id + '\',\'edit\');"><img src="' + ThinkPHP['ROOT'] + '/Public/admin/easyui/themes/icons/delete-new.png"></a>';
+                        }
+                    }
+                ]],
+                onClickCell : function (index) {
+                    $('#'+NAME+'-username-list-add').datagrid('selectRow', index);
+                }
+            });
                     }
                 }
             });
@@ -655,7 +755,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] = (function  (NAME) {
             $.messager.alert('警告操作', '此用户已选择！', 'warning');
         } else {
             this.ids.push(id);
-            $('#'+NAME+'-username-list-add').datagrid('appendRow',{
+            $('#'+NAME+'-username-list-'+this.isOpenPanel).datagrid('appendRow',{
                 id : id,
                 username : username,
                 name : name,
@@ -663,9 +763,10 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] = (function  (NAME) {
             $('#'+NAME+'-client').dialog('close');
             this.reset();
         }
+        console.log( this.ids)
     },
-    delete : function (index, id) {
-        var obj = $('#'+NAME+'-username-list-add');
+    delete : function (index, id,action) {
+        var obj = $('#'+NAME+'-username-list-'+action);
         console.log(obj)
         obj.datagrid('deleteRow', index);
         obj.datagrid('loadData', obj.datagrid('getRows'));

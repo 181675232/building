@@ -77,6 +77,8 @@ class FloorController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
+            print_r(I('post.'));
+            exit;
             $table = M('Floor');
             $where['title'] = I('post.title');
             $where['pid'] = $map['bid'] = $data['building'] = I('post.pid');
@@ -116,17 +118,34 @@ class FloorController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
+            print_r(I('post.'));
+            exit;
             $table = M('Floor');
-            $where = I('post.');
-//            if ($table->where("title = '{$where['title']}'")->find()){
-//                echo '职位名称已存在';
-//                exit;
-//            }
-            if ($where['content']){
-                $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
-            }
+            $where['title'] = I('post.title');
+            $where['pid'] = $map['bid'] = $data['building'] = I('post.pid');
+            $where['simg'] = I('post.simg');
+            $areas = explode(',',I('post.areas'));
+            $uid = explode(',',I('post.uid'));
+            $where['addtime'] = $map['addtime'] = time();
+            $where['proid'] = $map['proid'] = $data['proid'] = C('proid');
+
             $id = $table->save($where);
             if ($id) {
+                $area = M('area');
+                $admin_qs = M('admin_qs');
+                $map['pid'] = $data['floor'] = $id;
+                foreach ($areas as $val){
+                    if ($val){
+                        $map['title'] = $val;
+                        $area->add($map);
+                    }
+                }
+                foreach ($uid as $value){
+                    if ($value){
+                        $data['uid'] = $value;
+                        $admin_qs->add($data);
+                    }
+                }
                 echo $id ? $id : 0;
                 exit;
             } else {
@@ -177,7 +196,7 @@ class FloorController extends CommonController {
             $area = M('area');
             $admin = M('admin_qs');
             $object['areas'] = $area->field('id,title')->where("pid = '{$where['id']}'")->order('id asc')->select();
-            $object['users'] = $admin->field('t_admin.id,t_admin.username,t_level.title')
+            $object['users'] = $admin->field('t_admin.id,t_admin.username,t_level.title name')
                 ->join('left join t_admin on t_admin.id = t_admin_qs.uid')
                 ->join('left join t_level on t_level.id = t_admin.level')
                 ->where("floor = '{$where['id']}'")->order('t_admin_qs.id asc')->select();
