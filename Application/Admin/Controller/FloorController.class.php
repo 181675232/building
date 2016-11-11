@@ -77,8 +77,6 @@ class FloorController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
-            print_r(I('post.'));
-            exit;
             $table = M('Floor');
             $where['title'] = I('post.title');
             $where['pid'] = $map['bid'] = $data['building'] = I('post.pid');
@@ -118,8 +116,6 @@ class FloorController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            print_r(I('post.'));
-            exit;
             $table = M('Floor');
             $where['title'] = I('post.title');
             $where['pid'] = $map['bid'] = $data['building'] = I('post.pid');
