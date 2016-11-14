@@ -57,8 +57,8 @@ class ImgController extends CommonController {
                 $orders['id'] = 'desc';
             }
             $where['proid'] = C('proid');
-            $count = $table->field('FROM_UNIXTIME(addtime,"%Y-%m-%d") datetime')
-                ->group('datetime')
+            $count = $table
+                ->group('FROM_UNIXTIME(addtime,"%Y-%m-%d")')
                 ->where($where)->count();
             $data = $table->field('FROM_UNIXTIME(addtime,"%Y-%m-%d") datetime')
                 ->group('datetime')
