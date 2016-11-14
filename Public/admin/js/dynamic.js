@@ -275,6 +275,20 @@ $(function () {
             ]
         });
 
+        //搜索
+        $('#'+NAME+'-search-pid').combobox({
+            width : 80,
+            url : ThinkPHP['MODULE'] + '/Building/getall',
+            editable : false,
+            valueField : 'id',
+            textField : 'title',
+            required : true,
+            missingMessage : '选择楼',
+            panelHeight : 'auto',
+            tipPosition : 'left',
+            novalidate : true
+        });
+
         /* ---------------------------弹出框样式-------------------------------------------*/
         //时间搜索
         $('#'+NAME+'-search-date').combobox({
@@ -333,7 +347,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             if ($('#'+NAME+'-tool').form('validate')) {
                 $('#'+NAME+'').datagrid('load', {
                     keywords: $.trim($('input[name="'+NAME+'_search_keywords"]').val()),
-                    state: $('input[name="'+NAME+'_search_state"]').val(),
+                    pid: $('input[name="'+NAME+'_search_pid"]').val(),
                     date: $('input[name="'+NAME+'_search_date"]').val(),
                     date_from: $('input[name="'+NAME+'_search_date_from"]').val(),
                     date_to: $('input[name="'+NAME+'_search_date_to"]').val()

@@ -28,6 +28,9 @@ class DynamicController extends CommonController {
                 $keywords = I('post.keywords');
                 $where['content'] = array('like', '%'.$keywords.'%');
             }
+            if (I('post.pid')) {
+                $where['building'] = I('post.pid');
+            }
             if (I('post.date_from')) $starttime = strtotime(I('post.date_from'));
             if (I('post.date_to')) $stoptime = strtotime(I('post.date_to').' 23:59:59');
             $datetype = I('post.date') ? I('post.date') : 'addtime';
