@@ -42,7 +42,7 @@ $(function () {
                     formatter : function (value,row) {
                         var str='';
                         for(var i=0;i<value.length;i++){
-                            str+=('<a title="详情" href="'+row.simg+'" style="height: 20px;margin: 1px"><img src="'+value[i].img+'"/></a>');
+                            str+='<a title="详情" href="'+row.simg+'" style="width:100px;height:80px;overflow:hidden;margin: 1px"><img style="width: 100px;" src="'+value[i].img+'"/></a>';
                         }
                         return str;
                     }
