@@ -1,0 +1,32 @@
+<table class="details-table" style="max-width: 780px;">
+    <tbody>
+        <tr>
+            <td class="label">发布人:</td>
+            <td class="content">{$username}</td>
+            <td class="label">联系电话:</td>
+            <td class="content">{$phone}</td>
+        </tr>
+        <tr>
+            <td class="label">天气情况:</td>
+            <td class="content">{$weather} 温度:{$c} 风力:{$wind}</td>
+            <td class="label">地点:</td>
+            <td class="content">{$building} {$floor} {$area}</td>
+        </tr>
+        <tr>
+            <td class="label">发布时间:</td>
+            <td class="content" colspan="3">{$addtime|date="Y-m-d H:i",###}</td>
+        </tr>
+        <tr>
+            <td class="label">生产记录:</td>
+            <td class="content" colspan="3">{$prorecord}</td>
+        </tr>
+        <tr>
+            <td class="label">质量安全记录:</td>
+            <td class="content" colspan="3">{$record}</td>
+        </tr>
+        <tr>
+            <td class="label">突发事件:</td>
+            <td class="content" colspan="3">{$burst}</td>
+        </tr>
+    </tbody>
+</table>

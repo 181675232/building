@@ -494,6 +494,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             $('#'+NAME+'-search-keywords').textbox('clear');
             $('#'+NAME+'-search-date').combobox('clear').combobox('disableValidation');
             $('#'+NAME+'-search-date-from').datebox('clear');
+            $('#'+NAME+'-search-state').combobox('clear').combobox('disableValidation');
             $('#'+NAME+'-search-date-to').datebox('clear');
             $('#'+NAME+'').datagrid('resetSort', {
                 sortName : 'stoptime',

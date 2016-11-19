@@ -142,7 +142,7 @@ class DynamicController extends CommonController {
     public function getone() {
         if (IS_AJAX) {
             $where['pid'] = I('get.id');
-            $where['porid'] = C('proid');
+            $where['proid'] = C('proid');
             $where['type'] = 'dynamic';
             $img = M('img');
             $data['img'] = $img->where($where)->getField('simg',true);

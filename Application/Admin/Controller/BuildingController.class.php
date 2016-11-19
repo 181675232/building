@@ -224,7 +224,18 @@ class BuildingController extends CommonController {
     public function delete() {
         if (IS_AJAX) {
             $table = M('Building');
-            echo $table->delete(I('post.ids'));
+            $ids = explode(',',I('post.ids'));
+            $id = $table->delete(I('post.ids'));
+            $proid = C('proid');
+            if ($id){
+                echo $id;
+                $floor = M('floor');
+                $area = M('area');
+                foreach ($ids as $val){
+                    $area->where("bid = $val and proid = $proid")->delete();
+                    $floor->where("pid = $val and proid = $proid")->delete();
+                }
+            }
         } else {
             $this->error('非法操作！');
         }

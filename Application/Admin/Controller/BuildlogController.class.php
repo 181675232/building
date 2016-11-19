@@ -2,7 +2,7 @@
 namespace Admin\Controller;
 use Think\Controller;
 
-class ImgController extends CommonController {
+class BuildlogController extends CommonController {
 
     //加载首页
     public function index() {
@@ -16,7 +16,7 @@ class ImgController extends CommonController {
     //列表
     public function show() {
         if (IS_AJAX) {
-            $table = M('dynamic');
+            $table = M('Buildlog');
             //分页
             $page = I('post.page') ? I('post.page') : 1;
             $pagesize = I('post.rows') ? I('post.rows') : 20;
@@ -26,11 +26,10 @@ class ImgController extends CommonController {
             $where = array();
             if (I('post.keywords')) {
                 $keywords = I('post.keywords');
-                $where['content'] = array('like', '%'.$keywords.'%');
+                $where['_string'] = "burst LIKE '%$keywords%' or prorecord LIKE '%$keywords%' or record LIKE '%$keywords%'";
             }
             if (I('post.pid')) {
                 $where['building'] = I('post.pid');
-                $map['t_dynamic.building'] = I('post.pid');
             }
             if (I('post.date_from')) $starttime = strtotime(I('post.date_from'));
             if (I('post.date_to')) $stoptime = strtotime(I('post.date_to').' 23:59:59');
@@ -43,10 +42,10 @@ class ImgController extends CommonController {
                 $where["$datetype"] = array('elt', date($stoptime));
             }
             //管理 or 职员
-//            if (session('admin')['level']){
-//                $level_uid = session('admin')['id'];
-//                $where['_string'] = "uid = $level_uid or user_id = $level_uid";
-//            }
+            if (session('admin')['level']){
+                $level_uid = session('admin')['id'];
+                $where['_string'] = "uid = $level_uid";
+            }
             //排序
             $order = I('post.order');
             $sort = I('post.sort');
@@ -57,22 +56,20 @@ class ImgController extends CommonController {
                 $orders['id'] = 'desc';
             }
             $where['proid'] = C('proid');
-            $count = $table->field('FROM_UNIXTIME(addtime,"%Y-%m-%d") datetime')
-                ->group('datetime')
-                ->where($where)->select();
-            $count = count($count);
-            $data = $table->field('FROM_UNIXTIME(addtime,"%Y-%m-%d") datetime')
-                ->group('datetime')
-                ->where($where)->order('addtime desc')->limit($pages,$pagesize)->select();
-            $map['t_dynamic.proid'] = C('proid');
+            $count = $table->where($where)->count();
+            $data = $table->field('*')
+                ->where($where)
+                ->order($orders)->limit($pages,$pagesize)->select();
+            $admin = M('admin');
+            $building = M('building');
+            $floor = M('floor');
+            $area = M('area');
             foreach ($data as $key=>$val){
-                $map['_string'] = "FROM_UNIXTIME(t_dynamic.addtime,'%Y-%m-%d') = '{$val['datetime']}'";
-                $data[$key]['img'] = $table->field('t_img.simg img,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
-                    ->join('left join t_building on t_building.id = t_dynamic.building')
-                    ->join('left join t_floor on t_floor.id = t_dynamic.floor')
-                    ->join('left join t_area on t_area.id = t_dynamic.area')
-                    ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
-                    ->where($map)->order('t_dynamic.addtime desc')->select();
+                $data[$key]['username'] = $admin->where("id = '{$val['uid']}'")->getField('username');
+                $buildings = $building->where("id = '{$val['building']}'")->getField('title');
+                $floors = $floor->where("id = '{$val['floor']}'")->getField('title');
+                $areas = $area->where("id = '{$val['area']}'")->getField('title');
+                $data[$key]['build'] = $buildings.' '.$floors.' '.$areas;
             }
             $this->ajaxReturn(array('total'=>$count,'rows'=>$data ? $data : ''));
         } else {
@@ -83,7 +80,7 @@ class ImgController extends CommonController {
     //添加
     public function add() {
         if (IS_AJAX) {
-            $table = M('dynamic');
+            $table = M('Buildlog');
             $where = I('post.');
             $where['addtime'] = time();
             $where['proid'] = C('proid');
@@ -107,7 +104,7 @@ class ImgController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            $table = M('dynamic');
+            $table = M('Buildlog');
             $where = I('post.');
 //            if ($table->where("title = '{$where['title']}'")->find()){
 //                echo '职位名称已存在';
@@ -132,7 +129,7 @@ class ImgController extends CommonController {
     //获取所有职位
     public function getListAll() {
         if (IS_AJAX) {
-            $table = D('dynamic');
+            $table = D('Buildlog');
 //            $where['proid'] = C('proid');
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
@@ -144,14 +141,58 @@ class ImgController extends CommonController {
     //获取
     public function getone() {
         if (IS_AJAX) {
-            $where['pid'] = I('get.id');
-            $where['proid'] = C('proid');
-            $where['type'] = 'dynamic';
-            $img = M('img');
-            $data['img'] = $img->where($where)->getField('simg',true);
-            $data['img'] = $data['img'] ? $data['img'] : array();
+            $where['t_buildlog.id'] = I('get.id');
+            $where['t_buildlog.proid'] = C('proid');
+            $table = M('buildlog');
+            $data = $table->field('t_buildlog.id,t_buildlog.addtime,t_admin.username,t_admin.phone,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
+                ->join('left join t_admin on t_admin.id = t_buildlog.uid')
+                ->join('left join t_building on t_building.id = t_buildlog.building')
+                ->join('left join t_floor on t_floor.id = t_buildlog.floor')
+                ->join('left join t_area on t_area.id = t_buildlog.area')
+                ->where($where)->find();
+            $data['prorecord'] = nl2p($data['prorecord'],false);
+            $data['record'] = nl2p($data['record'],false);
+            $data['burst'] = nl2p($data['burst'],false);
             $this->assign($data);
-            $this->display('Dynamic_details');
+            $this->display('Buildlog_details');
+        } else {
+            $this->error('非法操作！');
+        }
+    }
+
+    //预打印
+    public function prints() {
+        if (IS_AJAX) {
+            $where['t_buildlog.addtime'] = strtotime(I('get.id'));
+            $where['t_buildlog.proid'] = C('proid');
+            $table = M('buildlog');
+            $res = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_level.title name')
+                ->join('left join t_building on t_building.id = t_buildlog.building')
+                ->join('left join t_floor on t_floor.id = t_buildlog.floor')
+                ->join('left join t_area on t_area.id = t_buildlog.area')
+                ->join('left join t_admin on t_admin.id = t_buildlog.uid')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->where($where)->select();
+            foreach ($res as $val){
+                $data['addtime'] = $val['addtime'];
+                $data['weather'] = $val['weather'];
+                $data['wind'] = $val['wind'];
+                $data['c'] = $val['c'];
+                if ($val['burst']){
+                    $data['burst'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['burst'].'/n';
+                }
+                if ($val['prorecord']){
+                    $data['prorecord'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['prorecord'].'/n';
+                }
+                if ($val['record']){
+                    $data['record'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['record'].'/n';
+                }
+            }
+            $data['burst'] = nl2p($data['burst'],false);
+            $data['prorecord'] = nl2p($data['prorecord'],false);
+            $data['record'] = nl2p($data['record'],false);
+            $this->assign($data);
+            $this->display('Buildlog_prints');
         } else {
             $this->error('非法操作！');
         }
@@ -159,7 +200,7 @@ class ImgController extends CommonController {
 
     //导出
     public function export() {
-        $table = M('dynamic');
+        $table = M('Buildlog');
 
         /*--------post参数--------*/
         $keywords = I('post.daytask_search_keywords');
@@ -211,7 +252,7 @@ class ImgController extends CommonController {
     //详情
     public function details() {
         if (IS_AJAX) {
-            $table = M('dynamic');
+            $table = M('Buildlog');
             $where['id'] = I('post.id');
             $object = $table->field('*')
                 ->where($where)->find();
@@ -226,7 +267,7 @@ class ImgController extends CommonController {
     //删除
     public function delete() {
         if (IS_AJAX) {
-            $table = M('dynamic');
+            $table = M('Buildlog');
             echo $table->delete(I('post.ids'));
         } else {
             $this->error('非法操作！');

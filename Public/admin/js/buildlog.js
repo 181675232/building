@@ -25,30 +25,64 @@ $(function () {
             toolbar : '#'+NAME+'-tool',
             columns : [[
                 {
-                    field : 'datetime',
-                    title : '发布时间',
+                    field : 'username',
+                    title : '发布人',
                     align : 'center',
-                    width : 200,
-                    fixed : true,
-                    sortable : true,
+                    width : 20
+                },
+                {
+                    field : 'build',
+                    title : '位置',
+                    align : 'center',
+                    width : 20,
 
                 },
                 {
-                    field : 'img',
-                    title : '图片',
+                    field : 'weather',
+                    title : '天气',
                     align : 'center',
-                    width : 200,
-                    height : 200,
-                    formatter : function (value,row) {
-                        var str='';
-                        for(var i=0;i<value.length;i++){
-                            str+='<a target="_blank" title="'+value[i].building+' '+value[i].floor+' '+value[i].area+'" href="'+value[i].img+'" style="float:left;width:120px;height:100px;overflow:hidden;margin: 1px"><img style="width: 118px;" src="'+value[i].img+'"/></a>';
-                        }
-                        return str;
-                    }
-
+                    width : 15
                 },
-
+                {
+                    field : 'c',
+                    title : '温度',
+                    align : 'center',
+                    width : 15
+                },
+                {
+                    field : 'wind',
+                    title : '风力',
+                    align : 'center',
+                    width : 15
+                },
+                {
+                    field : 'prorecord',
+                    title : '生产记录',
+                    align : 'center',
+                    width : 80
+                },
+                {
+                    field : 'record',
+                    title : '质量安全记录',
+                    align : 'center',
+                    width : 80
+                },
+                {
+                    field : 'burst',
+                    title : '突发事件',
+                    align : 'center',
+                    width : 80
+                },
+                {
+                    field : 'addtime',
+                    title : '发布时间',
+                    align : 'center',
+                    width : 40,
+                    sortable : true,
+                    formatter : function (value,row) {
+                        return formatDate(new Date(value * 1000));
+                    }
+                },
                 // {
                 //     field : 'stoptime',
                 //     title : '预警时间',
@@ -74,18 +108,18 @@ $(function () {
                 //         }
                 //     }
                 // },
-                // {
-                //     field: 'details',
-                //     title: '操作',
-                //     width: 60,
-                //     align : 'center',
-                //     fixed : true,
-                //     formatter : function (value,row) {
-                //         return '<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
-                //         //return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
-                //
-                //     }
-                // }
+                {
+                    field: 'details',
+                    title: '操作',
+                    width: 60,
+                    align : 'center',
+                    fixed : true,
+                    formatter : function (value,row) {
+                        return '<a title="详情" href="javascript:void(0)" class="'+NAME+'-details" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.details(' + row.id + ');"></a>'
+                        //return  '<a title="编辑" href="javascript:void(0)" class="'+NAME+'-edit" style="height: 20px;margin: 1px" onclick="PUBLIC_TOOL.'+NAME+'_tool.edit(' + row.id + ');"></a>';
+
+                    }
+                }
             ]],
             onLoadSuccess : function() {
                 $('.'+NAME+'-details').linkbutton({
@@ -332,6 +366,8 @@ $(function () {
                 }
             }
         });
+        $('#log-date').datebox({
+        });
 
     })(PUBLIC_STR_NAME);
 });
@@ -355,8 +391,22 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
         details : function (id) {
             $('#details-dialog').
             dialog('open').
-            dialog('setTitle', '现场图片').
+            dialog('setTitle', '日志详情').
             dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/getone/?id=' + id);
+        },
+        prints : function () {
+            var logdate = $('input[name="log_date"]').val();
+            if (logdate){
+                $('#details-dialog').
+                dialog('open').
+                dialog('setTitle', logdate+' 工作日志').
+                dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/prints/?id=' + logdate);
+            }else {
+                $('#details-dialog').
+                dialog('open').
+                dialog('setTitle', getNowFormatDate()+' 工作日志').
+                dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/prints/?id=' + getNowFormatDate());
+            }
         },
         add : function () {
             $('#'+NAME+'-add').dialog('open');
@@ -442,6 +492,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             $('#'+NAME+'-search-date').combobox('clear').combobox('disableValidation');
             $('#'+NAME+'-search-date-from').datebox('clear');
             $('#'+NAME+'-search-date-to').datebox('clear');
+            $('#log-date').datebox('clear');
             $('#'+NAME+'-search-pid').combobox('clear').combobox('disableValidation');
             $('#'+NAME+'').datagrid('resetSort', {
                 sortName : 'addtime',
@@ -451,3 +502,20 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
         }
     };
 })(PUBLIC_STR_NAME);
+
+function getNowFormatDate() {
+    var date = new Date();
+    var seperator1 = "-";
+    var seperator2 = ":";
+    var year = date.getFullYear();
+    var month = date.getMonth() + 1;
+    var strDate = date.getDate();
+    if (month >= 1 && month <= 9) {
+        month = "0" + month;
+    }
+    if (strDate >= 0 && strDate <= 9) {
+        strDate = "0" + strDate;
+    }
+    var currentdate = year + seperator1 + month + seperator1 + strDate;
+    return currentdate;
+}
