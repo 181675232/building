@@ -179,13 +179,13 @@ class BuildlogController extends CommonController {
                 $data['wind'] = $val['wind'];
                 $data['c'] = $val['c'];
                 if ($val['burst']){
-                    $data['burst'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['burst'].'/n';
+                    $data['burst'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['burst'].'<br />';
                 }
                 if ($val['prorecord']){
-                    $data['prorecord'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['prorecord'].'/n';
+                    $data['prorecord'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['prorecord'].'<br />';
                 }
                 if ($val['record']){
-                    $data['record'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['record'].'/n';
+                    $data['record'] .= $val['name'].' '.$val['username'].' '.$val['building'].$val['floor'].$val['area'].' : '.$val['record'].'<br />';
                 }
             }
             $data['burst'] = nl2p($data['burst'],false);

@@ -397,12 +397,12 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
         prints : function () {
             var logdate = $('input[name="log_date"]').val();
             if (logdate){
-                $('#details-dialog').
+                $('#details-prints-dialog').
                 dialog('open').
                 dialog('setTitle', logdate+' 工作日志').
                 dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/prints/?id=' + logdate);
             }else {
-                $('#details-dialog').
+                $('#details-prints-dialog').
                 dialog('open').
                 dialog('setTitle', getNowFormatDate()+' 工作日志').
                 dialog('refresh', ThinkPHP['MODULE'] + '/'+NAME+'/prints/?id=' + getNowFormatDate());

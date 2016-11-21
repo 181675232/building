@@ -3,11 +3,11 @@
   <component name="WebServers">
     <option name="servers">
       <webServer id="66ade203-2c67-4af3-9f45-2f0c6f3c2c07" name="jolly" url="http://101.200.81.192">
-        <fileTransfer host="101.200.81.192" port="22" rootFolder="/var/www/html" accessType="SFTP" password="df9cdf9fdf9edff9dfe6dfeedfcedfccdfc1dfc0dfccdfc5dfc3df89df8edf8fdfcedfccdfc6dfc1dfc0df9edf9cdf9fdf9edf93df92" username="root">
+        <fileTransfer host="101.200.81.192" port="221" rootFolder="/var/www/html" accessType="SFTP" password="df98df9adf9adf93dfe0dfc5dfc6dfc6dfd3dfeadf89df9bdf98df99" username="root">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" />
           </advancedOptions>
-          <option name="port" value="22" />
+          <option name="port" value="221" />
         </fileTransfer>
       </webServer>
     </option>

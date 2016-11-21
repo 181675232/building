@@ -1,32 +1,69 @@
-<table class="details-table" style="max-width: 780px;">
+<div id="build-prints">
+<table  class="details-table" style="max-width: 780px;">
     <tbody>
         <tr>
-            <td class="label">发布人:</td>
-            <td class="content">{$username}</td>
-            <td class="label">联系电话:</td>
-            <td class="content">{$phone}</td>
+            <td colspan="2" align="center" style="font-size: 16px;font-weight: bold;">{$addtime|date="Y-m-d",###} 施工日志</td>
+            <td align="center">资料编号</td>
+            <td align="center"> </td>
         </tr>
         <tr>
-            <td class="label">天气情况:</td>
-            <td class="content">{$weather} 温度:{$c} 风力:{$wind}</td>
-            <td class="label">地点:</td>
-            <td class="content">{$building} {$floor} {$area}</td>
+            <td align="center" width="22%">天气情况</td>
+            <td align="center" width="22%">风力</td>
+            <td align="center"  width="22%">温度</td>
+            <td align="center">备注</td>
         </tr>
         <tr>
-            <td class="label">发布时间:</td>
-            <td class="content" colspan="3">{$addtime|date="Y-m-d H:i",###}</td>
+            <td align="center" width="22%">{$weather}</td>
+            <td align="center" width="22%">{$wind}</td>
+            <td align="center"  width="22%">{$c}</td>
+            <td align="center"></td>
         </tr>
         <tr>
-            <td class="label">生产记录:</td>
-            <td class="content" colspan="3">{$prorecord}</td>
+            <td colspan="4" >
+                生产情况记录：(施工部位、施工内容、机械作业、班组工作，生产存在问题等)<br /><br />
+                {$prorecord}
+            </td>
         </tr>
         <tr>
-            <td class="label">质量安全记录:</td>
-            <td class="content" colspan="3">{$record}</td>
+            <td colspan="4">
+                质量安全记录：(技术质量安全活动，检查评定验收、技术质量安全问题等)<br /><br />
+                {$record}
+            </td>
         </tr>
         <tr>
-            <td class="label">突发事件:</td>
-            <td class="content" colspan="3">{$burst}</td>
+            <td colspan="4">
+                突发事件：<br /><br />
+                {$burst}
+            </td>
+        </tr>
+        <tr>
+            <td align="center">记录人</td>
+            <td align="center"> </td>
+            <td align="center">记录时间</td>
+            <td align="center"> </td>
         </tr>
     </tbody>
 </table>
+</div>
+<script type="text/javascript">
+    //窗口API
+//    var api = frameElement.api, W = api.opener;
+//    api.button({
+//        name: '确认打印',
+//        focus: true,
+//        callback: function () {
+//            printWin();
+//        }
+//    }, {
+//        name: '取消'
+//    });
+    //打印方法
+    function printWin() {
+        var oWin = window.open("", "_blank");
+        oWin.document.write(document.getElementById("build-prints").innerHTML);
+        oWin.focus();
+        oWin.document.close();
+        oWin.print()
+        //oWin.close()
+    }
+</script>
