@@ -1,4 +1,67 @@
 <div id="build-prints">
+<style>
+    .form-table, .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+}
+.details-table td {
+    border: 1px solid #ccc;
+}
+.form-table td.label, .details-table td.label  {
+    min-width: 100px;
+    text-align: right;
+    font-size:14px;
+    color: #666;
+}
+.form-table td.input, .details-table td.content  {
+    width: 290px;
+    text-align: left;
+    font-size:14px;
+    color: #666;
+}
+.form-table .link {
+    font-size: 14px;
+    color: #06f;
+    position: relative;
+    top: 2px;
+    left: 5px;
+    cursor: pointer;
+}
+.form-table .textdesc {
+    width: 50%;
+    height: 80px;
+    border-radius: 3px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    resize: none;
+    padding: 10px;
+}
+.form-table .textarea {
+    width: 91%;
+    height: 150px;
+    border-radius: 3px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    resize: none;
+    padding: 10px;
+}
+.details-table {
+    width: 98%;
+}
+.details-table td.content {
+    padding: 0 0 0 5px;
+}
+.details-table td {
+    padding: 8px 0;
+}
+.details-table tr:nth-child(2n) {
+    background-color: #fafafa;
+}
+.details-table tr:hover {
+    background-color: #eee;
+}
+</style>
 <table  class="details-table" style="max-width: 780px;">
     <tbody>
         <tr>

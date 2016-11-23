@@ -3142,7 +3142,7 @@ class IndexController extends CommonController {
         $where['t_warning_user.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_warning_user.uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $table = M('warning_user');
-        $data = $table->field('t_warning.title,t_warning.addtime')
+        $data = $table->field('t_warning.title,t_warning.mp3,t_warning.addtime')
             ->join('left join t_warning on t_warning.id = t_warning_user.pid')
             ->where($where)->order('t_warning.addtime desc')->find();
         if ($data){
@@ -3150,6 +3150,13 @@ class IndexController extends CommonController {
             $data['count'] = $table->field('t_warning.id')
                 ->join('left join t_warning on t_warning.id = t_warning_user.pid')
                 ->where($where)->count();
+            if (!$data['title']){
+                if ($data['mp3']){
+                    $data['title'] = '语音';
+                }else{
+                    $data['title'] = '图片';
+                }
+            }
             json('200','成功',$data);
         }else{
             json('400','没有数据');

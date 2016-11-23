@@ -545,6 +545,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
             //订单产品列表
             $('#'+NAME+'-username-list-add').datagrid({
                 //url : ThinkPHP['MODULE'] + '/Floor/getuser',
+                data:[],
                 width : '95%',
                 columns:[[
                     {
@@ -599,7 +600,6 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                     });
                 },
                 success : function(data) {
-                    console.log(data)
                     $.messager.progress('close');
                     if (data) {
                         var PUCLIC_JSON= eval('({'+
@@ -629,7 +629,6 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                                     newitem.find('label').html('');
                                 }
                                but.before(newitem);
-                               console.log(j)
                             }
                             item.remove();
                          }else{
@@ -763,11 +762,11 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_client_tool'] = (function  (NAME) {
             $('#'+NAME+'-client').dialog('close');
             this.reset();
         }
-        console.log( this.ids)
+        //console.log( this.ids)
     },
     delete : function (index, id,action) {
         var obj = $('#'+NAME+'-username-list-'+action);
-        console.log(obj)
+        //console.log(obj)
         obj.datagrid('deleteRow', index);
         obj.datagrid('loadData', obj.datagrid('getRows'));
         this.ids.splice($.inArray(id, this.ids), 1);
