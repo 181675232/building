@@ -432,6 +432,7 @@ $(function () {
             iconCls : 'icon-add-new',
             onClick : function () {
                 var item=$('#'+NAME+'-listitem-temple').clone(true);
+                item.find('input').attr('name',item.find('input').attr('addname'));
                 item.show();
                 item.attr('id','').addClass('will-kill').find('input').val('');
                 item.find('.l-btn.l-btn-small').show();
@@ -620,6 +621,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                             but.find('a').attr('numb',data.areas.length);
                             but.find('.label').html('');
                              var item=$('#'+NAME+'-listitem-temple').clone(true);
+                             item.find('input').attr('name',item.find('input').attr('editname'));
                              item.show();
                             for(var j=0;j<data.areas.length;j++){
                                 var newitem=item.clone(true);
@@ -648,7 +650,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                         width : 100,
                         hidden : true,
                         formatter : function (value, row, index) {
-                            return '<input value="'+row.id+'" name="'+NAME+'_uid_add" />';
+                            return '<input value="'+row.id+'" name="'+NAME+'_uid_edit" />';
                         }
                     },
                     {
@@ -671,7 +673,7 @@ PUBLIC_TOOL[PUBLIC_STR_NAME+'_tool'] = (function  (NAME) {
                     }
                 ]],
                 onClickCell : function (index) {
-                    $('#'+NAME+'-username-list-add').datagrid('selectRow', index);
+                    $('#'+NAME+'-username-list-edit').datagrid('selectRow', index);
                 }
             });
                     }

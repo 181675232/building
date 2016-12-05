@@ -33,7 +33,7 @@ $(function () {
             {
                 text : '打印',
                 size : 'large',
-                iconCls : 'icon-cross',
+                iconCls : 'icon-print',
                 handler : function () {
                     printWin();
                 }
