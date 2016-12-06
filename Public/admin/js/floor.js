@@ -199,7 +199,7 @@ $(function () {
                                 title : $('input[name="'+NAME+'_title_edit"]').val(),
                                 pid : $('input[name="'+NAME+'_pid_edit"]').val(),
                                 simg : $('input[name="'+NAME+'_simg_edit"]').val(),
-                                uid :(function(){var arry_data=[]; $('input[name="'+NAME+'_uid_eidt"]').each(function () {
+                                uid :(function(){var arry_data=[]; $('input[name="'+NAME+'_uid_edit"]').each(function () {
                                     arry_data.push($(this).val());
                                 });return arry_data.join(',');}),
                                 areas :(function(){var arry_data=[]; $('input[name="'+NAME+'_areas_edit"]').each(function () {
@@ -447,6 +447,7 @@ $(function () {
             iconCls : 'icon-add-new',
             onClick : function () {
                 var item=$('#'+NAME+'-listitem-temple').clone(true);
+                item.find('input').attr('name',item.find('input').attr('editname'));
                 item.show();
                 item.attr('id','').addClass('will-kill').find('input').val('');
                 item.find('.l-btn.l-btn-small').show();
