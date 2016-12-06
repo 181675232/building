@@ -2720,11 +2720,11 @@ class IndexController extends CommonController {
 
     //问题核销
     function qs_finish(){
-        $where['proid'] = $data1['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['proid'] = $data1['proid'] = $int1['proid'] = $int2['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['uid'] = $data1['uid'] = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
         $where['id'] = $data1['pid'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
         $table = M('qs');
-        $res = $table->field('user_id,stoptime')->where($where)->find();
+        $res = $table->field('user_id,type,stoptime')->where($where)->find();
         if ($res){
             if (!$table->where($where)->setField('state',4)){
                 json('400','重复操作');
@@ -2739,8 +2739,24 @@ class IndexController extends CommonController {
                 $map['user_id'] = $where['uid'];
                 $map['proid'] = $where['proid'];
                 $map['uid'] = $res['user_id'];
-                $map['addtime'] = time();
+                $map['addtime'] = $int1['addtime'] = $int2['addtime'] = time();
                 if (M('message')->add($map)) {
+                    if($res['stoptime'] >= $map['addtime']){
+                        $ints = M('ints');
+                        $int1['uid'] = $map['user_id'];
+                        $int1['type'] = 'qs';
+                        $int1['pid'] = $where['id'];
+                        $int1['num'] = $res['type'];
+                        $int1['bang'] = 1;
+                        $ints->add($int1);
+                        $int2['uid'] = $map['uid'];
+                        $int2['type'] = 'qs';
+                        $int2['pid'] = $where['id'];
+                        $int2['num'] = $res['type'];
+                        $int2['bang'] = 2;
+                        $ints->add($int2);
+                    }
+
                     $push['ids'] = $map['uid'];
                     $push['type'] = $map['type'];
                     $push['typeid'] = $map['typeid'];
@@ -3303,6 +3319,39 @@ class IndexController extends CommonController {
         $data['content'] = $data['content'];
         $this->assign($data);
         $this->display('Index_newsweb');
+    }
+
+    //荣誉榜
+    public function bang(){
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $type = I('post.type') ? I('post.type') : 1;
+        $table = M('ints');
+        if ($type == 1){
+            $data = $table->field('t_admin.id,t_admin.username,t_admin.simg,t_level.title name,sum(t_ints.num) as num')
+                ->join('left join t_admin on t_admin.id = t_ints.uid')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->group('t_ints.uid')
+                ->where("t_ints.bang = 1 and t_ints.proid = '{$proid}'")->order('num desc')->select();
+        }elseif ($type == 2){
+            $data = $table->field('t_admin.id,t_admin.username,t_admin.simg,t_level.title name,sum(t_ints.num) as num')
+                ->join('left join t_admin on t_admin.id = t_ints.uid')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->group('t_ints.uid')
+                ->where("t_ints.bang = 2 and t_ints.proid = '{$proid}'")->order('num desc')->select();
+        }else{
+            $dynamic = M('dynamic');
+            $data = $dynamic->field('t_admin.id,t_admin.username,t_admin.simg,t_level.title name,count(t_img.id) as num')
+                ->join('left join t_admin on t_admin.id = t_dynamic.uid')
+                ->join('left join t_level on t_level.id = t_admin.level')
+                ->join('left join t_img on t_img.pid = t_dynamic.id and t_img.type = "dynamic"')
+                ->group('t_dynamic.uid')
+                ->where("t_dynamic.proid = '{$proid}'")->order('num desc')->select();
+        }
+        if ($data){
+            json('200','成功',$data);
+        }else{
+            json('400','暂时还没有人入榜');
+        }
     }
 
 

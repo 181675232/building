@@ -116,11 +116,10 @@ class FloorController extends CommonController {
     //修改
     public function edit() {
         if (IS_AJAX) {
-            print_r(I('post.'));
-            exit;
             $table = M('Floor');
+            $where['id'] = I('post.id');
             $where['title'] = I('post.title');
-            $where['pid'] = $map['bid'] = $data['building'] = I('post.pid');
+            $where['pid'] = $map['bid'] = $data['building'] = $table->where("id = '{$where['id']}'")->getField('pid');
             $where['simg'] = I('post.simg');
             $areas = explode(',',I('post.areas'));
             $uid = explode(',',I('post.uid'));
@@ -131,7 +130,9 @@ class FloorController extends CommonController {
             if ($id) {
                 $area = M('area');
                 $admin_qs = M('admin_qs');
-                $map['pid'] = $data['floor'] = $id;
+                $map['pid'] = $data['floor'] = $where['id'];
+                $area->where("proid = '{$map['proid']}' and bid = '{$map['bid']}' and pid = '{$map['pid']}'")->delete();
+                $admin_qs->where("proid = '{$map['proid']}' and building = '{$map['bid']}' and floor = '{$map['pid']}'")->delete();
                 foreach ($areas as $val){
                     if ($val){
                         $map['title'] = $val;
