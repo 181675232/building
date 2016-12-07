@@ -3455,9 +3455,10 @@ class IndexController extends CommonController {
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
         $table = M('staff');
-        $data['count'] = $table->where($where)->count();
+
         $data['list'] = $table->field('id,simg,name,gender,bid,worker,age,id_card,tel,card_z,card_f')->where($where)->order('id desc')->limit($pages,20)->select();
-        if ($data){
+        if ($data['list']){
+            $data['count'] = $table->where($where)->count();
             $staff = M('staff_extend');
             $admin = M('admin');
             foreach ($data['list'] as $key=>$val){
