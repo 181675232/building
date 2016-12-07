@@ -3354,7 +3354,201 @@ class IndexController extends CommonController {
         }
     }
 
+    //添加劳务人员
+    public function add_user(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['bid'] = I('post.bid') ? I('post.bid') : json('400','请选择所属公司');
+        $where['name'] = I('post.name') ? I('post.name') : json('400','请输入姓名');
+        $where['gender'] = I('post.gender') ? I('post.gender') : json('400','请选择姓别');
+        $where['worker'] = I('post.worker') ? I('post.worker') : json('400','请选择工种');
+        $where['tel'] = I('post.tel') ? I('post.tel') : json('400','请输入联系电话');
+        $where['age'] = I('post.age') ? I('post.age') : json('400','请输入年龄');
+        $map['registered_address'] = I('post.registered_address') ? I('post.registered_address') : json('400','请输入籍贯');
+        $where['id_card'] = I('post.id_card') ? I('post.id_card') : json('400','请输入身份证号');
+        if($_FILES['simg']){
+            $file = $_FILES['simg'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','头像上传失败');
+            }
+        }else{
+            $where['simg'] = '/Public/upfile/touxiang.jpg';
+        }
+        if($_FILES['card_z']){
+            $file = $_FILES['card_z'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['card_z'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','头像上传失败');
+            }
+        }
+        if($_FILES['card_f']){
+            $file = $_FILES['card_f'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['card_f'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','头像上传失败');
+            }
+        }
+        $map['sid'] = M('staff')->add($where);
+        if ($map['sid']){
+            M('staff_extend')->add($map);
+            json('200','添加成功');
+        }else{
+            json('400','添加失败');
+        }
+    }
 
+    //劳务人员列表
+    public function user_list(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        if (I('post.keyword'))
+            $where['name'] = array('like','%'.$_POST['keyword'].'%');
+        if (I('post.bid'))
+            $where['bid'] = I('post.bid');
+        if (I('post.worker'))
+            $where['worker'] = I('post.worker');
+        if (I('post.gender'))
+            $where['gender'] = I('post.gender');
+        if (I('post.min') && I('post.max')){
+            $where['age'] = array(array('elt',I('post.max')),array('egt',I('post.min')));
+        }elseif(I('post.min')){
+            $where['age'] = array('egt',I('post.min'));
+        }elseif(I('post.max')){
+            $where['age'] = array('elt',I('post.max'));
+        }
+
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('staff');
+        $data['count'] = $table->where($where)->count();
+        $data['list'] = $table->field('id,simg,name,gender,bid,worker,age,id_card,tel,card_z,card_f')->where($where)->order('id desc')->limit($pages,20)->select();
+        if ($data){
+            $staff = M('staff_extend');
+            $admin = M('admin');
+            foreach ($data['list'] as $key=>$val){
+                $data['list'][$key]['registered_address'] = $staff->where("sid = '{$val['id']}'")->getField('registered_address');
+                $bid_name = $admin->where("id = '{$val['bid']}'")->getField('username');
+                $data['list'][$key]['bid_name'] = $bid_name ? $bid_name : '';
+            }
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
+        }
+    }
+
+    //编辑劳务人员
+    public function edit_user(){
+        $where['proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $where['id'] = I('post.id') ? I('post.id') : json('404','缺少参数 id');
+        $where['bid'] = I('post.bid') ? I('post.bid') : json('400','请选择所属公司');
+        $where['name'] = I('post.name') ? I('post.name') : json('400','请输入姓名');
+        $where['gender'] = I('post.gender') ? I('post.gender') : json('400','请选择姓别');
+        $where['worker'] = I('post.worker') ? I('post.worker') : json('400','请选择工种');
+        $where['tel'] = I('post.tel') ? I('post.tel') : json('400','请输入联系电话');
+        $where['age'] = I('post.age') ? I('post.age') : json('400','请输入年龄');
+        $map['registered_address'] = I('post.registered_address') ? I('post.registered_address') : json('400','请输入籍贯');
+        $where['id_card'] = I('post.id_card') ? I('post.id_card') : json('400','请输入身份证号');
+        if($_FILES['simg']){
+            $file = $_FILES['simg'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['simg'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','头像上传失败');
+            }
+        }
+        if($_FILES['card_z']){
+            $file = $_FILES['card_z'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['card_z'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','身份证正面上传失败');
+            }
+        }
+        if($_FILES['card_f']){
+            $file = $_FILES['card_f'];
+            $rand = '';
+            for ($i=0;$i<6;$i++){
+                $rand.=rand(0,9);
+            }
+            $type = explode('.', $file['name']);
+            $simg = date('YmdHis').$rand.'.'.end($type);
+            $dir = date('Y-m-d');
+            if (!is_dir('./Public/upfile/'.$dir)){
+                mkdir('./Public/upfile/'.$dir,0777);
+            }
+            if (move_uploaded_file($file['tmp_name'], './Public/upfile/'.$dir.'/'.$simg)){
+                $where['card_f'] = '/Public/upfile/'.$dir.'/'.$simg;
+                create_thumb($simg,$dir);
+            }else {
+                json('400','身份证反正面上传失败');
+            }
+        }
+        if (M('staff')->save($where)){
+            M('staff_extend')->where("sid = '{$where['id']}'")->save($map);
+            json('200','编辑成功');
+        }else{
+            json('400','编辑失败');
+        }
+    }
 
 
 
