@@ -5,27 +5,41 @@
 
 <div id="staff-tool" style="padding:5px;">
     <div style="margin-bottom:5px;">
+        <!--
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-add-new" onclick="staff_tool.add();">新增</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-edit-new" onclick="staff_tool.edit();">修改</a>
+
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-delete-new" onclick="staff_tool.remove();">删除</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-reload" onclick="staff_tool.reload();">刷新表</a>
+        -->
+        <!--
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-redo" onclick="staff_tool.redo();">取消选定</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-add-search" onclick="staff_tool.field();" id="field">展开查询字段</a>
+
         <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="staff_tool.reset();" style="margin-top:-1px;">重置查询</a>
+        -->
     </div>
     <div style="padding:0 0 0 7px;color:#333;">
         <label for="staff-search-keywords" title="This is the tooltip message.">关键字：</label>
         <input type="text" id="staff-search-keywords" class="easyui-textbox" prompt="姓名|电话" name="staff_search_keywords" style="width:143px;">
         <!--
         <input type="text" id="staff-search-post" prompt="职位" name="staff_search_post">
-        -->
+
         <input type="text" id="staff-search-entry-status" prompt="入职状态" name="staff_search_entry_status">
         <input type="text" id="staff-search-date" prompt="查询时间" name="staff_search_date">
         <input type="text" id="staff-search-date-from" prompt="起始时间" name="staff_search_date_from" editable="false"  style="width:110px;">
         <label for="staff-search-date-to">-</label>
         <input type="text" id="staff-search-date-to" prompt="结束时间" name="staff_search_date_to" editable="false" style="width:110px;">
+        <input type="text" id="staff-search-gender" prompt="性别" name="staff_search_gender">
+<input type="text" id="staff-search-nation" prompt="民族(请输入精准关键字，如：汉族)" name="staff_search_nation">
+        -->
+        <input type="text" id="staff-search-gender" prompt="性别" name="staff_search_gender">
+        <input type="text" id="staff-search-id-card" prompt="身份证(请输入精准18位身份证号码)" name="staff_search_id_card">
+
         <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="staff_tool.search();" style="margin-top:-1px;">查询</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-undo" onclick="staff_tool.reset();" style="margin-top:-1px;">重置查询</a>
     </div>
+    <!--
     <div class="more">
         <input type="text" id="staff-search-gender" prompt="性别" name="staff_search_gender">
         <input type="text" id="staff-search-marital-status" prompt="婚姻" name="staff_search_marital_status">
@@ -37,6 +51,7 @@
         <input type="text" id="staff-search-id-card" prompt="身份证(请输入精准18位身份证号码)" name="staff_search_id_card">
         <input type="text" id="staff-search-nation" prompt="民族(请输入精准关键字，如：汉族)" name="staff_search_nation">
     </div>
+    -->
 </div>
 
 <form id="staff-add">

@@ -122,7 +122,7 @@ class StaffModel extends RelationModel {
         }
 
         $object = $this->relation('Post')
-                        ->field('id,name,number,pid,nation,tel,marital_status,gender,id_card,type,entry_status,entry_date,education')
+                        ->field('id,name,number,pid,nation,worker,age,tel,marital_status,gender,id_card,type,entry_status,entry_date,education')
                         ->where($map)
                         ->order(array($sort=>$order))
                         ->limit(($rows * ($page - 1)), $rows)

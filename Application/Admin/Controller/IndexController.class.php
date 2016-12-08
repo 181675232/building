@@ -19,6 +19,21 @@ class IndexController extends Controller {
         $this->ajaxReturn($Nav->getNav(0));
     }
 
+    //修改密码
+    public function edit() {
+        $id = session('admin')['id'];
+        $table = M('admin');
+        $pass = md5(I('post.pass'));
+        $res = $table->where("id = $id")->getField('password');
+        if ($pass != $res){
+            echo '原密码不正确';
+        }else{
+            $where['password'] = md5(I('post.password'));
+            $table->where("id = $id")->save($where);
+            echo 1;
+        }
+    }
+
     //	上传图片
     function upload(){
         header("Content-Type:text/html; charset=utf-8");

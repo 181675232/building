@@ -174,6 +174,7 @@ $(function () {
                             username : $('input[name="'+NAME+'_username_edit"]').val(),
                             phone : $('input[name="'+NAME+'_phone_edit"]').val(),
                             level : $('input[name="'+NAME+'_level_edit"]').val(),
+                            password : $('input[name="'+NAME+'_password_edit"]').val(),
                         },
                         beforeSend : function () {
                             $.messager.progress({
@@ -220,13 +221,17 @@ $(function () {
     $('#'+NAME+'-name-edit').textbox({
         disabled : true
     });
-    $('#'+NAME+'-password-add,#'+NAME+'-password-edit').textbox({
+    $('#'+NAME+'-password-add').textbox({
         width : 220,
         height : 32,
         required : true,
         validType : 'length[6,20]',
         missingMessage : '请输入密码',
         invalidMessage : '账号6-20位'
+    });
+    $('#'+NAME+'-password-edit').textbox({
+        width : 220,
+        height : 32,
     });
     $('#'+NAME+'-username-add,#'+NAME+'-username-edit').textbox({
         width : 220,

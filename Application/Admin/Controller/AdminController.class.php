@@ -103,6 +103,11 @@ class AdminController extends CommonController {
 //                echo '职位名称已存在';
 //                exit;
 //            }
+            if ($where['password']){
+                $where['password'] = md5($where['password']);
+            }else{
+                unset($where['password']);
+            }
             $id = $table->save($where);
             if ($id) {
                 echo $id ? $id : 0;

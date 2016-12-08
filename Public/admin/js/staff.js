@@ -35,50 +35,54 @@ $(function () {
                 sortable : true
             },
             {
+                field : 'age',
+                title : '年龄',
+                width : 70,
+            },
+            {
                 field : 'id_card',
                 title : '身份证',
                 width : 170
             },
+            // {
+            //     field : 'nation',
+            //     title : '民族',
+            //     width : 100
+            // },
             {
-                field : 'nation',
-                title : '民族',
-                width : 100
-            },
-            {
-                field : 'type',
-                title : '员工类型',
+                field : 'worker',
+                title : '工种',
                 width : 100,
-                sortable : true
             },
             {
                 field : 'tel',
                 title : '移动电话',
                 width : 120
             },
-            {
-                field : 'entry_status',
-                title : '入职状态',
-                width : 100,
-                sortable : true
-            },
+            // {
+            //     field : 'entry_status',
+            //     title : '入职状态',
+            //     width : 100,
+            //     sortable : true
+            // },
             {
                 field : 'entry_date',
                 title : '入职时间',
                 width : 100,
                 sortable : true
             },
-            {
-                field : 'marital_status',
-                title : '婚姻状况',
-                width : 100,
-                sortable : true
-            },
-            {
-                field : 'education',
-                title : '学历',
-                width : 70,
-                sortable : true
-            },
+            // {
+            //     field : 'marital_status',
+            //     title : '婚姻状况',
+            //     width : 100,
+            //     sortable : true
+            // },
+            // {
+            //     field : 'education',
+            //     title : '学历',
+            //     width : 70,
+            //     sortable : true
+            // },
             {
                 field: 'details',
                 title: '详情',

@@ -1,8 +1,79 @@
 /**
  * Created by ASUS on 2016/1/2.
  */
+
+
+$('#password-edit').dialog({
+    width : 420,
+    height : 'auto',
+    title : '修改密码',
+    iconCls : 'icon-edit-new',
+    modal : true,
+    closed : true,
+    maximizable : true,
+    buttons : [{
+        text : '保存',
+        size : 'large',
+        iconCls : 'icon-accept',
+        handler : function () {
+            if ($('#password-edit').form('validate')) {
+                $.ajax({
+                    url : ThinkPHP['MODULE'] + '/Index/edit',
+                    type : 'POST',
+                    data : {
+                        pass : $('input[name="password_pass_edit"]').val(),
+                        password : $('input[name="password_password_edit"]').val(),
+                    },
+                    beforeSend : function () {
+                        $.messager.progress({
+                            text : '正在尝试保存...'
+                        });
+                    },
+                    success : function(data) {
+                        $.messager.progress('close');
+                        if (data > 0) {
+                            $.messager.show({
+                                title : '操作提醒',
+                                msg : '编辑成功！'
+                            });
+                            $('#password-edit').dialog('close');
+                        } else {
+                            $.messager.alert('修改失败！', data, 'warning');
+                        }
+                    }
+                });
+            }
+        }
+    },{
+        text : '取消',
+        size : 'large',
+        iconCls : 'icon-cross',
+        handler : function () {
+            $('#password-edit').dialog('close');
+        }
+    }],
+    onClose : function () {
+        $('#password-edit').form('reset');
+    }
+});
+
+
 $(function () {
-   
+
+    $('#password-password-edit').textbox({
+        width : 220,
+        height : 32,
+        required : true,
+        validType : 'length[6,20]',
+        missingMessage : '请输入新密码',
+        invalidMessage : '账号6-20位'
+    });
+    $('#password-pass-edit').textbox({
+        width : 220,
+        height : 32,
+        missingMessage : '请输入原密码',
+        required : true,
+    });
     //详情弹窗
     $('#details-dialog').dialog({
         width : 780,
