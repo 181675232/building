@@ -109,7 +109,8 @@ class LevelController extends CommonController {
             }
             $nav = D('Nav');
             $res = M('Level')->find(I('get.id'));
-            $res['rules'] = explode(',',$res['rules']);
+            //$res['rules'] = explode(',',$res['rules']);
+            $res['rules'] = explode(',',$res['m']);
             $data = $nav->getRole();
             $this->assign('data',$data);
             $this->assign($res);

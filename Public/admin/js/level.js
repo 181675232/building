@@ -154,7 +154,7 @@ $(function () {
                         data : {
                             id : $('input[name="'+NAME+'_edit_id"]').val(),
                             title : $('input[name="level_edit_title"]').val(),
-                            rules : (function(){var arry_data=[]; $('input[name="level_edit_node[]"]:checked').each(function () {
+                            m : (function(){var arry_data=[]; $('input[name="level_edit_node[]"]:checked').each(function () {
                                 arry_data.push($(this).val());
                             });return arry_data.join(',');}),
                         },

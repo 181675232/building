@@ -27,12 +27,13 @@
 							<span>{$val1.text}</span>
 						</td>
 						<td align="left">
+
+                            <input type="checkbox" Class="cbllist" <php> if(in_array($val1['id'],$rules)){</php>checked="checked"<php>}</php> name="level_edit_node[]" value="{$val1.id}" Style="vertical-align: middle;" /> 显示　
 							<!--
-                            <input type="checkbox" id="cblActionType" Class="cbllist" name="node_id[]" value="{$val1.id}" Style="vertical-align: middle;" /> 显示　
+                            <volist name="val1.role" id="val11">
+                                <input type="checkbox" id="cblActionType" <php> if(in_array($val11['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" name="level_edit_node[]" value="{$val11.id}" Style="vertical-align: middle;" /> {$val11.title} 　
+                            </volist>
                             -->
-							<volist name="val1.role" id="val11">
-								<input type="checkbox" id="cblActionType" <php> if(in_array($val11['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" name="level_edit_node[]" value="{$val11.id}" Style="vertical-align: middle;" /> {$val11.title} 　
-							</volist>
 						</td>
 					</tr>
 					<volist name="val1.children" id="val2">
@@ -43,12 +44,14 @@
 								<span>{$val2.text}</span>
 							</td>
 							<td align="left">
+
+                                <input type="checkbox" <php> if(in_array($val2['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" name="level_edit_node[]" value="{$val2.id}" Style="vertical-align: middle;" /> 显示　
+
 								<!--
-                                <input type="checkbox" id="cblActionType" Class="cbllist" name="node_id[]" value="{$val2.id}" Style="vertical-align: middle;" /> 显示　
-                                -->
 								<foreach name="val2.role" item="val21">
 									<input type="checkbox" id="cblActionType" <php> if(in_array($val21['id'],$rules)){</php>checked="checked"<php>}</php> name="level_edit_node[]" Class="cbllist" value="{$val21.id}" Style="vertical-align: middle;" /> {$val21.title} 　
 								</foreach>
+								-->
 							</td>
 						</tr>
 						<foreach name="val2.children" item="val3">
@@ -59,13 +62,14 @@
 									<span>{$val3.text}</span>
 								</td>
 								<td align="left">
-									<!--
-                                    <input type="checkbox" Class="cbllist" name="node_id[]" value="{$val3.id}" Style="vertical-align: middle;" /> 显示　
-                                    -->
 
+                                    <input type="checkbox" <php> if(in_array($val3['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" name="level_edit_node[]" value="{$val3.id}" Style="vertical-align: middle;" /> 显示　
+
+									<!--
 									<foreach name="val3.role" item="val31">
 										<input type="checkbox" name="level_edit_node[]" <php> if(in_array($val31['id'],$rules)){</php>checked="checked"<php>}</php> Class="cbllist" value="{$val31.id}" Style="vertical-align: top;margin:3px 0px 6px;" /> {$val31.title} 　
 									</foreach>
+									-->
 								</td>
 							</tr>
 						</foreach>
