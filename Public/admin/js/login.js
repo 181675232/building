@@ -4,8 +4,8 @@
 
 $(function () {
     //登录页背景随机
-    var rand = Math.floor(Math.random() * 5) + 1;
-
+    //var rand = Math.floor(Math.random() * 5) + 1;
+    var rand = 1;
     $('body')
         .css('background','url(' + ThinkPHP['IMG'] + '/bg' + rand + '.jpg) no-repeat center center fixed')
         .css('background-size', 'cover');
