@@ -1390,6 +1390,7 @@ class IndexController extends CommonController {
 
         $content = I('post.content')?I('post.content'):'';
         $map['id']   = array( 'in', $ids );
+        $map['jpushid'] = array('neq','');
         $jpushid = M('admin')->where($map)->getField('jpushid',true);
         file_put_contents('./Public/b.txt',json_encode($jpushid));
         file_put_contents('./Public/c.txt',json_encode($ids));
