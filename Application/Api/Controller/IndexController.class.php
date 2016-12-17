@@ -1390,6 +1390,7 @@ class IndexController extends CommonController {
         $content = I('post.content')?I('post.content'):'';
         $map['id']   = array( 'in', $ids );
         $jpushid = M('admin')->where($map)->getField('jpushid',true);
+        file_put_contents('./Public/b.txt',json_encode($jpushid));
         if ($jpushid){
             if (isset($type)) $arr['type'] = $type;
             if (isset($typeid)) $arr['typeid'] = $typeid;
