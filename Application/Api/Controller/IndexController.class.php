@@ -1391,6 +1391,7 @@ class IndexController extends CommonController {
         $content = I('post.content')?I('post.content'):'';
         $map['id']   = array( 'in', $ids );
         $jpushid = M('admin')->where($map)->getField('jpushid',true);
+        file_put_contents('./Public/b.txt',json_encode($jpushid));
         file_put_contents('./Public/c.txt',json_encode($ids));
 
         if ($jpushid){
@@ -3092,7 +3093,7 @@ class IndexController extends CommonController {
                 $res = explode(',',$ids);
             }else{
                 $res = $admin->where("proid = '{$where['proid']}' and id != '{$where['uid']}'")->getField('id',true);
-                $push['ids'] = $res;
+                $push['ids'] = implode(',',$res);
             }
             $map['pid'] = $data['pid'];
             $map['proid'] = $data['proid'];
