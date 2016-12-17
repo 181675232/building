@@ -634,18 +634,19 @@ class Excel{
         $table=M($table);
 
         $id = $table->order('id desc')->getField('id');
+
         //逐行加载
         foreach ($objPHPExcel->getWorksheetIterator() as $val){//循环取sheet
 
             $i=0;
             foreach ($val->getRowIterator() as $row){//逐行处理
+
                 if($row->getRowIndex()<2){
                     continue;
                 }
                 $rs = array();
                 $id = $id ? $id : 0;
                 //检测
-
                 foreach ($row->getCellIterator() as $key => $cell){//逐列读取
                     $data = $cell->getValue();//获取单元格数据
                     if($key==0){
@@ -671,6 +672,7 @@ class Excel{
 
                 //上传
                 foreach ($row->getCellIterator() as $key => $cell){//逐列读取
+
                     $data = $cell->getValue();//获取单元格数据
                     if($key==0){$rs['id']=$data+$id;}
                     if($key==1){$rs['status']=$data?$data:'';}
@@ -694,9 +696,11 @@ class Excel{
                 $level = $rs['level'];
                 $pid[$level] = $rs['id'];
                 $rs['proid'] = C('proid');
+
                 $table->add($rs);
                 $i++;
             }
+
             //echo '成功插入' .$i. '条数据。';
             return $i;
         }

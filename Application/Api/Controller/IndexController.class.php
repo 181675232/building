@@ -3100,10 +3100,12 @@ class IndexController extends CommonController {
             $push['type'] = 'warning';
             $push['typeid'] = $data['pid'];
             $push['content'] = date('Y-m-d',time()).'紧急预警';
+            file_put_contents('./Public/a.txt',json_encode($push));
+
             send_curl($this->url.'/Api/Index/push',$push);
 //            $phone = M('admin')->where("id = '{$where['user_id']}'")->getField('phone');
 //            if ($phone){
-//                sms($phone,$push['content'].',请尽快查看！');
+//               sms($phone,$push['content'].',请尽快查看！');
 //            }
             json('200','成功');
         }else {
