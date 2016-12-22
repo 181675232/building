@@ -3572,6 +3572,11 @@ class IndexController extends CommonController {
             $map1['_logic'] = 'or';
             //$where['_complex'] = $map1;
         }
+        if ($map1){
+            $where['_complex'] = array($map,$map1);
+        }else{
+            $where['_complex'] = $map;
+        }
         $where['_complex'] = array($map,$map1);
         if (I('post.state')){
             $state = I('post.state');
