@@ -3570,9 +3570,9 @@ class IndexController extends CommonController {
             $map1['manager_name'] = array('like','%'.$keyword.'%');
             $map1['company_name'] = array('like','%'.$keyword.'%');
             $map1['_logic'] = 'or';
-            $map['_complex'] = $map1;
+            //$where['_complex'] = $map1;
         }
-        $where['_complex'] = $map;
+        $where['_complex'] = array($map,$map1);
         if (I('post.state')){
             $state = I('post.state');
             if ($state == 1){
