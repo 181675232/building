@@ -1392,8 +1392,6 @@ class IndexController extends CommonController {
         $map['id']   = array( 'in', $ids );
         $map['jpushid'] = array('neq','');
         $jpushid = M('admin')->where($map)->getField('jpushid',true);
-        file_put_contents('./Public/b.txt',json_encode($jpushid));
-        file_put_contents('./Public/c.txt',json_encode($ids));
 
         if ($jpushid){
             if (isset($type)) $arr['type'] = $type;
@@ -3129,7 +3127,7 @@ class IndexController extends CommonController {
             ->join('left join t_warning on t_warning.id = t_warning_user.pid')
             ->join('left join t_admin on t_admin.id = t_warning.uid')
             ->join('left join t_level on t_level.id = t_admin.level')
-            ->where($where)->order('t_warning.addtime desc')->limit($pages,20)->select();
+            ->where($where)->order('t_warning_user.state asc,t_warning.addtime desc')->limit($pages,20)->select();
         if ($data){
             json('200','成功',$data);
         }elseif($pages > 1){
@@ -3555,6 +3553,98 @@ class IndexController extends CommonController {
             json('200','编辑成功');
         }else{
             json('400','编辑失败');
+        }
+    }
+
+    //项目列表
+    function pro_list(){
+        $uid = I('post.uid') ? I('post.uid') : json('404','缺少参数 uid');
+        $map['manager_id'] = $uid;
+        $map['company_id'] = $uid;
+        $map['group_id'] = $uid;
+        $map['_logic'] = 'or';
+        $where['_complex'] = $map;
+        if (I('post.state')){
+            $state = I('post.state');
+            if ($state == 1){
+                $where['truestoptime'] = 0;
+            }elseif ($state == 2){
+                $where['truestoptime'] = 0;
+                $where['stoptime'] = array('lt',time());
+            }elseif ($state == 3){
+                $where['truestoptime'] = array('neq',0);
+            }
+        }
+
+        if (I('post.starttime') && I('post.stoptime')){
+            $starttime = I('post.starttime');
+            $stoptime = I('post.stoptime');
+            if (checkTimeDate($starttime)){
+                $starttime = strtotime($starttime);
+            }else{
+                json('404','时间格式不正确');
+            }
+            if (checkTimeDate($stoptime)) {
+                $stoptime = strtotime($stoptime);
+            } else {
+                json('404', '时间格式不正确');
+            }
+            if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+            $where['_string'] = "(starttime >= $starttime and starttime <= $stoptime) or (stoptime >= $starttime and stoptime <= $stoptime)";
+        }elseif (I('post.starttime')){
+            $starttime = I('post.starttime');
+            if (checkTimeDate($starttime)){
+                $starttime = strtotime($starttime);
+                if ($where['stoptime']){
+                    $where['stoptime'] = array(array('egt',$starttime),array('lt',time()));
+                }else{
+                    $where['stoptime'] = array('egt',$starttime);
+                }
+            }else{
+                json('404','时间格式不正确');
+            }
+        }elseif (I('post.stoptime')) {
+            $stoptime = I('post.stoptime');
+            if (checkTimeDate($stoptime)) {
+                $stoptime = strtotime($stoptime);
+                //if ($stoptime < $starttime) json('400', '开始时间不能大于结束时间');
+                $where['starttime'] = array('elt',$stoptime);
+            } else {
+                json('404', '时间格式不正确');
+            }
+        }
+        $page = I('post.page') ? I('post.page') : 1;
+        $pages = ($page - 1)*20;
+        $table = M('pro');
+        $data['count'] = $table->where($where)->count();
+        $data['list'] = $table->where($where)->limit($pages,20)->order('starttime desc')->select();
+        if ($data['list']){
+            $admin = M('admin');
+            $task = M('day_task');
+            $qs = M('qs');
+            foreach ($data['list'] as $key=>$val){
+                $data['list'][$key]['pid_name'] = $admin->where("id = '{$val['pid']}'")->getField('username');
+                $data['list'][$key]['manager_name'] = $admin->where("id = '{$val['manager_id']}'")->getField('username');
+                $data['list'][$key]['company_name'] = $admin->where("id = '{$val['company_id']}'")->getField('username');
+                $data['list'][$key]['task_count'] = $task->where("proid = '{$val['id']}' and state = 3")->count();
+                $data['list'][$key]['task_all'] = $task->where("proid = '{$val['id']}'")->count();
+                $data['list'][$key]['qs_count'] = $qs->where("proid = '{$val['id']}' and state = 4")->count();
+                $data['list'][$key]['qs_all'] = $qs->where("proid = '{$val['id']}'")->count();
+                if ($val['truestoptime'] == 0){
+                    if ($val['stoptime'] < time()){
+                        $data['list'][$key]['type'] = '已延期';
+                    }else{
+                        $data['list'][$key]['type'] = '进行中';
+                    }
+                }else{
+                    $data['list'][$key]['type'] = '已完成';
+                }
+            }
+            json('200','成功',$data);
+        }elseif($pages > 1){
+            json('400','已经是最后一页');
+        }else{
+            json('400','没有数据');
         }
     }
 
