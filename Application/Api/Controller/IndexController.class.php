@@ -3577,7 +3577,6 @@ class IndexController extends CommonController {
         }else{
             $where['_complex'] = $map;
         }
-        $where['_complex'] = array($map,$map1);
         if (I('post.state')){
             $state = I('post.state');
             if ($state == 1){
