@@ -460,7 +460,7 @@ class IndexController extends CommonController {
         }
         $data = $table->field('t_admin.id,t_admin.phone,t_admin.username,t_admin.sex,t_admin.simg,t_admin.desc,t_admin.addtime,t_admin.level,t_level.title name')
             ->join('left join t_level on t_level.id = t_admin.level')
-            ->where("t_admin.id = $id and t_admin.proid = $proid")->find();
+            ->where("t_admin.id = $id")->find();
         if ($data){
             json('200','成功',$data);
         }else{
@@ -3563,6 +3563,15 @@ class IndexController extends CommonController {
         $map['company_id'] = $uid;
         $map['group_id'] = $uid;
         $map['_logic'] = 'or';
+        if (I('post.keyword')){
+            $keyword = I('post.keyword');
+            $map1['title'] = array('like','%'.$keyword.'%');
+            $map1['pid_name'] = array('like','%'.$keyword.'%');
+            $map1['manager_name'] = array('like','%'.$keyword.'%');
+            $map1['company_name'] = array('like','%'.$keyword.'%');
+            $map1['_logic'] = 'or';
+            $map['_complex'] = $map1;
+        }
         $where['_complex'] = $map;
         if (I('post.state')){
             $state = I('post.state');
@@ -3615,7 +3624,7 @@ class IndexController extends CommonController {
         }
         $page = I('post.page') ? I('post.page') : 1;
         $pages = ($page - 1)*20;
-        $table = M('pro');
+        $table = M('all_pro');
         $data['count'] = $table->where($where)->count();
         $data['list'] = $table->where($where)->limit($pages,20)->order('starttime desc')->select();
         if ($data['list']){
