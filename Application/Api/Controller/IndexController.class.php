@@ -436,6 +436,7 @@ class IndexController extends CommonController {
             $res = $table->week_task_tree($id,$proid);
         }else{
             $res = $table->task_tree($id,$proid);
+
         }
         if ($res){
             $data = array_page($res,$page);
