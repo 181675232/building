@@ -91,7 +91,7 @@ class IndexController extends CommonController {
         $data['jpushid'] = I('post.jpushid') ? I('post.jpushid') : json('404','缺少参数 jpushid');
         $password = I('post.password') ? I('post.password') : json('404','缺少参数 password');
         $table = M('admin');
-        $res = $table->field('id,jpushid,proid,level,password,token,phone,username')->where("phone='{$data['phone']}'")->find();
+        $res = $table->field('id,jpushid,proid,level,password,token,phone,username')->where("name='{$data['name']}'")->find();
         if ($res){
             if ($res['password'] == md5(trim($password))){
                 unset($res['password']);

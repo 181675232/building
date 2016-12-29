@@ -9,6 +9,8 @@ class TaskModel extends Model{
         $result = $table->field('t_task.id,t_task.title,t_task.starttime,t_task.stoptime,t_task.day,IFNULL(t.title,"") as btitle')
             ->join('left join t_task as t on t.id = t_task.bid')
             ->where("t_task.pid = $pid and t_task.proid = $proid")->order('t_task.id asc')->select();
+        print_r($result);
+        exit;
         if ($result){
             foreach ($result as $key => $val){
                 if ($table->where("pid = '{$val['id']}' and proid = $proid")->find()){
