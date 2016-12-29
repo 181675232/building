@@ -146,6 +146,7 @@ $(function () {
                                 } else {
                                     $.messager.alert('添加失败！', data, 'warning');
                                 }
+                            $('#'+NAME+'-simg-add').prev().attr('src','');
                             }
                         });
                     }
