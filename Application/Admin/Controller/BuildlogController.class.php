@@ -55,7 +55,7 @@ class BuildlogController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -83,7 +83,7 @@ class BuildlogController extends CommonController {
             $table = M('Buildlog');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -130,7 +130,7 @@ class BuildlogController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('Buildlog');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
@@ -142,7 +142,7 @@ class BuildlogController extends CommonController {
     public function getone() {
         if (IS_AJAX) {
             $where['t_buildlog.id'] = I('get.id');
-            $where['t_buildlog.proid'] = C('proid');
+            $where['t_buildlog.proid'] = session('admin')['proid'];
             $table = M('buildlog');
             $data = $table->field('t_buildlog.id,t_buildlog.addtime,t_admin.username,t_admin.phone,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
                 ->join('left join t_admin on t_admin.id = t_buildlog.uid')
@@ -164,7 +164,7 @@ class BuildlogController extends CommonController {
     public function prints() {
         if (IS_AJAX) {
             $where['t_buildlog.addtime'] = strtotime(I('get.id'));
-            $where['t_buildlog.proid'] = C('proid');
+            $where['t_buildlog.proid'] = session('admin')['proid'];
             $table = M('buildlog');
             $res = $table->field('t_buildlog.id,t_buildlog.addtime,t_buildlog.weather,t_buildlog.wind,t_buildlog.c,t_buildlog.burst,t_buildlog.prorecord,t_buildlog.record,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area,t_admin.username,t_level.title name')
                 ->join('left join t_building on t_building.id = t_buildlog.building')
@@ -243,7 +243,7 @@ class BuildlogController extends CommonController {
         //排序
 
         $orders['stoptime'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $execl = new \Org\Util\Excel();
         $execl->excel_daytask($data,date('YmdHis',time()));

@@ -55,7 +55,7 @@ class DynamicController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -83,7 +83,7 @@ class DynamicController extends CommonController {
             $table = M('dynamic');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -130,7 +130,7 @@ class DynamicController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('dynamic');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
@@ -142,7 +142,7 @@ class DynamicController extends CommonController {
     public function getone() {
         if (IS_AJAX) {
             $where['pid'] = I('get.id');
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['type'] = 'dynamic';
             $img = M('img');
             $data['img'] = $img->where($where)->getField('simg',true);
@@ -199,7 +199,7 @@ class DynamicController extends CommonController {
         //排序
 
         $orders['stoptime'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $execl = new \Org\Util\Excel();
         $execl->excel_daytask($data,date('YmdHis',time()));

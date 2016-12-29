@@ -52,7 +52,7 @@ class WarningController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -76,7 +76,7 @@ class WarningController extends CommonController {
             $table = M('Warning');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -123,7 +123,7 @@ class WarningController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('Warning');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
@@ -176,7 +176,7 @@ class WarningController extends CommonController {
         //排序
 
         $orders['id'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $find_group = M('Find_group');
         $admin = M('admin');

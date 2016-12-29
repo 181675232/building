@@ -20,42 +20,40 @@ class LoginController extends Controller {
             $map['password'] = md5(I('post.password'));
             $object = $table->field('id,level,name,username,state,login_count,proid')
                 ->where($map)->find();
-            if ($object['proid'] == C('proid') || $object['proid'] == 0) {
-                if ($object) {
-                    if (!$object['state'] == 2) return -1;
-                    //if (!$object['name']) return -2;
-                    $role = M('Level')->field('title,level')->where("id = '{$object['level']}'")->find();
-                    $arr = array(
-                        'id' => $object['id'],
-                        'name' => $object['name'],
-                        'username' => $object['username'],
-                        'level' => $role['level'],
-                        'title' => $role['title'],
-                    );
-                    session('admin', $arr);
-                    $update = array(
-                        'id' => $object['id'],
-                        'logintime' => time(),
-                        'ip' => get_client_ip(),
-                        'login_count' => $object['login_count'] + 1
-                    );
-                    $table->save($update);
-                    echo $object['id'];
-                    exit;
-                    //写入日志
+
+            if ($object) {
+                if (!$object['state'] == 2) return -1;
+                //if (!$object['name']) return -2;
+                $role = M('Level')->field('title,level')->where("id = '{$object['level']}'")->find();
+                $arr = array(
+                    'id' => $object['id'],
+                    'name' => $object['name'],
+                    'username' => $object['username'],
+                    'level' => $role['level'],
+                    'title' => $role['title'],
+                    'proid' => $object['proid'],
+                );
+                session('admin', $arr);
+                $update = array(
+                    'id' => $object['id'],
+                    'logintime' => time(),
+                    'ip' => get_client_ip(),
+                    'login_count' => $object['login_count'] + 1
+                );
+                $table->save($update);
+                echo $object['id'];
+                exit;
+                //写入日志
 //                $param = array(
 //                    'user'=>$object['name'].'('.$object['username'].')',
 //                    'type'=>'登录系统',
 //                    'module'=>'人事管理 >> 登录帐号',
 //                    'ip'=>get_client_ip()
 //                );
-                    //tag('log', $param);
-                    //               return $object['id'];
+                //tag('log', $param);
+                //               return $object['id'];
 
-                } else {
-                    return 0;
-                }
-            }else{
+            } else {
                 return 0;
             }
         } else {

@@ -60,7 +60,7 @@ class QsController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -77,7 +77,7 @@ class QsController extends CommonController {
             $table = M('all_qs');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -124,7 +124,7 @@ class QsController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('all_qs');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
@@ -139,7 +139,7 @@ class QsController extends CommonController {
             $where['id'] = I('get.id');
             $data = $table->field('*')
                 ->where($where)->find();
-            $proid = C('proid');
+            $proid = session('admin')['proid'];
             //$object['content'] = htmlspecialchars_decode($object['content']);
             $schedule = M('qs_schedule');
             $data['schedule'] = $schedule->field('t_qs_schedule.id,t_qs_schedule.title,t_qs_schedule.addtime,t_qs_schedule.uid,t_admin.username,t_admin.simg,t_level.title name')
@@ -203,7 +203,7 @@ class QsController extends CommonController {
         //排序
 
         $orders['stoptime'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $execl = new \Org\Util\Excel();
         $execl->excel_qs($data,date('YmdHis',time()));

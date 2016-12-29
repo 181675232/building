@@ -52,7 +52,7 @@ class WordController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -75,7 +75,7 @@ class WordController extends CommonController {
             $table = M('Word');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -121,7 +121,7 @@ class WordController extends CommonController {
     //获取所有职位
     public function getListAll() {
         if (IS_AJAX) {
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $table = D('Word');
             $this->ajaxReturn($table->getListAll());
@@ -175,7 +175,7 @@ class WordController extends CommonController {
         //排序
 
         $orders['id'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $word_group = M('Word_group');
         $admin = M('admin');

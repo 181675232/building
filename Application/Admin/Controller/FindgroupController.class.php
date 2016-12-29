@@ -106,7 +106,7 @@ class FindgroupController extends CommonController {
     //获取所有职位
     public function getListAll() {
         if (IS_AJAX) {
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $table = D('Find_group');
             $this->ajaxReturn($table->getListAll());

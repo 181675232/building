@@ -55,7 +55,7 @@ class FloorController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -84,7 +84,7 @@ class FloorController extends CommonController {
             $areas = explode(',',I('post.areas'));
             $uid = explode(',',I('post.uid'));
             $where['addtime'] = $map['addtime'] = time();
-            $where['proid'] = $map['proid'] = $data['proid'] = C('proid');
+            $where['proid'] = $map['proid'] = $data['proid'] = session('admin')['proid'];
             $id = $table->add($where);
             if ($id) {
                 $area = M('area');
@@ -124,7 +124,7 @@ class FloorController extends CommonController {
             $areas = explode(',',I('post.areas'));
             $uid = explode(',',I('post.uid'));
             $where['addtime'] = $map['addtime'] = time();
-            $where['proid'] = $map['proid'] = $data['proid'] = C('proid');
+            $where['proid'] = $map['proid'] = $data['proid'] = session('admin')['proid'];
 
             $id = $table->save($where);
             if ($id) {
@@ -160,7 +160,7 @@ class FloorController extends CommonController {
     public function getall() {
         if (IS_AJAX) {
             $table = M('Floor');
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($data);
         } else {
@@ -172,7 +172,7 @@ class FloorController extends CommonController {
     public function getuser() {
         if (IS_AJAX) {
             $table = M('floor');
-            $proid = C('proid');
+            $proid = session('admin')['proid'];
             $res = $table->field('id,pid')->find();
             $admin_qs = M('admin_qs');
             $data = $admin_qs->field('t_admin.id,t_admin.username,t_level.title')

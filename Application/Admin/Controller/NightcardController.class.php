@@ -53,7 +53,7 @@ class NightcardController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -77,7 +77,7 @@ class NightcardController extends CommonController {
             $where['stoptime'] = strtotime($where['stoptime'].' 23:59:59');
 
             $where['uid'] = session('admin')['id'];
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['addtime'] = time();
             $id = $table->add($where);
             if ($id) {
@@ -116,7 +116,7 @@ class NightcardController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('Night_card');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {

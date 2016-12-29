@@ -62,7 +62,7 @@ class DaytaskController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -79,7 +79,7 @@ class DaytaskController extends CommonController {
             $table = M('all_day_task');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -126,7 +126,7 @@ class DaytaskController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('all_day_task');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
@@ -141,7 +141,7 @@ class DaytaskController extends CommonController {
             $where['id'] = I('get.id');
             $data = $table->field('*')
                 ->where($where)->find();
-            $proid = C('proid');
+            $proid = session('admin')['proid'];
             //$object['content'] = htmlspecialchars_decode($object['content']);
             $workers = M('task_work');
             $data['workers'] = $workers->field('t_worker.title,t_task_work.num')
@@ -210,7 +210,7 @@ class DaytaskController extends CommonController {
         //排序
 
         $orders['stoptime'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $execl = new \Org\Util\Excel();
         $execl->excel_daytask($data,date('YmdHis',time()));

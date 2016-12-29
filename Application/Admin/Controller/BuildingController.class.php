@@ -52,7 +52,7 @@ class BuildingController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -78,7 +78,7 @@ class BuildingController extends CommonController {
             $map['simg'] = I('post.simg');
             $obj['uid'] = I('post.uid');
             $where['addtime'] = $map['addtime'] = $data['addtime'] = time();
-            $where['proid'] = $map['proid'] = $data['proid'] = $obj['proid'] = C('proid');
+            $where['proid'] = $map['proid'] = $data['proid'] = $obj['proid'] = session('admin')['proid'];
             $id = $table->add($where);
             if ($id) {
                 $floor = M('floor');
@@ -139,7 +139,7 @@ class BuildingController extends CommonController {
     public function getall() {
         if (IS_AJAX) {
             $table = M('Building');
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($data);
         } else {
@@ -192,7 +192,7 @@ class BuildingController extends CommonController {
         //排序
 
         $orders['id'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $find_group = M('Find_group');
         $admin = M('admin');
@@ -226,7 +226,7 @@ class BuildingController extends CommonController {
             $table = M('Building');
             $ids = explode(',',I('post.ids'));
             $id = $table->delete(I('post.ids'));
-            $proid = C('proid');
+            $proid = session('admin')['proid'];
             if ($id){
                 echo $id;
                 $floor = M('floor');

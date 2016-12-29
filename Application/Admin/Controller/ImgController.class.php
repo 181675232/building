@@ -56,7 +56,7 @@ class ImgController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->field('FROM_UNIXTIME(addtime,"%Y-%m-%d") datetime')
                 ->group('datetime')
                 ->where($where)->select();
@@ -64,7 +64,7 @@ class ImgController extends CommonController {
             $data = $table->field('FROM_UNIXTIME(addtime,"%Y-%m-%d") datetime')
                 ->group('datetime')
                 ->where($where)->order('addtime desc')->limit($pages,$pagesize)->select();
-            $map['t_dynamic.proid'] = C('proid');
+            $map['t_dynamic.proid'] = session('admin')['proid'];
             foreach ($data as $key=>$val){
                 $map['_string'] = "FROM_UNIXTIME(t_dynamic.addtime,'%Y-%m-%d') = '{$val['datetime']}'";
                 $data[$key]['img'] = $table->field('t_img.simg img,t_dynamic.addtime,t_building.title building,t_floor.title floor,IFNULL(t_area.title,"") area')
@@ -86,7 +86,7 @@ class ImgController extends CommonController {
             $table = M('dynamic');
             $where = I('post.');
             $where['addtime'] = time();
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['uid'] = session('admin')['id'];
             if ($where['content']){
                 $where['content'] = stripslashes(htmlspecialchars_decode($_POST['content']));
@@ -133,7 +133,7 @@ class ImgController extends CommonController {
     public function getListAll() {
         if (IS_AJAX) {
             $table = D('dynamic');
-//            $where['proid'] = C('proid');
+//            $where['proid'] = session('admin')['proid'];
 //            $data = $table->field('id,title')->where($where)->select();
             $this->ajaxReturn($table->getListAll());
         } else {
@@ -145,7 +145,7 @@ class ImgController extends CommonController {
     public function getone() {
         if (IS_AJAX) {
             $where['pid'] = I('get.id');
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['type'] = 'dynamic';
             $img = M('img');
             $data['img'] = $img->where($where)->getField('simg',true);
@@ -202,7 +202,7 @@ class ImgController extends CommonController {
         //排序
 
         $orders['stoptime'] = 'desc';
-        $where['proid'] = C('proid');
+        $where['proid'] = session('admin')['proid'];
         $data = $table->field('*')->where($where)->order($orders)->select();
         $execl = new \Org\Util\Excel();
         $execl->excel_daytask($data,date('YmdHis',time()));

@@ -53,7 +53,7 @@ class TaskController extends CommonController {
                 //默认排序
                 $orders['id'] = 'desc';
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $count = $table->where($where)->count();
             $data = $table->field('*')
                 ->where($where)
@@ -77,7 +77,7 @@ class TaskController extends CommonController {
                 echo '账号已存在';
                 exit;
             }
-            $where['proid'] = C('proid');
+            $where['proid'] = session('admin')['proid'];
             $where['simg'] = '/Public/upfile/xitong.jpg';
             $where['password'] = md5($where['password']);
             $where['addtime'] = time();
@@ -143,7 +143,7 @@ class TaskController extends CommonController {
 
     //获取所有职位
     public function getListAll() {
-//        $where['proid'] = C('proid');
+//        $where['proid'] = session('admin')['proid'];
 //        $data = $table->field('id,title')->where($where)->select();
         if (IS_AJAX) {
             $table = D('Task');
