@@ -87,7 +87,7 @@ class IndexController extends CommonController {
 
     //密码登录
     public  function  login(){
-        $data['phone'] = I('post.phone') ? I('post.phone') : json('404','缺少参数 phone');
+        $data['name'] = I('post.phone') ? I('post.phone') : json('404','缺少参数 phone');
         $data['jpushid'] = I('post.jpushid') ? I('post.jpushid') : json('404','缺少参数 jpushid');
         $password = I('post.password') ? I('post.password') : json('404','缺少参数 password');
         $table = M('admin');
@@ -101,7 +101,7 @@ class IndexController extends CommonController {
             if (!$res['token']){
                 $data['simg'] = $this->url.'/Public/upfile/touxiang.jpg';
                 $rongyun = new  \Org\Util\Rongyun($this->appKey,$this->appSecret);
-                $r = $rongyun->getToken($res['id'],$data['phone'],$data['simg']);
+                $r = $rongyun->getToken($res['id'],$data['name'],$data['simg']);
                 if($r){
                     $rong = json_decode($r);
                     if ($rong->code == 200){
@@ -118,7 +118,7 @@ class IndexController extends CommonController {
             if ($table->where("id = '{$res['id']}'")->save($data)){
                 $table->where("jpushid = '{$data['jpushid']}' and id != '{$res['id']}'")->setField('jpushid','');
                 $res['jpushid'] = $data['jpushid'];
-                $res['phone'] = $data['phone'];
+                $res['phone'] = $data['name'];
                 if(!$res['token']) $res['token'] = $data['token'];
                 json('200','成功',$res);
             }else {
