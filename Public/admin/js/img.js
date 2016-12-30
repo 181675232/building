@@ -16,6 +16,7 @@ $(function () {
             striped : true,
             rownumbers : true,
             border : false,
+            checkOnSelect: false,
             pagination : true,
             pageSize : 20,
             pageList : [10, 20, 30, 40, 50],
