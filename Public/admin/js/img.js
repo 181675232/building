@@ -98,6 +98,9 @@ $(function () {
                     plain : true
                 });
             },
+            onBeforeSelect:function(index, row){
+              return false;
+            },
             onClickCell : function (index,field) {
                 if (field == 'state' || field == 'details'){
                     $('#'+NAME).datagrid('selectRow', index);
