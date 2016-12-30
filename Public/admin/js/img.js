@@ -42,7 +42,7 @@ $(function () {
                     formatter : function (value,row) {
                         var str='';
                         for(var i=0;i<value.length;i++){
-                            str+='<a target="_blank" title="'+value[i].building+' '+value[i].floor+' '+value[i].area+'" href="'+value[i].img+'" style="float:left;width:120px;height:100px;overflow:hidden;margin: 1px"><img style="width: 118px;" src="'+value[i].img+'"/></a>';
+                            str+='<a target="_blank" title="'+value[i].building+' '+value[i].floor+' '+value[i].area+'" href="'+value[i].img+'" style="float:left;width:120px;height:100px;overflow:hidden;margin: 1px"><img style="width: 118px;" src="'+value[i].img.replace('upfile','thumb')+'"/></a>';
                         }
                         return str;
                     }
