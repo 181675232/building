@@ -1652,7 +1652,7 @@ class IndexController extends CommonController {
         $where['addtime'] = time();
         $data['pid'] = $table->add($where);
         if ($data['pid']){
-            if ($where['bai'] == 1){
+            if (floor($where['bai']) == 1){
                 $map['state'] = 3;
                 $map['truestoptime'] = date('Y-m-d H:i:s',time());
             }
