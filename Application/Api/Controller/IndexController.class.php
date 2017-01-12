@@ -1273,7 +1273,7 @@ class IndexController extends CommonController {
         $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_groupsuser.groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
         $table = M('groupsuser');
-        $data = $table->field('t_admin.id,t_groupsuser.level,t_admin.username,t_admin.simg,t_level.name')
+        $data = $table->field('t_admin.id,t_groupsuser.level,t_admin.username,t_admin.simg,t_level.title')
             ->join('left join t_admin on t_admin.id = t_groupsuser.user_id')
             ->join('left join t_level on t_level.id = t_admin.level')
             ->where($where)->order('t_groupsuser.level desc,t_groupsuser.id asc')->select();
