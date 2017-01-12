@@ -1270,7 +1270,7 @@ class IndexController extends CommonController {
 
     //群组成员
     public function groupsuser(){
-        $where['t_groupsuser.proid'] = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
+        $proid = I('post.proid') ? I('post.proid') : json('404','缺少参数 proid');
         $where['t_groupsuser.groups_id'] = I('post.groups_id') ? I('post.groups_id') : json('404','缺少参数 groups_id');
         $table = M('groupsuser');
         $data = $table->field('t_admin.id,t_groupsuser.level,t_admin.username,t_admin.simg,t_level.name')
