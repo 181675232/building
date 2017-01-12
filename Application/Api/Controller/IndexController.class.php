@@ -2189,9 +2189,9 @@ class IndexController extends CommonController {
         $table = M('issue');
         $data = $table->field('id,title')->where("pid = 0")->select();
         foreach ($data as $key=>$val){
-            $data[$key]['catid'] = $table->field('id,title')->where("pid = '{$val['id']}' and proid = '{$where['proid']}'")->select();
+            $data[$key]['catid'] = $table->field('id,title')->where("pid = '{$val['id']}' and (proid = '{$where['proid']}' or proid = 0)")->select();
             foreach ($data[$key]['catid'] as $k=>$v){
-                $data[$key]['catid'][$k]['catid'] = $table->field('id,title')->where("pid = '{$v['id']}' and proid = '{$where['proid']}'")->select();
+                $data[$key]['catid'][$k]['catid'] = $table->field('id,title')->where("pid = '{$v['id']}' and (proid = '{$where['proid']}' or proid = 0)")->select();
             }
         }
         if ($data){
