@@ -2232,7 +2232,7 @@ class IndexController extends CommonController {
         }
         $where['pid'] = I('post.pid') ? I('post.pid') : json('404','缺少参数 pid');
         $issue = M('issue');
-        $res = $issue->field('id,title,pid')->where("id = '{$where['pid']}' and proid = '{$where['proid']}'")->find();
+        $res = $issue->field('id,title,pid')->where("id = '{$where['pid']}'")->find();
         $ress = $issue->field('id,title,pid')->where("id = '{$res['pid']}'")->find();
         $resss = $issue->field('id,title')->where("id = '{$ress['pid']}'")->find();
         $where['bid'] = $resss['id'];
