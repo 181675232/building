@@ -7,7 +7,7 @@ class TaskController extends CommonController {
     //加载首页
     public function index() {
 //        if (session('Task')) {
-            $this->display();
+        $this->display();
 //        } else {
 //            $this->redirect('Login/index');
 //        }
@@ -94,18 +94,13 @@ class TaskController extends CommonController {
         }
     }
 
-
-
-
-
-
     //导入
     public function import() {
         if (IS_AJAX) {
             $where = I('post.');
             if($where['file']){
                 $excel = new \Org\Util\Excel();
-                $where['sheet'] = $where['sheet'] ? $where['sheet'] : 'Sheet1';
+                $where['sheet'] = $where['sheet'] ? $where['sheet'] : '任务_表';
 
                 $id = $excel->excelimport('.'.$where['file'],$where['sheet'],'task');
                 if ($id) {
