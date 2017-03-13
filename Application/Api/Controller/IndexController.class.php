@@ -493,7 +493,7 @@ class IndexController extends CommonController {
                 json('400','头像上传失败');
             }
         }
-        $where['proid'] = $proid;
+//        $where['proid'] = $proid;
         $table = M('admin');
         $data = $table->save($where);
         $res['simg'] = $where['simg'];
