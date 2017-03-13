@@ -36,6 +36,30 @@ class StaffController extends Controller {
             $this->error('非法操作！');
         }
     }
+    //导入
+    public function import() {
+        if (IS_AJAX) {
+            $where = I('post.');
+            if($where['file']){
+                $excel = new \Org\Util\Excel();
+                $where['sheet'] = $where['sheet'] ? $where['sheet'] : 'Sheet1';
+
+                $id = $excel->excelimport_work('.'.$where['file']);
+                if ($id) {
+                    echo $id ? $id : 0;
+                    exit;
+                } else {
+                    echo '操作失败！';
+                    exit;
+                }
+            }else{
+                echo '没有上传文件！';
+                exit;
+            }
+        } else {
+            $this->error('非法操作！');
+        }
+    }
 
     //添加档案
     public function register() {

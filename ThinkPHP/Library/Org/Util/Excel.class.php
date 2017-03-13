@@ -695,7 +695,7 @@ class Excel{
                 }
                 $level = $rs['level'];
                 $pid[$level] = $rs['id'];
-                $rs['proid'] = C('proid');
+                $rs['proid'] = session('admin')['proid'];
 
                 $table->add($rs);
                 $i++;
