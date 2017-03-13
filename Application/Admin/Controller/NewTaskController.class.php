@@ -2,7 +2,7 @@
 namespace Admin\Controller;
 use Think\Controller;
 
-class TaskController extends CommonController {
+class NewTaskController extends CommonController {
 
     //加载首页
     public function index() {
